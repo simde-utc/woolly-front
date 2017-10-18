@@ -8,24 +8,16 @@
  * Factory in the woollyFrontApp.
  */
 angular.module('woollyFrontApp')
-  .factory('serviceAjax', function () {
-    // Service logic
-    // ...
-
-    var meaningOfLife = 42;
-
-    // Public API here
-    return {
-      someMethod: function () {
-        return meaningOfLife;
-      }
-    };
-  });
-angular.module('woollyFrontApp')
   .factory('serviceAjax', function serviceAjax($http) {
     return{
         sales: function(page){
-            return $http.get("http://localhost:8000/sales");
+            return $http.get("http://localhost:8000/sales", {withCredentials:true});
+        },
+        path: function(path){
+            return $http.get("http://localhost:8000/"+path, {withCredentials:true});
+        },
+        url: function(url){
+            return $http.get(url, {withCredentials:true});
         }
     }
   });
