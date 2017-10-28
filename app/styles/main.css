@@ -186,7 +186,7 @@ color: #424242;
 }
     .bg-color-woolly2 {
 background-color: #424242;
-color: #FFFFFF;
+color: #424242;
 }
 
  .icon-box-right {
@@ -242,3 +242,7 @@ font-size: 16px;
 line-height: 30px;
 }
 
+/* Menu page mon_compte */
+@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css);
+body{margin-top:20px;}
+.fa-fw {width: 2em;}

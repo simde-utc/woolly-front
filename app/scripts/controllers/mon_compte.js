@@ -2,13 +2,13 @@
 
 /**
  * @ngdoc function
- * @name woollyFrontApp.controller:BilletterieCtrl
+ * @name woollyFrontApp.controller:MainCtrl
  * @description
- * # BilletterieCtrl
+ * # MainCtrl
  * Controller of the woollyFrontApp
  */
 angular.module('woollyFrontApp')
-  .controller('BilletterieCtrl', function () {
+  .controller('Mon_compteCtrl', function () {
     this.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',

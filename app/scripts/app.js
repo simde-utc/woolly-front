@@ -24,8 +24,8 @@ angular
         controller: 'MainCtrl',
         controllerAs: 'main'
       })
-      .when('/about', {
-        templateUrl: 'views/about.html',
+      .when('/mon_compte', {
+        templateUrl: 'views/mon_compte.html',
         controller: 'AboutCtrl',
         controllerAs: 'about'
       })
@@ -34,6 +34,11 @@ angular
         controller: 'BilletterieCtrl',
         controllerAs: 'billetterie'
       })
+      /*.when('/mon_compte', {
+        templateUrl: 'views/mon_compte.html',
+        controller: 'Mon_compteCtrl',
+        controllerAs: 'mon_compte'
+      })*/
       .otherwise({
         redirectTo: '/'
       });
