@@ -31,7 +31,7 @@ sudo npm install -g generator-angular
 ```
 ### Installing
 
-Once you have your virtual environment up and running, you can clone this repo
+Once you have install all the prerequisites, you can clone this repo
 
 ```
 git clone https://github.com/obledaym/woolly-front.git
@@ -48,9 +48,6 @@ Now you will to build the server, like this :
 ```
 grunt build
 ```
-
-Now ask a responsible person for the settings_confidential.py file containing the foreign APIs indentification keys. The
-file is to be placed next to the settings.py file.
 
 Finally you can launch the server
 
