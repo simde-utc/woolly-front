@@ -8,7 +8,7 @@
  * Controller of the woollyFrontApp
  */
 angular.module('woollyFrontApp')
-  .controller('Mon_compteCtrl', function () {
+  .controller('AdminCtrl', function () {
     this.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
@@ -16,7 +16,7 @@ angular.module('woollyFrontApp')
     ];
   });
   angular.module('woollyFrontApp')
-  .controller('Mon_compteCtrl', function ($scope,serviceAjax) {
+  .controller('AdminCtrl', function ($scope,serviceAjax) {
         var loadOrders = function(){
             $scope.loading = true;
           serviceAjax.path("orders").then(function(data){

@@ -41,14 +41,15 @@
         <div class="collapse navbar-collapse" id="navbar-collapse-2">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Accueil</a></li>
-            <li><a href="#">Liste des ventes</a></li>
+            <li><a href="#!/billetterie">Liste des ventes</a></li>
             <li><a href="#!/mon_compte">Mon compte</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a ng-show="" href="#!/admin">Administrateur</a></li>
+            <!--<li><a href="#">Contact</a></li>!-->
             <li>
-              <a class="btn btn-default btn-outline btn-circle collapsed"  data-toggle="collapse" href="#nav-collapse2" aria-expanded="false" aria-controls="nav-collapse2">Se connecter</a>
+              <a class="btn btn-default btn-outline btn-circle collapsed"  data-toggle="collapse" href="#menu" aria-expanded="false" aria-controls="nav-collapse2" >Se connecter</a>
             </li>
           </ul>
-          <div class="collapse nav navbar-nav nav-collapse slide-down" style="padding-top:8px;" id="nav-collapse2">
+          <div class="collapse nav navbar-nav nav-collapse slide-down" style="padding-top:8px;" id="menu">
             <a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="http://localhost:8000/login" >UTC / Escom</a>
             <a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="" >Extérieur</a>
           </div>
@@ -62,7 +63,7 @@
 
     <div class="footer">
       <div class="container">
-        <p>Made with <span class="glyphicon glyphicon-heart"></span> by SiMDE</p>
+        <p>Made with <span class="glyphicon glyphicon-heart"></span> by SiMDE. <a href="#!/about">Contacter</a></p>
       </div>
     </div>
 
@@ -101,6 +102,10 @@
         <script src="scripts/controllers/main.js"></script>
         <script src="scripts/controllers/about.js"></script>
         <script src="scripts/controllers/billetterie.js"></script>
+        <script src="scripts/controllers/add_sale.js"></script>
+        <script src="scripts/controllers/mon_compte.js"></script>
+        <script src="scripts/controllers/admin.js"></script>
+        <script src="scripts/controllers/sale.js"></script>
         <script src="scripts/services/serviceajax.js"></script>
         <!-- endbuild -->
 </body>

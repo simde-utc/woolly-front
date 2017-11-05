@@ -2,29 +2,30 @@
 
 /**
  * @ngdoc function
- * @name woollyFrontApp.controller:MainCtrl
+ * @name woollyFrontApp.controller:Add_saleCtrl
  * @description
- * # MainCtrl
+ * # Add_saleCtrl
  * Controller of the woollyFrontApp
  */
 angular.module('woollyFrontApp')
-  .controller('Mon_compteCtrl', function () {
+  .controller('Add_saleCtrl', function () {
     this.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
       'Karma'
     ];
   });
-  angular.module('woollyFrontApp')
-  .controller('Mon_compteCtrl', function ($scope,serviceAjax) {
+
+angular.module('woollyFrontApp')
+  .controller('Add_saleCtrl', function ($scope,serviceAjax) {
         var loadOrders = function(){
             $scope.loading = true;
           serviceAjax.path("orders").then(function(data){
                 console.log("Orders",data.data.data);
                 //console.log("status:",data.data.data.attributes.status);
                 /*if(data.data.data.attributes.status=="awaiting_validation"){
-                  data.data.data.attributes.status="A payer";
-                  console.log(data.data.data.attributes.status);
+                	data.data.data.attributes.status="A payer";
+                	console.log(data.data.data.attributes.status);
                 }*/
                 $scope.orders = data.data.data;
 
@@ -44,20 +45,20 @@ angular.module('woollyFrontApp')
             
                       console.log("order status "+order.attributes.status); 
                       switch(order.attributes.status) {
-                      case "awaiting_validation":
-                      $scope.button= '<strong>test</strong>';
-                          return "En attente de validation";
-                          break;
-                      case "not_payed":
-                          return "Non payé";
-                          break;
-                      case "payed":
-                          return "Payé";
-                          break;
-                      case "validated":
-                          return "Validé";
-                          break;
-                  } 
+									    case "awaiting_validation":
+									    $scope.button= '<strong>test</strong>';
+									        return "En attente de validation";
+									        break;
+									    case "not_payed":
+									        return "Non payé";
+									        break;
+									    case "payed":
+									        return "Payé";
+									        break;
+									    case "validated":
+									        return "Validé";
+									        break;
+									} 
         };
         // $scope.getName = function(order){
         //     $scope.loading = true;

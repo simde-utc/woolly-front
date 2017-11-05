@@ -35,6 +35,11 @@ angular.module('woollyFrontApp')
             loadSales();
         };
         loadSales();
+
+        $scope.showDialog = function(value){
+          console.log('Value is', value);
+          $('#myModal').modal('show');
+        }
         /*var loadItems = function(url){
             $scope.loading = true;
             console.log(url);
@@ -52,13 +57,14 @@ angular.module('woollyFrontApp')
         };
         loadItems();*/
        
-        var loadItemSpecification = function(){
+        $scope.loadItemSpecification = function(sale){
             $scope.loading = true;
+            console.log(sale);
             //var url= data.data.data.relationships.items.links.related;
-          serviceAjax.url("http://localhost:8000/items/1/itemspecifications/").then(function(data){
+          serviceAjax.url("http://localhost:8000/items/"+sale.id+"/itemspecifications/").then(function(data){
                 console.log("Poulet3",data.data.data);
                 console.log("Poulet4",data.data.included);
-                $scope.items2 = data.data.data;
+                sale.__items = data.data.data;
                 $scope.items3 = data.data.included;
                 $scope.loading = false;
                 $scope.getPlaceName = function(id){
@@ -71,34 +77,37 @@ angular.module('woollyFrontApp')
                           
                     });
                   };
+                  sale.__showMore = true;
                 
 
             });
         };
-
-        $scope.pageChanged = function(){
-            loadItemSpecification();
-        };
-        loadItemSpecification();
+        // // $scope.pageChanged = function(){
+        //     loadItemSpecification();
+        // };
+        // loadItemSpecification();
 
         
 });
-var app = angular.module('woollyFrontApp')
+/*var app = angular.module('woollyFrontApp')
         app.controller('MyController', function ($scope) {
             //This will hide the DIV by default.
             $scope.IsVisible = false;
-            $scope.IsHidden = true;
+            $scope.IsHidden= true;
             $scope.ShowHide = function () {
                 //If DIV is visible it will be hidden and vice versa.
                 $scope.IsVisible = $scope.IsVisible ? false : true;
                 $scope.IsHidden = $scope.IsHidden ? false : true;
             }
-            $scope.PlaceUtceen=1; 
+            $scope.nbPlace=2; 
+            console.log($scope.nbPlace);
             $scope.PlaceExterieur=0; 
-            $scope.getNbPlaceUtc = function(){
-              return $scope.PlaceUtceen;    
+            $scope.getNbPlace = function(){
+              return ($scope.nbPlace); 
+                
             };
-            $scope.getNbPlaceExte = function(){
-              return $scope.PlaceExterieur;    
+            $scope.getPrice = function(){
+              return $scope.price;    
             };
-        });
+            
+        });*/
