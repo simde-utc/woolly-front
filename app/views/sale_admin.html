@@ -1,0 +1,116 @@
+<div class="row">
+        <div class="jumbotron">
+            <h1>{{sale.attributes.name}}</h1>
+            <p>Administration</p>
+        </div> 
+        <div class="container" style="background-color: rgba(255, 255, 255, 0.6); margin-bottom: 2em; " >
+           <h2>Informations générales:</h2>
+            <form class="form-horizontal">
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="name">Nom :</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="name" value="{{sale.attributes.name}}" disabled>
+                            </div>
+                          </div>
+                          <div class="form-group"> 
+                            <label class="control-label col-sm-2" for="description">Description :</label>
+                             <div class="col-sm-10">
+                            <textarea class="form-control" rows="3" id="description" disabled>{{sale.attributes.description}}</textarea>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="nbPlaces">Nombre de places total :</label>
+                            <div class="col-sm-10">
+                              <input type="number" class="form-control" id="nbPlaces" value="{{sale.attributes.max_item_quantity}}" disabled>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="start_date">Date de début des ventes :</label>
+                            <div class="col-sm-10">
+                              <input type="datetime" class="form-control" id="start_date" value="{{sale.attributes.begin_date}}" disabled>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="end_date">Date de fin des ventes :</label>
+                            <div class="col-sm-10">
+                              <input type="datetime" class="form-control" id="end_date" value="{{sale.attributes.end_date}}" disabled>
+                            </div>
+                          </div>
+                          <hr>
+                          <h2>Informations sur les places :</h2>
+                          <h3>Place 1</h3>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_name">Nom :</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="place1_name" value="{{items.attributes.description}}" disabled="">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_type">Type de place :</label>
+                            <div class="col-sm-10">
+                              <select class="form-control" id="place1_type">
+                                <option>{{items.attributes.name}}</option>                                
+                              </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_nbPlaces">Nombre de places vendues:</label>
+                            <div class="col-sm-10">
+		                               <div class="progress">
+										  <div class="progress-bar progress-bar-info progress-bar-striped role="progressbar" aria-valuenow="{{statPlace}}"
+										  aria-valuemin="0" aria-valuemax="100" style="width:{{statPlace}}%">
+										    {{placeRestante}} / {{items.attributes.initial_quantity}} 
+										  </div>
+										</div> 
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_price">Prix :</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="place1_price" value="12€" disabled>
+                            </div>
+                          </div>
+                          <div id="place2">
+                            <h3>Place 2</h3>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_name">Nom :</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="place1_name" value="{{items.attributes.description}}" disabled>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_type">Type de place :</label>
+                            <div class="col-sm-10">
+                              <select class="form-control" id="place1_type">
+                                <option>{{items.attributes.name}}</option>                                
+                              </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_nbPlaces">Nombre de places vendues:</label>
+                            <div class="col-sm-10">
+		                               <div class="progress">
+										  <div class="progress-bar progress-bar-info progress-bar-striped role="progressbar" aria-valuenow="{{statPlace}}"
+										  aria-valuemin="0" aria-valuemax="100" style="width:{{statPlace}}%">
+										    {{placeRestante}} / {{items.attributes.initial_quantity}} 
+										  </div>
+										</div> 
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="place1_price">Prix :</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="place1_price" value="12€" disabled>
+                            </div>
+                          </div>
+                          <hr>
+
+                          <div class="form-group">
+                            <div class="col-sm-12" style="text-align: center;">
+                              <button type="submit" class="btn btn-success btn-lg"  >Ajouter</button>
+                            </div>
+                          </div>
+                        </form>  
+                      </div>
+        </div>          
+</div>

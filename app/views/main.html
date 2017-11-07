@@ -17,14 +17,16 @@
                                 <!--{{sale.relationships.items.links.related}}!-->
                                     <div  ng-show="sale.__showMore" ng-repeat="item in sale.__items"  style="text-align:left;" ><hr>
                                         <h3><span ng-bind="item.id"></span> :   </h3> 
-                                        <p> Prix : <span ng-bind="item.attributes.price"></span> €</p>
-                                        Nombre de place : 
-                                        <input type="number" max="5" min="0" value="1" ng-model="poulet"/>                                        
+                                        <form name="formPlace" novalidate>
+                                                <p> Prix : <span ng-bind="item.attributes.price"></span> €</p>
+                                                Nombre de place : 
+                                                <input type="number" max="5" min="0" value="1" ng-model="sale.nbPlace"/>    
+                                         </form>                                    
                                     </div>
                             </div>
 
                             <div ng-show="sale.__showMore" class="panel-footer bg-color-woolly2">
-                                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" ng-click="showDialog(poulet)">Payer</button>
+                                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" ng-click="showDialog(sale)" data-target="#myModal" >Payer</button>
                             </div>
                             <div ng-show="!sale.__showMore" class="panel-footer bg-color-woolly2">
                                    <input type="button" value="Voir la vente" ng-click="loadItemSpecification(sale)" />
@@ -45,12 +47,12 @@
                             <h4 class="modal-title">Finalisation de votre achat</h4>
                           </div>
                           <div class="modal-body">
-                            <p>Vous souhaitez acheter <b ng-bind="getNbPlace()">0</b> place.<br>Veuillez choisir votre moyen de paiement : </p>
+                            <p>Vous souhaitez acheter <b ng-bind="nbPlace">0</b> place pour <b ng-bind="nameEvent"></b><br>Veuillez choisir votre moyen de paiement : </p>
                           </div>
                           <div class="modal-footer" style="text-align: center;">
                             <!--<button type="button" class="btn btn-success" ng-href="https://payutc.nemopay.net" >PayUTC</button>!-->
                             <a type="button" class="btn btn-success" ng-href="https://payutc.nemopay.net">PayUTC</a>
-                            <a type="button" class="btn btn-success" ng-href="#!/mon_compte" >Liquide</a>
+                            
                             <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
                           </div>
                         </div>

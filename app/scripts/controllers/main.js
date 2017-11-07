@@ -39,7 +39,10 @@ angular.module('woollyFrontApp')
         $scope.showDialog = function(value){
           console.log('Value is', value);
           $('#myModal').modal('show');
+          $scope.nbPlace = value.nbPlace;
+          $scope.nameEvent = value.attributes.name;
         }
+       
         /*var loadItems = function(url){
             $scope.loading = true;
             console.log(url);
@@ -82,6 +85,8 @@ angular.module('woollyFrontApp')
 
             });
         };
+        
+        
         // // $scope.pageChanged = function(){
         //     loadItemSpecification();
         // };

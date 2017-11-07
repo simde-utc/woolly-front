@@ -39,7 +39,7 @@ angular
         controller: 'BilletterieCtrl',
         controllerAs: 'billetterie'
       })
-      .when('/add_sale', {
+      .when('/add_sale/:id', {
         templateUrl: 'views/add_sale.html',
         controller: 'Add_saleCtrl',
         controllerAs: 'add_sale'
@@ -53,6 +53,11 @@ angular
         templateUrl: 'views/sale.html',
         controller: 'SaleCtrl',
         controllerAs: 'sale'
+      })
+      .when('/admin/sale/:id', {
+        templateUrl: 'views/sale_admin.html',
+        controller: 'Sale_adminCtrl',
+        controllerAs: 'sale_admin'
       })
       /*.when('/mon_compte', {
         templateUrl: 'views/mon_compte.html',

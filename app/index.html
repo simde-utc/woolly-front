@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
   </head>
-  <body ng-app="woollyFrontApp">
+  <body ng-app="woollyFrontApp" style='background-image: url("http://wallpaperdj.com/download/qlimax_festival-1920x1080.jpg"); background-attachment:fixed;'>
     <!--[if lte IE 8]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
@@ -43,7 +43,7 @@
             <li><a href="#">Accueil</a></li>
             <li><a href="#!/billetterie">Liste des ventes</a></li>
             <li><a href="#!/mon_compte">Mon compte</a></li>
-            <li><a ng-show="" href="#!/admin">Administrateur</a></li>
+            <li><a ng-show="1==1" href="#!/admin">Administrateur</a></li>
             <!--<li><a href="#">Contact</a></li>!-->
             <li>
               <a class="btn btn-default btn-outline btn-circle collapsed"  data-toggle="collapse" href="#menu" aria-expanded="false" aria-controls="nav-collapse2" >Se connecter</a>
@@ -57,7 +57,7 @@
       </div><!-- /.container -->
     </nav><!-- /.navbar -->
         </div>
-    <div class="container">
+    <div class="container" >
     <div ng-view=""></div>
     </div>
 
@@ -106,6 +106,7 @@
         <script src="scripts/controllers/mon_compte.js"></script>
         <script src="scripts/controllers/admin.js"></script>
         <script src="scripts/controllers/sale.js"></script>
+        <script src="scripts/controllers/sale_admin.js"></script>
         <script src="scripts/services/serviceajax.js"></script>
         <!-- endbuild -->
 </body>
