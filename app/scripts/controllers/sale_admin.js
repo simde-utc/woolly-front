@@ -66,13 +66,13 @@ angular.module('woollyFrontApp')
                 $scope.statPlace = Math.round(stat*100)/100;
                 $scope.placeRestante = data.data.data.attributes.initial_quantity-(data.data.data.attributes.remaining_quantity);
                 console.log("stat : "+ stat);
-                
+                if(data.data.data.attributes.remaining_quantity>0){
+                        setTimeout(loadItemsBis, 1000);}
             });
         };
 
-        $scope.pageChanged = function(){
-            loadItemsBis();
-        };
         loadItemsBis();
+
+        
 
 });

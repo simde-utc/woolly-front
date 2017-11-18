@@ -59,6 +59,16 @@ angular.module('woollyFrontApp')
                           break;
                   } 
         };
+ $scope.generatePDF= function(order){
+var pdf = new jsPDF('p', 'pt', 'a4');
+pdf.text(100, 100, "Place achetée le : "+ order.attributes.date);
+pdf.text(100, 120, "Statut de la vente : "+ order.attributes.status);
+pdf.rect(85, 80, 300, 100);
+pdf.line(0, 250, 1000, 250);
+pdf.save("sale_"+order.id+'.pdf');
+    
+};
+
         // $scope.getName = function(order){
         //     $scope.loading = true;
         //     console.log(order);

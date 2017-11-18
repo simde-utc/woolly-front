@@ -59,6 +59,11 @@ angular
         controller: 'Sale_adminCtrl',
         controllerAs: 'sale_admin'
       })
+      .when('/paiement/:id_item/:', {
+        templateUrl: 'views/sale_admin.html',
+        controller: 'Sale_adminCtrl',
+        controllerAs: 'sale_admin'
+      })
       /*.when('/mon_compte', {
         templateUrl: 'views/mon_compte.html',
         controller: 'Mon_compteCtrl',

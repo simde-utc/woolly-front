@@ -35,7 +35,7 @@ angular.module('woollyFrontApp')
             loadSales();
         };
         loadSales();
-
+        $
         $scope.showDialog = function(value){
           console.log('Value is', value);
           $('#myModal').modal('show');

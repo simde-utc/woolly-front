@@ -70,6 +70,27 @@ angular.module('woollyFrontApp')
         };
         loadItemSpecification();
             
+             $scope.addOrder = function(){
+         var data=JSON.stringify(
+                                  {
+                                        "data": {
+                                            "type": "orders",
+                                            "id": null,
+                                            "attributes": {
+                                                "status": "not_payed",
+                                                "date": 2017-12-11
+                                            }
+                                        }
+                                    });
+
+          serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
+                console.log("Poulet5",data);
+
+            });
+        };
+
+       
+        
         /*var loadAsso = function(){
             $scope.loading = true;
             console.log(url);

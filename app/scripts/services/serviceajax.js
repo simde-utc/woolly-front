@@ -18,6 +18,10 @@ angular.module('woollyFrontApp')
         },
         url: function(url){
             return $http.get(url, {withCredentials:true});
+        },
+        urlPost: function(url, data){
+            return $http.post(url, data, {withCredentials:true, headers: {'Content-Type': 'application/json'}});
         }
+        
     }
   });
