@@ -49,28 +49,29 @@ angular.module('woollyFrontApp')
             });
         };
 
-        $scope.pageChanged = function(){
-            loadItems();
-        };
+        $scope.__loadItemsInterval = true;
         loadItems();
 
         var loadItemsBis = function(){
             $scope.loading = true;
             
           serviceAjax.url("http://localhost:8000/items/"+id).then(function(data){
-                console.log("Poulet2",data.data.data);
+                //console.log("Poulet2",data.data.data);
                 $scope.itemsBis = data.data.data;
                 $scope.loading = false;
                 var stat = (1-(data.data.data.attributes.remaining_quantity / data.data.data.attributes.initial_quantity))*100;
                 Math.round(stat*100)/100;
                 $scope.statPlace = Math.round(stat*100)/100;
                 $scope.placeRestante = data.data.data.attributes.initial_quantity-(data.data.data.attributes.remaining_quantity);
-                console.log("stat : "+ stat);
-                if(data.data.data.attributes.remaining_quantity>0){
+                //console.log("stat : "+ stat);
+                if(data.data.data.attributes.remaining_quantity>0 && $scope.__loadItemsInterval){
                         setTimeout(loadItemsBis, 1000);}
+
             });
         };
-
+        $scope.$on('$locationChangeStart', function(event) {
+            $scope.__loadItemsInterval = false;  
+        });
         loadItemsBis();
 
         

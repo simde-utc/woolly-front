@@ -18,5 +18,5 @@ angular.module('woollyFrontApp')
 angular.module('woollyFrontApp')
   .controller('AboutCtrl', function ($scope,serviceAjax) {
        
-        
+  
 });

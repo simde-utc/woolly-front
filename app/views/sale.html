@@ -15,6 +15,7 @@
                             <th>Nom</th>
                             <th>Description</th>
                             <th>Prix</th>
+                            <th>Quantité</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -23,7 +24,19 @@
                             <td>{{items.attributes.name}}</td>
                             <td>{{items.attributes.description}}</td>
                             <td>{{item.attributes.price}} €</td>
-                            <td><button type="button"  ng-show="items.attributes.remaining_quantity>0" class="btn btn-success"  ng-click="addOrder()" style="text-align: center;">Acheter</button>
+                            <td> <select name="cars" ng-model="item.nbPlace">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                  </select> </td>
+                            <td><button type="button"  ng-show="items.attributes.remaining_quantity>0" class="btn btn-success"  ng-click="addOrder(item)" style="text-align: center;">Acheter</button>
                             <button type="button"  ng-show="items.attributes.remaining_quantity==0" class="btn btn-danger disabled" style="text-align: center;">Complet</button></td>
                           </tr>
                         </tbody>

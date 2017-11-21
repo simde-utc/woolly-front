@@ -38,65 +38,44 @@ angular.module('woollyFrontApp')
         };
         loadOrders();
 
-        $scope.getStatus = function(order){
-            $scope.loading = true;
-            console.log("order:",order);
-            
-                      console.log("order status "+order.attributes.status); 
-                      switch(order.attributes.status) {
-                      case "awaiting_validation":
-                      $scope.button= '<strong>test</strong>';
-                          return "En attente de validation";
-                          break;
-                      case "not_payed":
-                          return "Non payé";
-                          break;
-                      case "payed":
-                          return "Payé";
-                          break;
-                      case "validated":
-                          return "Validé";
-                          break;
-                  } 
-        };
- $scope.generatePDF= function(order){
-var pdf = new jsPDF('p', 'pt', 'a4');
-pdf.text(100, 100, "Place achetée le : "+ order.attributes.date);
-pdf.text(100, 120, "Statut de la vente : "+ order.attributes.status);
-pdf.rect(85, 80, 300, 100);
-pdf.line(0, 250, 1000, 250);
-pdf.save("sale_"+order.id+'.pdf');
-    
+        
+$scope.generatePDF= function(order){
+  pdf = new PDFDocument
+  var pdf = new jsPDF('p', 'pt', 'a4');
+  var img = new Image;
+  
+  var width = pdf.internal.pageSize.width;    
+  var height = pdf.internal.pageSize.height;
+  img.onload = function() {
+      pdf.addImage(this, 0, 0, width, height);
+  
+  // img_qr.onload = function() {
+  //     pdf.addImage(this, 0, 0, width, height);
+  //     pdf.save("sale_"+order.id+'.pdf');
+  // };
+
+ 
+  var canvas = document.querySelector("#qrcode canvas");
+
+  
+  var pdfImage = canvas.toDataURL('image/jpg');
+  console.log("test");
+  pdf.addImage(pdfImage, 300, 120);
+ pdf.save("sale_"+order.id+'.pdf');
+ // img_qr.src ="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Example&format=jpeg"; 
+  //$scope.qrcode = '<img src="'+img_qr.src+'"/>';
+     //pdf.save("sale_"+order.id+'.pdf');
+  };
+   img.src = "../images/place.jpg";  // some random imgur image
+   console.log(order.id);
+$('#qrcode').qrcode({
+    text  : order.id
+  }); 
 };
 
-        // $scope.getName = function(order){
-        //     $scope.loading = true;
-        //     console.log(order);
-        //     //var url= data.data.data.relationships.items.links.related;
-        //   serviceAjax.url("http://localhost:8000/orders/"+order.id+"/orderlines/").then(function(data){
-        //         console.log("Poulet3",data.data.included);
-               
-                
-        //             data.data.included.filter(e => {
-        //               console.log("name "+e.attributes.name);
-        //               return e.attributes.name;
-                          
-        //             });
-                  
-                  
-                
 
-        //     });
-        // };        
 
-       // // $scope.getStatus = function(order){
-       //      $scope.loading = true;
-       //      console.log(order);
-       //      //var url= data.data.data.relationships.items.links.related;
-          
-                
 
-       //      });
-       //  };
+
         
 });

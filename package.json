@@ -42,6 +42,7 @@
     "test": "karma start test/karma.conf.js"
   },
   "dependencies": {
-    "jspdf": "^1.3.5"
+    "jspdf": "^1.3.5",
+    "pdfkit": "^0.8.3"
   }
 }
