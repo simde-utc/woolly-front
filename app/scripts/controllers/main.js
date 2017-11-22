@@ -56,10 +56,15 @@ angular.module('woollyFrontApp')
 
             // });
           //var data = '[[3933,2],[23232,3]]';
-          var data = JSON.stringify([[3933,2],[23232,3]]);
+          var data = JSON.stringify([[9633,2],[9633,3]]);
           console.log("poulet",data);
-          serviceAjax.urlPost("http://localhost:8000/payutc/createTransaction?mail=obled.aymeric@gmail.com&funId=6",data).then(function(data){
-                console.log("ok");
+          serviceAjax.urlPost("http://localhost:8000/payutc/createTransaction?mail=obled.aymeric@gmail.com&funId=38",data).then(function(data){
+                 data = JSON.parse(JSON.stringify(data));
+          //       console.log("hi")
+                 console.log(data.data.url);
+            //     console.log("hj")
+                document.location.href = data.data.url;
+
                 
 
             });
