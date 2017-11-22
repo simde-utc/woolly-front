@@ -45,6 +45,7 @@ angular.module('woollyFrontApp')
                 console.log("Poulet2",data.data.data);
                 $scope.items = data.data.data;
                 $scope.loading = false;
+                
                
             });
         };
@@ -68,6 +69,7 @@ angular.module('woollyFrontApp')
         $scope.pageChanged = function(){
             loadItemSpecification();
         };
+
         loadItemSpecification();
             
              $scope.addOrder = function(item){
@@ -77,22 +79,12 @@ angular.module('woollyFrontApp')
                 $scope.nbPlace = item.nbPlace;
             
      
-         // var data=JSON.stringify(
-         //                          {
-         //                                "data": {
-         //                                    "type": "orders",
-         //                                    "id": null,
-         //                                    "attributes": {
-         //                                        "status": "not_payed",
-         //                                        "date": 2017-12-11
-         //                                    }
-         //                                }
-         //                            });
+         var data='[{"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": 2017-12-11}}}]';
 
-         //  serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
-         //        console.log("Poulet5",data);
+          serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
+                console.log("Poulet5",data);
 
-         //    });
+            });
         };
 
        

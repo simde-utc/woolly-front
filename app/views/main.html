@@ -20,13 +20,13 @@
                                         <form name="formPlace" novalidate>
                                                 <p> Prix : <span ng-bind="item.attributes.price"></span> €</p>
                                                 Nombre de place : 
-                                                <input type="number" max="10" min="0" value="1" ng-model="sale.nbPlace"/>    
+                                                <input type="number" max="10" min="0" value="1" ng-model="item.nbPlace"/>    
                                          </form>                                    
                                     </div>
                             </div>
 
                             <div ng-show="sale.__showMore" class="panel-footer bg-color-woolly2">
-                                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" ng-click="showDialog(sale)" data-target="#myModal" >Payer</button>
+                                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" ng-click="showDialog(sale.__items)" data-target="#myModal" >Payer</button>
                             </div>
                             <div ng-show="!sale.__showMore" class="panel-footer bg-color-woolly2">
                                    <input type="button" value="Voir la vente" ng-click="loadItemSpecification(sale)" />
@@ -51,7 +51,7 @@
                           </div>
                           <div class="modal-footer" style="text-align: center;">
                             <!--<button type="button" class="btn btn-success" ng-href="https://payutc.nemopay.net" >PayUTC</button>!-->
-                            <a type="button" class="btn btn-success" ng-href="https://payutc.nemopay.net">PayUTC</a>
+                            <a type="button" class="btn btn-success" ng-click="createTransaction(sale)">PayUTC</a>
                             
                             <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
                           </div>

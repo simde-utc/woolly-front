@@ -39,26 +39,40 @@ angular.module('woollyFrontApp')
         $scope.showDialog = function(value){
           console.log('Value is', value);
           $('#myModal').modal('show');
-          $scope.nbPlace = value.nbPlace;
-          $scope.nameEvent = value.attributes.name;
+          value.filter(e => {
+            console.log(e.nbPlace);
+                  $scope.nbPlace = e.nbPlace;
+                });
+          //$scope.nbPlace = value.nbPlace;
+          //$scope.nameEvent = value.attributes.name;
         }
        
-        /*var loadItems = function(url){
-            $scope.loading = true;
-            console.log(url);
+        $scope.createTransaction = function(sale){
+            
             //var url= data.data.data.relationships.items.links.related;
-          serviceAjax.url(url).then(function(data){
-                console.log("Poulet2",data.data.data);
-                $scope.items = data.data.data;
-                $scope.loading = false;
+            // serviceAjax.urlPost("localhost:8000/payutc/createTransaction/").then(function(data){
+            //     console.log("Poulet2",data.data);
+                
+
+            // });
+          //var data = '[[3933,2],[23232,3]]';
+          var data = JSON.stringify([[3933,2],[23232,3]]);
+          console.log("poulet",data);
+          serviceAjax.urlPost("http://localhost:8000/payutc/createTransaction?mail=obled.aymeric@gmail.com&funId=6",data).then(function(data){
+                console.log("ok");
+                
 
             });
+          // var xsrf = $.param({fkey: "key"});
+          // $http({
+          //     method: 'POST',
+          //     url: url,
+          //     data: xsrf,
+          //     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          // })
         };
 
-        $scope.pageChanged = function(){
-            loadItems();
-        };
-        loadItems();*/
+        
        
         $scope.loadItemSpecification = function(sale){
             $scope.loading = true;
