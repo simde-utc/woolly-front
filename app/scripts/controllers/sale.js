@@ -1,5 +1,20 @@
 'use strict';
+ function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 
+}
 /**
  * @ngdoc function
  * @name woollyFrontApp.controller:MainCtrl
@@ -75,11 +90,11 @@ angular.module('woollyFrontApp')
              $scope.addOrder = function(item){
                
                 console.log('Value is', item.nbPlace);
-                
+ 
                 $scope.nbPlace = item.nbPlace;
             
      
-                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": 15-11-2017}}};
+                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": new Date().toISOString(),"hash_key":"test","orderlines": {"item ": "test", "order":"test"}}}};
 console.log("data :",data);
                   serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
                       console.log("data",data);

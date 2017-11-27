@@ -1,5 +1,21 @@
 'use strict';
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+
+}
 /**
  * @ngdoc service
  * @name woollyFrontApp.serviceAjax
@@ -7,6 +23,8 @@
  * # serviceAjax
  * Factory in the woollyFrontApp.
  */
+ var csrftoken =  getCookie('csrftoken');
+
 angular.module('woollyFrontApp')
   .factory('serviceAjax', function serviceAjax($http) {
     return{
@@ -20,7 +38,7 @@ angular.module('woollyFrontApp')
             return $http.get(url, {withCredentials:true});
         },
         urlPost: function(url, data){
-            return $http.post(url, data, {withCredentials:true, headers: {'Content-Type': 'application/json'}});
+            return $http.post(url, data, {withCredentials:true, headers: {'Content-Type': 'application/vnd.api+json',"X-CSRFToken": csrftoken}});
         }
         
     }
