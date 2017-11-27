@@ -79,7 +79,7 @@ angular.module('woollyFrontApp')
                 $scope.nbPlace = item.nbPlace;
             
      
-                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": 15-11-2017}}};
+                  var data={"data": {"type": "orders","id": 20,"attributes": {"status": "not_payed","date": 15-11-2017}}};
 console.log("data :",data);
                   serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
                       console.log("data",data);

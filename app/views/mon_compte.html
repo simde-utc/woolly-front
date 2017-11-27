@@ -58,7 +58,7 @@
                               <tr ng-repeat="order in orders | date : format : 'medium' | orderBy: '-date':true | limitTo: 10">
                                 <td>{{order.id}}</td>
                                 <td>{{order.attributes.date}}</td>
-                                <td>12€</td>
+                                <td>{{order.attributes.price}} €</td>
                                 <td ng-bind="getStatus(order)">{{order.attributes.status}}</td>
                                 <td><a type="button" ng-show="order.attributes.status=='payed'" class="btn btn-primary" style="width: 12em;" ng-click="generatePDF(order)" >Télécharger ma place</a>
                                     <button type="button" ng-show="order.attributes.status=='not_payed'" class="btn btn-success" style="width: 12em;">Payer</button>
