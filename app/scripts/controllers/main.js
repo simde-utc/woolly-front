@@ -22,18 +22,18 @@ angular.module('woollyFrontApp')
           serviceAjax.path("sales").then(function(data){
                 console.log("Poulet",data.data.data);
                 $scope.next_sales = data.data.data.filter(e => {
-                  return ((new Date(e.attributes.end_date)).getTime() > Date.now());
+                  var endDate = new Date(e.attributes.end_date);
+                  var beginDate = new Date(e.attributes.begin_date);
+                  return ((endDate.getTime() > Date.now()) && (beginDate.getTime() < Date.now()));
                 });
                 $scope.sales = data.data.data;
 
                 $scope.loading = false;
-
+                
             });
         };
 
-        $scope.pageChanged = function(){
-            loadSales();
-        };
+       
         loadSales();
         $
         $scope.showDialog = function(value){
@@ -42,12 +42,13 @@ angular.module('woollyFrontApp')
           value.filter(e => {
             console.log(e.nbPlace);
                   $scope.nbPlace = e.nbPlace;
+                  
                 });
           //$scope.nbPlace = value.nbPlace;
           //$scope.nameEvent = value.attributes.name;
         }
        
-        $scope.createTransaction = function(sale){
+        $scope.createTransaction = function(nbPlace){
             
             //var url= data.data.data.relationships.items.links.related;
             // serviceAjax.urlPost("localhost:8000/payutc/createTransaction/").then(function(data){
@@ -56,7 +57,8 @@ angular.module('woollyFrontApp')
 
             // });
           //var data = '[[3933,2],[23232,3]]';
-          var data = JSON.stringify([[9633,2],[9633,3]]);
+          console.log(nbPlace);
+          var data = JSON.stringify([[9633,nbPlace]]);
           console.log("poulet",data);
           serviceAjax.urlPost("http://localhost:8000/payutc/createTransaction?mail=obled.aymeric@gmail.com&funId=38",data).then(function(data){
                  data = JSON.parse(JSON.stringify(data));
@@ -79,31 +81,22 @@ angular.module('woollyFrontApp')
 
         
        
-        $scope.loadItemSpecification = function(sale){
-            $scope.loading = true;
-            console.log(sale);
-            //var url= data.data.data.relationships.items.links.related;
-          serviceAjax.url("http://localhost:8000/items/"+sale.id+"/itemspecifications/").then(function(data){
+            $scope.loadItemSpecification = function(sale){
+                $scope.loading = true;
+                console.log(sale);
+                //var url= data.data.data.relationships.items.links.related;
+                serviceAjax.url("http://localhost:8000/items/"+sale.id+"/itemspecifications/").then(function(data){
                 console.log("Poulet3",data.data.data);
                 console.log("Poulet4",data.data.included);
                 sale.__items = data.data.data;
                 $scope.items3 = data.data.included;
                 $scope.loading = false;
-                $scope.getPlaceName = function(id){
-                    data.data.included.filter(e => {
-                      console.log("id "+id);
-                      console.log("e.id "+e.id);
-                      console.log("e.name"+e.attributes.name);
-                      if (e.id==id){return e.attributes.name; 
-                        console.log("ok");}
-                          
-                    });
-                  };
+                
                   sale.__showMore = true;
                 
 
             });
-        };
+};
         
         
         // // $scope.pageChanged = function(){

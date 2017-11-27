@@ -68,8 +68,10 @@ $scope.generatePDF= function(order){
   };
    img.src = "../images/place.jpg";  // some random imgur image
    console.log(order.id);
+   var data = JSON.stringify({'username' : 'snastuzz', 'id' : order.attributes.hash_key, 'api':'woolly','command':''});
+   console.log("data : ",data);
 $('#qrcode').qrcode({
-    text  : order.id
+    text  : data
   }); 
 };
 

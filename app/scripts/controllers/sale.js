@@ -79,12 +79,12 @@ angular.module('woollyFrontApp')
                 $scope.nbPlace = item.nbPlace;
             
      
-         var data='[{"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": 2017-12-11}}}]';
+                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": 15-11-2017}}};
+console.log("data :",data);
+                  serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
+                      console.log("data",data);
 
-          serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
-                console.log("Poulet5",data);
-
-            });
+                    });
         };
 
        
