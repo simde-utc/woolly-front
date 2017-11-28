@@ -85,11 +85,22 @@ angular.module('woollyFrontApp')
                 $scope.loading = true;
                 console.log(sale);
                 //var url= data.data.data.relationships.items.links.related;
-                serviceAjax.url("http://localhost:8000/items/"+sale.id+"/itemspecifications/").then(function(data){
+                serviceAjax.url("http://localhost:8000/items/"+sale.id).then(function(data){
                 console.log("Poulet3",data.data.data);
                 console.log("Poulet4",data.data.included);
                 sale.__items = data.data.data;
-                $scope.items3 = data.data.included;
+                $scope.items3 = data.data.data;
+                console.log("items3",$scope.items3)
+                $scope.loading = false;
+                
+                  sale.__showMore = true;
+                });
+                serviceAjax.url("http://localhost:8000/items/"+sale.id+"/itemspecifications").then(function(data){
+                console.log("Poulet3",data.data.data);
+                console.log("Poulet4",data.data.included);
+                sale.__itemspecification = data.data.data;
+                $scope.items = data.data.data;
+                console.log("items3",$scope.items3)
                 $scope.loading = false;
                 
                   sale.__showMore = true;

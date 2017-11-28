@@ -31,6 +31,7 @@ angular.module('woollyFrontApp')
                 $scope.loading = false;
 
             });
+          
         };
 
         $scope.pageChanged = function(){

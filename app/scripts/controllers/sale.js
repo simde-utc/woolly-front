@@ -94,7 +94,9 @@ angular.module('woollyFrontApp')
                 $scope.nbPlace = item.nbPlace;
             
      
+
                   var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": new Date().toISOString(),"hash_key":"test","orderlines": {"item ": "test", "order":"test"}}}};
+
 console.log("data :",data);
                   serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
                       console.log("data",data);
