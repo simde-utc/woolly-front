@@ -92,10 +92,10 @@ angular.module('woollyFrontApp')
                 console.log('Value is', item.nbPlace);
  
                 $scope.nbPlace = item.nbPlace;
-            
+                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": new Date().toISOString(),"price": 12.0,"hash_key": "dfvfdv"},"relationships": {"orderlines": {"data": [{"type": "orderlines","id": "2"}],"meta": {"count": 1}}}}};
      
-
-                  var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": new Date().toISOString(),"hash_key":"test","orderlines": {"item ": "test", "order":"test"}}}};
+                  //var data={"data": {"type": "orders","id": 17,"attributes": {"status": "payed","date": new Date().toISOString(),"price": 15,"hash_key": "rqgfgf","orderlines": {"item ": "test", "order":"test"}}}};
+                  //var data={"data": {"type": "orders","id": null,"attributes": {"status": "not_payed","date": new Date().toISOString(),"hash_key":"test","price":15,"orderlines": {"item ": "test", "order":"test"}}}};
 
 console.log("data :",data);
                   serviceAjax.urlPost("http://localhost:8000/orders/",data).then(function(data){
