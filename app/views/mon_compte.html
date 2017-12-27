@@ -55,7 +55,7 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <tr ng-repeat="order in orders | date : format : 'medium' | orderBy: '-date':true | limitTo: 10">
+                              <tr ng-repeat="order in orders | orderBy: '-date':true ">
                                 <td>{{order.id}}</td>
                                 <td>{{order.attributes.date}}</td>
                                 <td>{{order.attributes.price}} €</td>
