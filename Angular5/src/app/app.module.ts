@@ -16,8 +16,8 @@ const routes: Routes = [
 	// { path: 'login', 	component: LoginComponent },
 	// { path: 'logout', 	component: LogoutComponent },
 	// { path: 'admin', 	loadChildren: 'app/admin/admin.module#AdminModule', canActivate: [AuthGuard] },
-	// { path: '', 		loadChildren: 'app/pages/pages.module#PagesModule'},
-	// { path: '**', 		redirectTo: 'page-inconnue' }
+	{ path: '', 		loadChildren: 'app/pages/pages.module#PagesModule'},
+	// { path: '**', 		redirectTo: '' }
 ];
 
 @NgModule({

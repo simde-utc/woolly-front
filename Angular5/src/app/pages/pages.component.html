@@ -1,0 +1,33 @@
+<nav class="navbar navbar-light bg-light">
+	<div class="container d-flex justify-content-between">
+		<!-- TODO responsive -->
+		<div class="d-flex justify-content-between">
+			<a class="navbar-brand" routerLink="/">Woolly</a>
+			<button class="navbar-toggler" type="button">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+		</div>
+
+		<div class="collapse navbar-collapse" id="navbar-collapse-2">
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="#">Accueil</a></li>
+				<li><a href="#!/billetterie">Liste des ventes</a></li>
+				<li><a href="#!/mon_compte">Mon compte</a></li>
+				<li><a href="#!/admin">Administrateur</a></li>
+				<li>
+					<a class="btn btn-default btn-outline btn-circle collapsed"  data-toggle="collapse" href="#menu" aria-expanded="false" aria-controls="nav-collapse2" >Se connecter</a>
+				</li>
+			</ul>
+			<div class="collapse nav navbar-nav nav-collapse slide-down" style="padding-top:8px;" id="menu">
+				<a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="http://localhost:8000/login" >UTC / Escom</a>
+				<a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="#!/login" >Extérieur</a>
+			</div>
+		</div>
+	</div>
+</nav>
+
+<router-outlet></router-outlet>
+
+<footer class="footer fixed-bottom">
+	<p class="container my-2 text-center">Made with <span class="glyphicon glyphicon-heart"></span> by SiMDE. <a href="#!/about">Contacter</a></p>
+</footer>
