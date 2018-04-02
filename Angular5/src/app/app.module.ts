@@ -8,7 +8,8 @@ import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
 
 // Services
-
+import { UserService } from './models/user/user.service';
+import { SaleService } from './models/sale/sale.service';
 
 // Layout + AppComponent
 import { AppComponent } from './app.component';
@@ -32,6 +33,8 @@ const routes: Routes = [
 		RouterModule.forRoot(routes)
 	],
 	providers: [		// Services
+		UserService,
+		SaleService
 	],
 	bootstrap: [ AppComponent ]
 })

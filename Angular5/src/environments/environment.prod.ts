@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+	production: true,
+	apiURL: 'https://assos.utc.fr/wooly/api'
 };
