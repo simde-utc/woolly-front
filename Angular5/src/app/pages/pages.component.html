@@ -1,7 +1,6 @@
-
 <mdb-navbar SideClass="navbar fixed-top navbar-expand-md navbar-dark bg-blue scrolling-navbar ie-nav" [containerInside]="true">
 	<logo>
-		<a class="logo navbar-brand" href="#"><strong>Woolly</strong></a>
+		<a class="logo navbar-brand" routerLink="/"><strong>Woolly</strong></a>
 	</logo>
 	<links>
 		<ul class="navbar-nav ml-auto">
@@ -9,7 +8,7 @@
 				<a class="nav-link" routerLink="/">Accueil</a>
 			</li>
 			<li class="nav-item waves-light" mdbRippleRadius>
-				<a class="nav-link" routerLink="/billetterie">Liste des ventes</a>
+				<a class="nav-link" routerLink="/ventes">Liste des ventes</a>
 			</li>
 			<li class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/mon_compte">Mon compte</a>
@@ -18,7 +17,7 @@
 				<a class="nav-link" routerLink="/admin">Administration</a>
 			</li>
 			<li class="nav-item waves-light" mdbRippleRadius>
-				<a class="nav-link">Se connecter</a>
+				<a class="nav-link" routerLink="/login">Se connecter</a>
 			</li>
 		</ul>
 		<!-- 
