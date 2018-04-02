@@ -1,9 +1,11 @@
 // Main modules
+import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { MDBBootstrapModule } from 'angular-bootstrap-md';
+
 
 // Services
 
@@ -26,7 +28,7 @@ const routes: Routes = [
 	],
 	imports: [			// Modules
 		BrowserModule,
-		NgbModule.forRoot(),
+		MDBBootstrapModule.forRoot(),
 		RouterModule.forRoot(routes)
 	],
 	providers: [		// Services
