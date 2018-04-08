@@ -2,7 +2,11 @@
 import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { NgxJsonapiModule } from 'ngx-jsonapi';
+import { environment } from '../environments/environment';
 
+// UI
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
@@ -10,6 +14,7 @@ import { MDBBootstrapModule } from 'angular-bootstrap-md';
 // Services
 import { UserService } from './models/user/user.service';
 import { SaleService } from './models/sale/sale.service';
+
 
 // Layout + AppComponent
 import { AppComponent } from './app.component';
@@ -23,14 +28,32 @@ const routes: Routes = [
 	// { path: '**', 		redirectTo: '' }
 ];
 
+// JSON API Resources
+/*
+// import { StoreModule } from '@ngrx/store';
+// import { counterReducer } from './counter';
+import { NgrxJsonApiModule, ResourceDefinition } from 'ngrx-json-api';
+let resourceDefinitions: Array<ResourceDefinition> = [
+	{ type: 'User', 	collectionPath: 'users' },
+	{ type: 'Sale', 	collectionPath: 'sales' },
+];
+import { EffectsModule } from '@ngrx/effects';
+*/
+
+
+
 @NgModule({
 	declarations: [		// Components
 		AppComponent
 	],
 	imports: [			// Modules
 		BrowserModule,
+		HttpClientModule,
 		MDBBootstrapModule.forRoot(),
-		RouterModule.forRoot(routes)
+		RouterModule.forRoot(routes),
+		NgxJsonapiModule.forRoot({
+			url: environment.apiURL
+		})
 	],
 	providers: [		// Services
 		UserService,

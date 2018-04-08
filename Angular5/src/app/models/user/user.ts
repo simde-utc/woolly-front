@@ -1,13 +1,17 @@
-export class UserType {
-	id: number;
-	name: string;
+import { Resource } from 'ngx-jsonapi';
+
+export class UserType extends Resource {
+	public attributes: {
+		name: string;
+	}
 }
 
-export class User {
-	id: number;
-	email: string;
-	firstname?: string;
-	lastname?: string;
-	login?: string;
-	type: UserType;
+export class User extends Resource {
+	public attributes: {
+		email: string;
+		firstname?: string;
+		lastname?: string;
+		login?: string;
+		type: UserType;
+	};
 }
