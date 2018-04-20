@@ -6,15 +6,18 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgxJsonapiModule } from 'ngx-jsonapi';
 import { environment } from '../environments/environment';
 
-// UI
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MDBBootstrapModule } from 'angular-bootstrap-md';
-
+// JWT Interceptor
+import { AuthService, jwtTokenGetter } from './models/auth.service';
+import { JwtModule } from '@auth0/angular-jwt';
 
 // Services
 import { UserService } from './models/user/user.service';
 import { SaleService } from './models/sale/sale.service';
 
+
+// UI
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
 // Layout + AppComponent
 import { AppComponent } from './app.component';
@@ -49,14 +52,22 @@ import { EffectsModule } from '@ngrx/effects';
 	imports: [			// Modules
 		BrowserModule,
 		HttpClientModule,
+		JwtModule.forRoot({
+			config: {
+				tokenGetter: jwtTokenGetter,
+				whitelistedDomains: [ environment.apiUrl ],
+				blacklistedRoutes: [ environment.apiUrl + '/auth/' ]
+			}
+		}),
 		MDBBootstrapModule.forRoot(),
 		BrowserAnimationsModule,
 		RouterModule.forRoot(routes),
 		NgxJsonapiModule.forRoot({
-			url: environment.apiURL
+			url: environment.apiUrl
 		})
 	],
 	providers: [		// Services
+		AuthService,
 		UserService,
 		SaleService
 	],
