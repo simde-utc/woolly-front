@@ -1,3 +1,55 @@
-<p>
-  account works!
-</p>
+<main class="container p-5">
+	<h1>Mon Compte</h1>
+
+	<div class="row">
+		<!-- 
+		<div class="panel-body">
+			<ul class="nav nav-pills">
+				<li class="active"><a (click)="infos=false">Mes achats</a></li>
+				<li class=""><a (click)="infos=true">Mes informations</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<div class="tab-pane fade active in" id="achats">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Intitulé</th>
+								<th>Date</th>
+								<th>Prix</th>
+								<th>Statut</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let order in orders | orderBy: '-date':true ">
+								<td>{{ order.id }}</td>
+								<td>{{ order.attributes.date }}</td>
+								<td>{{ order.attributes.price }} €</td>
+								<td ng-bind="getStatus(order)">{{order.attributes.status}}</td>
+								<td>
+									<a type="button" *ngIf="order.attributes.status=='payed'" class="btn btn-primary" style="width: 12em;" (click)="generatePDF(order)">
+										Télécharger ma place
+									</a>
+									<button type="button" *ngIf=="order.attributes.status=='not_payed'" 
+										class="btn btn-success">Payer</button>
+									<button type="button" *ngIf=="order.attributes.status=='awaiting_validation'" 
+										class="btn btn-warning">Valider</button>
+									<button type="button" *ngIf=="order.attributes.status=='validated'" 
+										class="btn btn-success disabled">Validé</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="tab-pane fade" id="profile">
+						<p><b>Nom :</b></p>
+						<p><b>Prénom :</b></p>
+					</div>
+				</div>
+			</div> 
+			<div id="qrcode" style="display:none;"></div>                 
+
+		 -->
+	</div>
+</main>

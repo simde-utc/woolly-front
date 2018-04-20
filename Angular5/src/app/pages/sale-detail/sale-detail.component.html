@@ -1,3 +1,30 @@
-<p>
-  sale-detail works!
-</p>
+<main class="container p-5 h-100">
+
+	<div *ngIf="sale.is_loading; else saleReady">
+		<div class="d-flex h-100 justify-content-center align-items-center three-balls-loader">
+			<div class="ball ball-1"></div>
+			<div class="ball ball-2"></div>
+			<div class="ball ball-3"></div>
+		</div>
+	</div>
+
+	<ng-template #saleReady>
+		<div class="text-center py-3 mb-2">
+			<h1 class="display-4">{{ sale.attributes.name }}</h1>
+			<h5 class="text-gray-dark">Organisé par {{ sale.attributes.association }}</h5>
+		</div>
+
+		<div class="row">
+			<div class="col-md-5">
+				<span class="lead">Description</span>
+				<p>{{ sale.attributes.description }}</p>
+			</div>
+			<div class="col-md-5">
+				
+			</div>
+		</div>
+
+		<pre class="pre-scrollable mt-5">{{ sale | json }}</pre>
+	</ng-template>
+
+</main>

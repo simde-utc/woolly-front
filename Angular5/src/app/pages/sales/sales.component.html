@@ -1,20 +1,22 @@
 <main class="p-5">
 	<div class="container">
-		<h1 class="mb-5">Liste des ventes</h1>
+		<h1 class="mb-5 animated fadeIn">Liste des ventes</h1>
 	</div>
 
 	<div class="row mb-4">
-		<div *ngFor="let sale of sales.$toArray" class="py-3 col-md-4 col-sm-6 col-xl-3">
-			<div class="card card-image view hm-white-slight waves-light" mdbRippleRadius style="background-image: url(https://mdbootstrap.com/img/Photos/Horizontal/Work/4-col/img%20%2814%29.jpg);">
+		<div *ngFor="let sale of sales.$toArray" class="py-3 col-md-4 col-sm-6 col-xl-3 animated fadeInRight">
+			<div class="card card-image view hm-white-slight waves-light" mdbRippleRadius [@fullCard]="sale.selected" 
+				style="background-image: url(https://mdbootstrap.com/img/Photos/Horizontal/Work/4-col/img%20%2814%29.jpg);">
 				<div class="card-body text-white rgba-black-strong d-flex align-items-center py-5 px-4">
 					<div>
 						<h3 class="card-title"><strong>{{ sale.attributes.name }}</strong></h3>
 						<h5 class="font-italic">Organisé par {{ sale.attributes.association }}</h5>
 						<hr>
 						<p>{{ sale.attributes.description }}</p>
-						<a class="btn btn-blue waves-light" mdbRippleRadius>
+						<a class="btn btn-blue waves-light" mdbRippleRadius (click)="sale.selected = true">
 							<i class="fa fa-hand-o-right" aria-hidden=true></i> Accéder à la vente
 						</a>
+						<code>{{ sale.full | json}}</code>
 					</div>
 				</div>
 			</div>

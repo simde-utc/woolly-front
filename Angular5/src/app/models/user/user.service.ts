@@ -22,4 +22,9 @@ export class UserTypeService extends Service<UserType> {
 	public resource = User;
 	public type = 'woollyusertypes';
 	public schema: ISchema = { };
+
+	// TODO : not working ?
+	public isConnected() : boolean {
+		return false;
+	}
 }

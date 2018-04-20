@@ -50,6 +50,7 @@ import { EffectsModule } from '@ngrx/effects';
 		BrowserModule,
 		HttpClientModule,
 		MDBBootstrapModule.forRoot(),
+		BrowserAnimationsModule,
 		RouterModule.forRoot(routes),
 		NgxJsonapiModule.forRoot({
 			url: environment.apiURL

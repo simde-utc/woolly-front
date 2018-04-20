@@ -10,14 +10,17 @@
 			<li class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/ventes">Liste des ventes</a>
 			</li>
-			<li class="nav-item waves-light" mdbRippleRadius>
+			<li *ngIf="isConnected" class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/mon_compte">Mon compte</a>
 			</li>
 			<li class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/admin">Administration</a>
 			</li>
-			<li class="nav-item waves-light" mdbRippleRadius>
+			<li *ngIf="!isConnected" class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/login">Se connecter</a>
+			</li>
+			<li *ngIf="isConnected" class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/logout">Se déconnecter</a>
 			</li>
 		</ul>
 		<!-- 
