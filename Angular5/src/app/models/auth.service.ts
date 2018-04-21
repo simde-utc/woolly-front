@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+import { Observable } from 'rxjs';
+import { of } from 'rxjs/observable/of';
+import { catchError, map, tap, finalize } from 'rxjs/operators';
+
 export function jwtTokenGetter() {
 	return localStorage.getItem('jwt_token');
 }
@@ -34,6 +38,26 @@ export class AuthService {
 	 */
 	getLoginUrl() : string {
 		return environment.apiUrl + 'auth/login' + '?redirect=' + environment.frontUrl + 'login'
+	}
+
+
+	/**
+	 * Get the JWT from the API
+	 */
+	getJwt(code: string) : Observable<boolean> {
+		// TODO POST + CSRF
+		return this.http.get<boolean>(environment.apiUrl + 'auth/jwt?code=' + code).pipe(
+			map(jwt => {
+				console.log('token', jwt)
+				if (jwt && jwt.token) {
+					this.token = jwt.token;
+					localStorage.setItem('jwt_token', this.token);
+					// this.startInterval();
+					return true;
+				}
+				return false;
+			})
+		);
 	}
 
 	/*
