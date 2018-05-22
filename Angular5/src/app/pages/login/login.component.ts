@@ -18,26 +18,26 @@ export class LoginComponent {
 		this.loginUrl = this.authService.getLoginUrl();
 		this.route.queryParams.subscribe(params => {
 			let code = params['code']
-			console.log(code)
 			if (code && code != '') {
 				this.loading = true;		// Show spinner
 				// Get JWT
 				this.authService.login(code).subscribe(
 					logged => {
-						if (logged) {
-							// Redirect once logged in
-							console.log("Success ! Logged")
+						if (logged)		// Redirect once logged in
 							this.router.navigate(['']);
-						} else {
-							// Show error
-							console.log("ERROR !!!! NOT LOGGED")
+						else {
+							// TODO Show error
 							this.loading = false
 							// Erase ?code=...
 						}
 					},
-					err => console.log('ERR 2', err)
+					err => console.log('ERR 2', err)	// TODO
 				);
 			}
+		})
+		this.authService.isLogged().subscribe(logged => {
+			if (logged)
+				this.router.navigate(['']);
 		})
 	}
 

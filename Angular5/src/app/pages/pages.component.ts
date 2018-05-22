@@ -1,19 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs/Subscription';
 import { AuthService } from '../models/auth.service';
+
 @Component({
 	selector: 'app-pages',
 	templateUrl: './pages.component.html'
 })
-export class PagesComponent implements OnInit {
-	isConnected: boolean = false;
+export class PagesComponent implements OnDestroy {
+	isLogged: boolean = false;
 	loginUrl: string = '';
+	isLoggedSub: Subscription;
 
-	constructor(private authService: AuthService) { }
-
-	ngOnInit() {
-		// TODO fix changes
-		this.authService.isLogged().subscribe(logged => this.isConnected);
+	constructor(private authService: AuthService) {
 		this.loginUrl = this.authService.getLoginUrl();
+		this.isLoggedSub = this.authService.isLogged$.subscribe(logged => this.isLogged = logged);
+	}
+
+	ngOnDestroy() {
+		// Prevent memory leak
+		this.isLoggedSub.unsubscribe();
 	}
 
 }

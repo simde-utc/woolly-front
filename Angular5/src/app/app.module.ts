@@ -47,7 +47,7 @@ import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
 	declarations: [		// Components
-		AppComponent
+		AppComponent,
 	],
 	imports: [			// Modules
 		BrowserModule,

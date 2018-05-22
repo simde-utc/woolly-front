@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
@@ -13,46 +14,84 @@ export function jwtTokenGetter() {
 
 @Injectable()
 export class AuthService {
-	token: string = '';
+	token: string = null;
 	refresher: number;
+	// isLogged Boolean Subject for components to know log status
+	private isLoggedSource = new BehaviorSubject<boolean>(false);
+	isLogged$ = this.isLoggedSource.asObservable();
 
 	constructor(private http: HttpClient) {
 		let currentToken = jwtTokenGetter();
 		if (currentToken) {
-			this.token = currentToken;		// TODO : Get the current Token and store it Useful ??
+			this.token = currentToken;
 			// this.startInterval();
 		}
+		this.changeLogStatus();
 	}
 
 	/*
 	|--------------------------------------------------------------------------
 	|	Fonctions atomiques
 	|--------------------------------------------------------------------------
+	| changeLogStatus
 	| isLogged
-	| fetchJwt
 	| refresh ?
 	*/
 
+	/**
+	 * Change l'état de connection à partir du token stocké
+	 */
+	changeLogStatus() : void {
+		this.isLoggedSource.next(Boolean(this.token));
+	}
 
 	/**
 	 * Vérifie si l'utilisateur est connecté en local et/ou sur l'API
 	 */
 	isLogged(callAPI: boolean = false) : Observable<boolean> {
 		this.token = jwtTokenGetter();
+		// Appel à l'API si besoin
 		if (Boolean(this.token) && callAPI) {
-			// TODO Appel API
-			// return this.http.get<boolean>(environment.apiUrl + 'auth/isLogged');
-			return of(Boolean(this.token))
+			return this.http.get<boolean>(environment.apiUrl + 'auth/validate').pipe(
+				map((res: any) => {
+					let isValid = Boolean(res.valid)
+					// JWT non valide => suppression
+					if (!isValid) {
+						this.token = null;
+						localStorage.removeItem('jwt_token')
+					}
+					return isValid
+				}),
+				finalize(() => this.changeLogStatus())
+			)
+		} else {
+			let isValid = Boolean(this.token)
+			this.changeLogStatus()
+			return of(isValid);
 		}
-		return of(Boolean(this.token));
 	}
 
-	// /**
-	//  * Get the JWT from the API
-	//  */
-	// fetchJwt(code: string) : Observable<boolean> {
-	// 	// TODO POST + CSRF
-	// }
+	/**
+	 * Rafraichit le JWT
+	 * TODO + Timer
+	 */
+	refresh() : Observable<boolean> {
+		return this.http.get<boolean>(environment.apiUrl + 'auth/refresh').pipe(
+			// tap(res => console.log(res)),
+			map(res => true),	// TODO
+			finalize(() => this.changeLogStatus())		// Change le status
+		)
+	}
+
+	/**
+	 * Start & Clear Refresher interval
+	 */
+	private startInterval(TTL: number, offset: number = 5000) : void {
+		this.refresher = window.setInterval(() => this.refresh(), TTL - offset);
+	}
+	private clearInterval() : void {
+		window.clearInterval(this.refresher);
+	}
 
 	/*
 	|--------------------------------------------------------------------------
@@ -70,7 +109,6 @@ export class AuthService {
 	login(code: string) : Observable<boolean> {
 		return this.http.get<boolean>(environment.apiUrl + 'auth/jwt?code=' + code).pipe(
 			map((jwt: any) => {
-				console.log('token', jwt)
 				if (jwt && jwt.token) {
 					this.token = jwt.token;
 					localStorage.setItem('jwt_token', this.token);
@@ -82,7 +120,8 @@ export class AuthService {
 			catchError(err => {
 				console.warn(err)
 				return of(false);
-			})
+			}),
+			finalize(() => this.changeLogStatus())
 		);
 	}
 
@@ -101,17 +140,10 @@ export class AuthService {
 			catchError(err => {
 				console.warn("Cannot logout from server : ", err);		// TODO
 				return of(false);
-			})
+			}),
+			finalize(() => this.changeLogStatus())
 		);
 	}
 
 
-	/*
-	private startInterval() {
-		this.refresher = window.setInterval(() => this.refreshToken(), 3 * 60 * 1000);		// 3 min
-	}
-	private clearInterval() {
-		window.clearInterval(this.refresher);
-	}
-	*/
 }
