@@ -24,30 +24,52 @@ export class AuthService {
 		}
 	}
 
+	/*
+	|--------------------------------------------------------------------------
+	|	Fonctions atomiques
+	|--------------------------------------------------------------------------
+	| isLogged
+	| fetchJwt
+	| refresh ?
+	*/
+
+
 	/**
-	 * Vérifie si l'utilisateur est connecté
+	 * Vérifie si l'utilisateur est connecté en local et/ou sur l'API
 	 */
-	isLogged() : boolean {
+	isLogged(callAPI: boolean = false) : Observable<boolean> {
 		this.token = jwtTokenGetter();
-		return Boolean(this.token);
+		if (Boolean(this.token) && callAPI) {
+			// TODO Appel API
+			// return this.http.get<boolean>(environment.apiUrl + 'auth/isLogged');
+			return of(Boolean(this.token))
+		}
+		return of(Boolean(this.token));
 	}
 
+	// /**
+	//  * Get the JWT from the API
+	//  */
+	// fetchJwt(code: string) : Observable<boolean> {
+	// 	// TODO POST + CSRF
+	// }
 
-	/**
-	 * Return the login url
-	 */
+	/*
+	|--------------------------------------------------------------------------
+	|	Fonctions principales
+	|--------------------------------------------------------------------------
+	*/
+
 	getLoginUrl() : string {
 		return environment.apiUrl + 'auth/login' + '?redirect=' + environment.frontUrl + 'login'
 	}
 
-
 	/**
-	 * Get the JWT from the API
+	 * Se connecte à l'API et stocke le token après callback avec code
 	 */
-	getJwt(code: string) : Observable<boolean> {
-		// TODO POST + CSRF
+	login(code: string) : Observable<boolean> {
 		return this.http.get<boolean>(environment.apiUrl + 'auth/jwt?code=' + code).pipe(
-			map(jwt => {
+			map((jwt: any) => {
 				console.log('token', jwt)
 				if (jwt && jwt.token) {
 					this.token = jwt.token;
@@ -56,23 +78,10 @@ export class AuthService {
 					return true;
 				}
 				return false;
-			})
-		);
-	}
-
-	/*
-	login() : Observable<boolean> {
-		return this.http.get(apiUrl + 'auth/callback').pipe(
-			map((res: any) => {
-				let token = res.access_token;
-				if (token) {
-					this.token = token;
-					localStorage.setItem('jwt_token', this.token);
-					this.logger.toast('success', "Vous êtes connecté");
-					this.startInterval();
-					return true;
-				}
-				return false;
+			}),
+			catchError(err => {
+				console.warn(err)
+				return of(false);
 			})
 		);
 	}
@@ -80,20 +89,18 @@ export class AuthService {
 	/**
 	 * Se déconnecte de l'API et efface le token
 	 */
-	/*
 	logout() : Observable<boolean> {
+		// Suppression des tokens locaux
 		this.token = null;
-		if (!jwtTokenGetter())	// Déjà supprimé
-			return of(true);
+		localStorage.removeItem('jwt_token');				
 
-		return this.http.post<boolean>(apiUrl + 'logout', {}).pipe(
-			map(res => {
-				return true;
-			}),
-			finalize(() => {
-				this.clearInterval();
-				this.logger.toast('success', "Vous venez d'être déconnecté");
-				localStorage.removeItem('TOKEN');				
+		// Déconnexion du serveur
+		// TODO Background task
+		return this.http.post<boolean>(environment.apiUrl + 'auth/logout', {}).pipe(
+			map(res => true),
+			catchError(err => {
+				console.warn("Cannot logout from server : ", err);		// TODO
+				return of(false);
 			})
 		);
 	}

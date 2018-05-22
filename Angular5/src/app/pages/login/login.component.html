@@ -3,7 +3,11 @@
 		<h1 class="mb-5 text-center">Espace de connexion</h1>
 	</div>
 	
-	<div class="d-flex align-items-center justify-content-center">
+	<div *ngIf="!loading; else loader" class="d-flex align-items-center justify-content-center">
 		<a href="{{ loginUrl }}" class="btn btn-primary waves-light" mdbWavesEffect>Se connecter</a>
 	</div>
+	
+	<ng-template #loader>
+		Connexion en cours
+	</ng-template>
 </main>

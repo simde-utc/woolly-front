@@ -11,7 +11,8 @@ export class PagesComponent implements OnInit {
 	constructor(private authService: AuthService) { }
 
 	ngOnInit() {
-		this.isConnected = this.authService.isLogged();
+		// TODO fix changes
+		this.authService.isLogged().subscribe(logged => this.isConnected);
 		this.loginUrl = this.authService.getLoginUrl();
 	}
 

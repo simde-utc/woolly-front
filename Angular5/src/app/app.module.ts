@@ -55,16 +55,16 @@ import { EffectsModule } from '@ngrx/effects';
 		JwtModule.forRoot({
 			config: {
 				tokenGetter: jwtTokenGetter,
-				whitelistedDomains: [ environment.apiUrl ],
-				blacklistedRoutes: [ environment.apiUrl + '/auth/' ]
+				whitelistedDomains: [ environment.apiDomain ],
+				// blacklistedRoutes: [ environment.apiUrl + '/auth/' ],
 			}
 		}),
-		MDBBootstrapModule.forRoot(),
-		BrowserAnimationsModule,
-		RouterModule.forRoot(routes),
 		NgxJsonapiModule.forRoot({
 			url: environment.apiUrl
-		})
+		}),
+		RouterModule.forRoot(routes),
+		MDBBootstrapModule.forRoot(),
+		BrowserAnimationsModule,
 	],
 	providers: [		// Services
 		AuthService,

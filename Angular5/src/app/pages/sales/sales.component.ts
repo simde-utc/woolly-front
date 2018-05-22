@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ICollection } from 'ngx-jsonapi';
 import { Item, Sale } from '../../models/sale/sale';
 import { SaleService } from '../../models/sale/sale.service';
 
+// TODO Animations
 import { trigger, state, style, animate,transition } from '@angular/animations';
 
 
@@ -19,13 +20,15 @@ import { trigger, state, style, animate,transition } from '@angular/animations';
 		])
 	]
 })
-export class SalesComponent implements OnInit {
+export class SalesComponent {
 	sales: ICollection<Sale>;
 
-	constructor(private saleService: SaleService) { }
-
-	ngOnInit() {
-		this.saleService.all().subscribe(sales => this.sales = sales);
+	// OnInit ou constructor ??
+	constructor(private saleService: SaleService) {
+		this.saleService.all().subscribe(sales => {
+			console.log(sales)
+			this.sales = sales
+		});
 	}
 
 }

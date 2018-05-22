@@ -9,20 +9,37 @@
 	</div>
 
 	<ng-template #saleReady>
-		<div class="text-center py-3 mb-2">
+		<!-- <a class="float-left" routerLink="/ventes">Retour aux ventes</a> -->
+		<div class="text-center pb-3 mb-2">
 			<h1 class="display-4">{{ sale.attributes.name }}</h1>
-			<h5 class="text-gray-dark">Organisé par {{ sale.attributes.association }}</h5>
+			<!-- TODO association -->
+			<h5 *ngIf="sale.attributes.associatio" class="text-gray-dark">Organisé par {{ sale.attributes.association }}</h5>
 		</div>
 
-		<div class="row">
-			<div class="col-md-5">
-				<span class="lead">Description</span>
-				<p>{{ sale.attributes.description }}</p>
+		<div class="row py-4 my-4">
+			<div class="col-md-6 my-2">
+				<p class="lead">Description</p>
+				<p class="m-0">{{ sale.attributes.description }}</p>
 			</div>
-			<div class="col-md-5">
-				
+			<div class="col-md-3 my-2">
+				<p class="lead">Dates</p>
+				<p class="m-0">Ouverture&nbsp;: {{ sale.attributes.begin_date | date }}</p>			
+				<p class="m-0">Fermeture&nbsp;: {{ sale.attributes.end_date | date }}</p>			
+			</div>
+			<div class="col-md-3 my-2">
+				<p class="lead">Quantités</p>
+				<p class="m-0">{{ sale.attributes.max_item_quantity }}</p>
 			</div>
 		</div>
+
+		<div *ngIf="sale.relationships.items.count>0; else noItem" class="row">
+			<div *ngFor="let item of sale.relationships.items">
+				azd
+			</div>
+		</div>
+		<ng-template #noItem>
+			<p class="lead">Aucune item n'a été mis en vente pour le moment, revenez plus tard.</p>
+		</ng-template>
 
 		<pre class="pre-scrollable mt-5">{{ sale | json }}</pre>
 	</ng-template>
