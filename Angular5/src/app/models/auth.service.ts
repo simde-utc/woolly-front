@@ -24,6 +24,7 @@ export class AuthService {
 		let currentToken = jwtTokenGetter();
 		if (currentToken) {
 			this.token = currentToken;
+			this.isLogged(true).subscribe();
 			// this.startInterval();
 		}
 		this.changeLogStatus();
