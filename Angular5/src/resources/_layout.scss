@@ -1,0 +1,81 @@
+html, body {
+	height: 100%;
+}
+body {
+	padding-top: 70px;
+}
+
+/*
+|--------------------------------------------------------------------------
+|	Helpers
+|--------------------------------------------------------------------------
+*/
+
+// Align content vertically and horizontally
+.f-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/*
+|--------------------------------------------------------------------------
+|	Loaders
+|--------------------------------------------------------------------------
+*/
+
+.three-balls-loader {
+
+	margin: 0 auto;
+	width: 70px;
+	text-align: center;
+
+	.ball {
+		position: relative;
+		width: 15px;
+		height: 15px;
+		border-radius: 50%;
+		display: inline-block;
+		-webkit-animation: bouncedelay 3.0s infinite cubic-bezier(.62, .28, .23, .99) both;
+		animation: bouncedelay 3.0s infinite cubic-bezier(.62, .28, .23, .99) both;
+	}
+	.ball-1 {
+		-webkit-animation-delay: -.16s;
+		animation-delay: -.16s;
+	}
+	.ball-2 {
+		-webkit-animation-delay: -.08s;
+		animation-delay: -.08s;
+	}
+}
+
+@keyframes bouncedelay {
+	0% {
+		bottom: 0;
+		background-color: #03A9F4;
+	}
+	16.66% {
+		bottom: 40px;
+		background-color: #FB6542;
+	}
+	33.33% {
+		bottom: 0px;
+		background-color: #FB6542;
+	}
+	50% {
+		bottom: 40px;
+		background-color: #FFBB00;
+	}
+	66.66% {
+		bottom: 0px;
+		background-color: #FFBB00;
+	}
+	83.33% {
+		bottom: 40px;
+		background-color: #03A9F4;
+	}
+	100% {
+		bottom: 0;
+		background-color: #03A9F4;
+	}
+}

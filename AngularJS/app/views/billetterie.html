@@ -1,0 +1,34 @@
+<div class="row"> 
+
+	<div class="jumbotron">
+		<h1>Liste des ventes</h1>
+		<p>Toutes les ventes sont affichées.</p>
+	</div>    
+	<!--<div  ng-controller="MyController">       !-->
+		<div class="col-md-6 col-sm-6 col-xs-6" ng-repeat="sale in sales" ng-cloak>
+			<div class="panel panel-primary text-center no-boder bg-color-woolly">
+				<div class="panel-body">
+					<i class="fa fa-check-square  fa-5x"></i>
+					<h1>{{sale.attributes.name}}</h1>
+					<hr>
+					<p>{{sale.attributes.description}}</p>
+					<p>Organisé par : <b>{{sale.attributes.association}}</b></p>
+					<p>Début des ventes le : {{sale.attributes.begin_date | date: 'dd - MM - yyyy'}}</p>
+					<!--{{sale.relationships.items.links.related}}!-->
+					<div  ng-show="sale.__showMore" ng-repeat="item in sale.__items"  style="text-align:left;" ><hr>
+						<h3><span ng-bind="item.id"></span> :   </h3> 
+						<p> Prix : <span ng-bind="item.attributes.price"></span> €</p>
+						Nombre de place : 
+						<input type="number" max="5" min="0" value="1" ng-model="poulet"/>
+					</div>
+				</div>
+				<div  class="panel-footer bg-color-woolly2">
+					<a  class="btn btn-default btn-lg" ng-href="#!/sale/{{sale.id}}">Voir la vente</a>
+
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<!-- /. ROW  --> 
