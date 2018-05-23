@@ -2,7 +2,7 @@
 import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgxJsonapiModule } from 'ngx-jsonapi';
 import { environment } from '../environments/environment';
 
@@ -31,19 +31,6 @@ const routes: Routes = [
 	// { path: '**', 		redirectTo: '' }
 ];
 
-// JSON API Resources
-/*
-// import { StoreModule } from '@ngrx/store';
-// import { counterReducer } from './counter';
-import { NgrxJsonApiModule, ResourceDefinition } from 'ngrx-json-api';
-let resourceDefinitions: Array<ResourceDefinition> = [
-	{ type: 'User', 	collectionPath: 'users' },
-	{ type: 'Sale', 	collectionPath: 'sales' },
-];
-import { EffectsModule } from '@ngrx/effects';
-*/
-
-
 
 @NgModule({
 	declarations: [		// Components
@@ -52,6 +39,10 @@ import { EffectsModule } from '@ngrx/effects';
 	imports: [			// Modules
 		BrowserModule,
 		HttpClientModule,
+		HttpClientXsrfModule.withOptions({
+			cookieName: 'csrftoken ',
+			headerName: 'HTTP_X_CSRFTOKEN',
+		}),
 		JwtModule.forRoot({
 			config: {
 				tokenGetter: jwtTokenGetter,
