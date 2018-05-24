@@ -130,19 +130,26 @@ export class AuthService {
 	 * Se déconnecte de l'API et efface le token
 	 */
 	logout() : Observable<boolean> {
-		// Suppression des tokens locaux
-		this.token = null;
-		localStorage.removeItem('jwt_token');				
-
 		// Déconnexion du serveur
 		// TODO Background task
 		return this.http.post<boolean>(environment.apiUrl + 'auth/logout', {}).pipe(
-			map(res => true),
+			map((res:any) => {
+				// Redirect et logout
+				// TODO ajax ?
+				// if (res.logout_url && res.logout_url != '')
+					// window.location.href = res.logout_url
+				return true
+			}),
 			catchError(err => {
 				console.warn("Cannot logout from server : ", err);		// TODO
 				return of(false);
 			}),
-			finalize(() => this.changeLogStatus())
+			finalize(() => {
+				// Suppression des tokens locaux
+				this.token = null;
+				localStorage.removeItem('jwt_token');				
+				this.changeLogStatus()
+			})
 		);
 	}
 

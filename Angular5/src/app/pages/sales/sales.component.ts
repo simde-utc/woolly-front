@@ -23,10 +23,8 @@ import { trigger, state, style, animate,transition } from '@angular/animations';
 export class SalesComponent {
 	sales: ICollection<Sale>;
 
-	// OnInit ou constructor ??
 	constructor(private saleService: SaleService) {
 		this.saleService.all().subscribe(sales => {
-			console.log(sales)
 			this.sales = sales
 		});
 	}
