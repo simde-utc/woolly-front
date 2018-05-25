@@ -11,14 +11,14 @@ export class UserService extends Service<User> {
 	public type = 'users';
 	public schema: ISchema = {
 		relationships: {
-			usertypes: {
+			usertype: {
 				hasMany: false
-			},
+			}
 		}
 	};
 	public user_id: number = null;
 
-	constructor(public jwtHelper: JwtHelperService) {
+	constructor(private jwtHelper: JwtHelperService) {
 		super()
 		let token = jwtTokenGetter();
 		if (token) {

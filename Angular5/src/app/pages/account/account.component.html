@@ -21,12 +21,20 @@
 					</tr>
 					<tr>
 						<th>Type</th>
-						<!-- <td>{{ me.included.last_name }}</td> -->
+						<td>
+							<pre>{{ me.relationships | json }}</pre>
+						</td>						
 					</tr>
 				</tbody>
 			</table>
 		</div>
+		<div class="col-md-7">
+			<h3>Mes commandes</h3>
+			<!-- <pre class="mt-5">{{ me | json }}</pre> -->
+		</div>
+	</div>
 
+</main>
 		<!-- 
 		<div class="panel-body">
 			<ul class="nav nav-pills">
@@ -76,5 +84,3 @@
 			<div id="qrcode" style="display:none;"></div>                 
 
 		 -->
-	</div>
-</main>

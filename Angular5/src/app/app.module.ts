@@ -11,7 +11,7 @@ import { AuthService, jwtTokenGetter } from './models/auth.service';
 import { JwtModule } from '@auth0/angular-jwt';
 
 // Services
-import { UserService } from './models/user/user.service';
+import { UserService, UserTypeService } from './models/user/user.service';
 import { SaleService } from './models/sale/sale.service';
 
 
@@ -60,6 +60,7 @@ const routes: Routes = [
 	providers: [		// Services
 		AuthService,
 		UserService,
+		UserTypeService,
 		SaleService
 	],
 	bootstrap: [ AppComponent ]

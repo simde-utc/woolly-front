@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ICollection } from 'ngx-jsonapi';
-import { UserService } from '../../models/user/user.service';
+import { UserService, UserTypeService } from '../../models/user/user.service';
 import { User } from '../../models/user/user';
 
 @Component({
@@ -10,13 +10,14 @@ import { User } from '../../models/user/user';
 export class AccountComponent {
 	me: User;
 
-	constructor(private userService: UserService) {
+	constructor(
+		private userService: UserService
+	) {
 		let id = String(this.userService.user_id)
-		// TODO id
 		this.userService.get(id).subscribe(
 			(user: User) => {
-				console.log(user)
 				this.me = user
+				console.log(user.relationships)
 			}
 		)
 	}
