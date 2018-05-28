@@ -9,9 +9,15 @@ export class SaleService extends Service<Sale> {
 	public type = 'sales';
 	public schema: ISchema = {
 		relationships: {
-			woollyusertypes: {
+			association: {
+				hasMany: false
+			},
+			items: {
 				hasMany: true
 			},
+			orders: {
+				hasMany: true
+			}
 		}
 	};
 }

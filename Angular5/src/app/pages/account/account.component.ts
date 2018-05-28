@@ -15,10 +15,7 @@ export class AccountComponent {
 	) {
 		let id = String(this.userService.user_id)
 		this.userService.get(id).subscribe(
-			(user: User) => {
-				this.me = user
-				console.log(user.relationships)
-			}
+			(user: User) => this.me = user
 		)
 	}
 

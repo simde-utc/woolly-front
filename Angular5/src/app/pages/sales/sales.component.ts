@@ -24,8 +24,9 @@ export class SalesComponent {
 	sales: ICollection<Sale>;
 
 	constructor(private saleService: SaleService) {
-		this.saleService.all().subscribe(sales => {
+		this.saleService.all({ include: ['association'] }).subscribe(sales => {
 			this.sales = sales
+			console.log(sales)
 		});
 	}
 
