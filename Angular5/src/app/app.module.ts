@@ -21,7 +21,7 @@ import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { AppComponent } from './app.component';
 
 // Routes
-const routes: Routes = [	
+const routes: Routes = [
 	// { path: 'login', 	component: LoginComponent },
 	// { path: 'logout', 	component: LogoutComponent },
 	// { path: 'admin', 	loadChildren: 'app/admin/admin.module#AdminModule', canActivate: [AuthGuard] },

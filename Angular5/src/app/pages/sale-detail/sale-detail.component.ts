@@ -9,7 +9,8 @@ import { Sale, Item } from '../../models/sale';
 	templateUrl: './sale-detail.component.html'
 })
 export class SaleDetailComponent implements OnInit {
-	// sale: Sale;
+	sale: Sale;
+	loading = true;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -17,11 +18,16 @@ export class SaleDetailComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.route.params.subscribe(({ id }) => {
-			// this.saleService.get(id).subscribe(
-				// sale => this.sale = sale,
-				// error => console.error('Could not load author.')
-			// );
-		});
+		this.getSale(this.route.snapshot.params.id);
+	}
+
+	getSale(id) {
+		this.jsonApiService.findRecord(Sale, id).subscribe(
+			(sale: Sale) => {
+				this.sale = sale;
+				this.loading = false;
+				console.log(this.sale);
+			}
+		);
 	}
 }

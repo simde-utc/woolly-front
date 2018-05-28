@@ -4,7 +4,7 @@ import { JsonApiService } from '../../models/json-api.service';
 import { Sale } from '../../models/sale';
 
 // TODO Animations
-import { trigger, state, style, animate,transition } from '@angular/animations';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
 
 @Component({
@@ -22,12 +22,14 @@ import { trigger, state, style, animate,transition } from '@angular/animations';
 })
 export class SalesComponent {
 	sales: Sale[];
+	loading = true;
 
 	constructor(private jsonApiService: JsonApiService) {
-		this.jsonApiService.findAll(Sale, {
-			page: { size: 10, number: 1 },
-		}).subscribe(
-			(sales: JsonApiQueryData<Sale>) => console.log(sales.getModels())
+		this.jsonApiService.findAll(Sale).subscribe(
+			(sales: JsonApiQueryData<Sale>) => {
+				this.sales = sales.getModels();
+				this.loading = false;
+			}
 		);
 	}
 
