@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ICollection } from 'ngx-jsonapi';
-import { Item, Sale } from '../../models/sale/sale';
-import { SaleService } from '../../models/sale/sale.service';
+import { JsonApiQueryData } from 'angular2-jsonapi';
+import { JsonApiService } from '../../models/json-api.service';
+import { Sale } from '../../models/sale';
 
 // TODO Animations
 import { trigger, state, style, animate,transition } from '@angular/animations';
@@ -21,13 +21,14 @@ import { trigger, state, style, animate,transition } from '@angular/animations';
 	]
 })
 export class SalesComponent {
-	sales: ICollection<Sale>;
+	sales: Sale[];
 
-	constructor(private saleService: SaleService) {
-		this.saleService.all({ include: ['association'] }).subscribe(sales => {
-			this.sales = sales
-			console.log(sales)
-		});
+	constructor(private jsonApiService: JsonApiService) {
+		this.jsonApiService.findAll(Sale, {
+			page: { size: 10, number: 1 },
+		}).subscribe(
+			(sales: JsonApiQueryData<Sale>) => console.log(sales.getModels())
+		);
 	}
 
 }

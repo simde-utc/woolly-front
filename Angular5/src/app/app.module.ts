@@ -3,17 +3,15 @@ import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgxJsonapiModule } from 'ngx-jsonapi';
+
+// Json API Module & Service
+import { JsonApiModule } from 'angular2-jsonapi';
+import { JsonApiService } from './models/json-api.service';
 import { environment } from '../environments/environment';
 
 // JWT Interceptor
 import { AuthService, jwtTokenGetter } from './models/auth.service';
 import { JwtModule } from '@auth0/angular-jwt';
-
-// Services
-import { UserService, UserTypeService } from './models/user/user.service';
-import { SaleService } from './models/sale/sale.service';
-
 
 // UI
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -50,18 +48,14 @@ const routes: Routes = [
 				// blacklistedRoutes: [ environment.apiUrl + '/auth/' ],
 			}
 		}),
-		NgxJsonapiModule.forRoot({
-			url: environment.apiUrl
-		}),
+		JsonApiModule,
 		RouterModule.forRoot(routes),
 		MDBBootstrapModule.forRoot(),
 		BrowserAnimationsModule,
 	],
 	providers: [		// Services
 		AuthService,
-		UserService,
-		UserTypeService,
-		SaleService
+		JsonApiService,
 	],
 	bootstrap: [ AppComponent ]
 })

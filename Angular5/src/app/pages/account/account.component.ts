@@ -1,22 +1,24 @@
 import { Component } from '@angular/core';
-import { ICollection } from 'ngx-jsonapi';
-import { UserService, UserTypeService } from '../../models/user/user.service';
-import { User } from '../../models/user/user';
+import { JsonApiQueryData } from 'angular2-jsonapi';
+import { JsonApiService } from '../../models/json-api.service';
+import { AuthService } from '../../models/auth.service';
+import { User } from '../../models/user';
 
 @Component({
 	selector: 'app-account',
 	templateUrl: './account.component.html'
 })
 export class AccountComponent {
-	me: User;
+	// me: User;
 
 	constructor(
-		private userService: UserService
+		private authService: AuthService,
+		private jsonApiService: JsonApiService
 	) {
-		let id = String(this.userService.user_id)
-		this.userService.get(id).subscribe(
-			(user: User) => this.me = user
-		)
+		this.authService.getUserId().subscribe(id => {
+			// TODO
+		})
+		// TODO
 	}
 
 }

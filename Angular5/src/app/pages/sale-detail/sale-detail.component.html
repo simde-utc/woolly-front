@@ -1,5 +1,5 @@
 <main class="container p-5 h-100">
-
+<!-- 
 	<div *ngIf="sale.is_loading; else saleReady">
 		<div class="d-flex h-100 justify-content-center align-items-center three-balls-loader">
 			<div class="ball ball-1"></div>
@@ -9,10 +9,10 @@
 	</div>
 
 	<ng-template #saleReady>
-		<!-- <a class="float-left" routerLink="/ventes">Retour aux ventes</a> -->
+		<!- - <a class="float-left" routerLink="/ventes">Retour aux ventes</a> - ->
 		<div class="text-center pb-3 mb-2">
 			<h1 class="display-4">{{ sale.attributes.name }}</h1>
-			<!-- TODO association -->
+			<!- - TODO association - ->
 			<h5 *ngIf="sale.attributes.associatio" class="text-gray-dark">Organisé par {{ sale.attributes.association }}</h5>
 		</div>
 
@@ -43,5 +43,6 @@
 
 		<pre class="pre-scrollable mt-5">{{ sale | json }}</pre>
 	</ng-template>
+ -->
 
 </main>
