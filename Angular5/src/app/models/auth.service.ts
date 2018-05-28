@@ -17,7 +17,7 @@ export function jwtTokenGetter() {
 export class AuthService {
 	token: string = null;
 	refresher: number;
-	// isLogged Boolean Subject for components to know log status
+	// isLogged : Boolean Subject for components to know log status
 	private isLoggedSource = new BehaviorSubject<boolean>(false);
 	isLogged$ = this.isLoggedSource.asObservable();
 
