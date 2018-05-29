@@ -30,14 +30,42 @@
 			</div>
 		</div>
 
-		<div *ngIf="sale.items; else noItem" class="row">
-			<div *ngFor="let item of sale.items">
-				<div>{{item.name}}</div>
-			</div>
+		<!--<div class = "container">-->
+			<!--<h1>Product Form</h1>-->
+			<!--<form>-->
+				<!--<div class = "form-group">-->
+					<!--<label for = "productid">ID</label>-->
+					<!--<input type = "text" class = "form-control" id = "productid" required-->
+						   <!--[(ngModel)] = "model.productid" name = "id">-->
+				<!--</div>-->
+
+				<!--<div class = "form-group">-->
+					<!--<label for = "name">Name</label>-->
+					<!--<input type = "text" class = "form-control" id = "name"-->
+						   <!--[(ngModel)] = "model.productname" name = "name">-->
+				<!--</div>-->
+			<!--</form>-->
+		<!--</div>-->
+		<div class = "container">
+			<form (ngSubmit)="onSubmit()">
+				<div *ngIf="sale.items; else noItem" class="row">
+					<div class = "form-group">
+						<div *ngFor="let item of sale.items">
+							<div>{{item.name}}</div>
+							<select class = "form-control" name = "nbPlaces">
+								<ng-container *ngFor="let val of tab(item.max_per_user)">
+									<option value='{{val}}'>{{val}}</option>
+								</ng-container>
+							</select>
+						</div>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-primary" >Valider</button>
+			</form>
+			<ng-template #noItem>
+				<p class="lead">Aucun item n'a été mis en vente pour le moment, revenez plus tard.</p>
+			</ng-template>
 		</div>
-		<ng-template #noItem>
-			<p class="lead">Aucun item n'a été mis en vente pour le moment, revenez plus tard.</p>
-		</ng-template>
 
 		<!--<pre class="pre-scrollable mt-5">{{ sale | json }}</pre>-->
 	</ng-template>

@@ -30,4 +30,16 @@ export class SaleDetailComponent implements OnInit {
 			}
 		);
 	}
+
+	tab(length) {
+		let res = new Array(length);
+		for (var i = 0; i <= length ; i++) {
+			res[i] = i;
+		}
+		return res;
+	}
+
+	onSubmit() {
+		
+	}
 }
