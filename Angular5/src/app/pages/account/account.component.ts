@@ -9,25 +9,16 @@ import { User } from '../../models/user';
 	templateUrl: './account.component.html'
 })
 export class AccountComponent {
-	me: User;
-	loading: boolean = true;
+	// me: User;
 
 	constructor(
 		private authService: AuthService,
 		private jsonApiService: JsonApiService
 	) {
 		this.authService.getUserId().subscribe(id => {
-			this.jsonApiService.findRecord(User, String(id), { include: 'orders'}).subscribe(
-				(user: User) => {
-					// window.a = user
-					// TODO vérifier les orders 
-					this.me = user
-					console.log(user)
-				},
-				err => console.warn(err),
-				() => this.loading = false
-			)
+			// TODO
 		})
+		// TODO
 	}
 
 }

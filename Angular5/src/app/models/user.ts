@@ -1,5 +1,4 @@
 import { JsonApiModelConfig, JsonApiModel, Attribute, HasMany, BelongsTo } from 'angular2-jsonapi';
-import { Order } from './sale';
 
 @JsonApiModelConfig({ type: 'usertypes' })
 export class UserType extends JsonApiModel {
@@ -9,10 +8,8 @@ export class UserType extends JsonApiModel {
 @JsonApiModelConfig({ type: 'users' })
 export class User extends JsonApiModel {
 	@Attribute() email: string;
-	@Attribute() first_name: string;	
-	@Attribute() last_name: string;
+	@Attribute() firstname: string;	
+	@Attribute() lastname: string;
 	@Attribute() type: string;
-
 	@BelongsTo() usertype: UserType;
-	@HasMany() orders: Order[];
 }
