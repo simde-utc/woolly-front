@@ -49,7 +49,21 @@ export class Item extends JsonApiModel {
 @JsonApiModelConfig({ type: 'orders' })
 export class Order extends JsonApiModel {
 	@Attribute() created_at: Date;
+	@Attribute() updated_at: Date;
+	@Attribute() status: string;
+	@Attribute() tra_id: number;
 
+	@BelongsTo() owner: User;
+	@BelongsTo() sale: Sale;
+	@HasMany() orderlines: OrderLine[];
+}
+
+@JsonApiModelConfig({ type: 'orderlines' })
+export class OrderLine extends JsonApiModel {
+	@Attribute() quantity: number;
+
+	@BelongsTo() item: Item;
+	@BelongsTo() order: Order;
 }
 /*
 @JsonApiModelConfig({ type: 'paymentmethods' })

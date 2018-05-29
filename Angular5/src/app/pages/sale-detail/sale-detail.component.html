@@ -55,7 +55,7 @@
 					<td class="align-middle">
 						<div class="md-form my-0">
 							<input mdbInputDirective type="number" class="form-control my-0"
-								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id]"
+								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id].quantity"
 								min="0" max="{{ item.max_per_user }}" value="0">
 						</div>
 					</td>
