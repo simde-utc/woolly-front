@@ -22,14 +22,13 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 })
 export class SalesComponent {
 	sales: Sale[];
-	loading = true;
+	loading: boolean = true;
 
 	constructor(private jsonApiService: JsonApiService) {
-		this.jsonApiService.findAll(Sale).subscribe(
-			(sales: JsonApiQueryData<Sale>) => {
-				this.sales = sales.getModels();
-				this.loading = false;
-			}
+		this.jsonApiService.findAll(Sale, { include: 'association' }).subscribe(
+			(sales: JsonApiQueryData<Sale>) => this.sales = sales.getModels(),
+			err => console.warn(err),
+			() => this.loading = false
 		);
 	}
 

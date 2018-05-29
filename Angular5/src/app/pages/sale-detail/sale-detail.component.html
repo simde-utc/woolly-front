@@ -1,4 +1,6 @@
-<main class="container p-5 h-100">
+<main class="container p-5">
+	<!-- <pre class="pre-scrollable">{{ cart | json}}</pre> -->
+
 	<div *ngIf="loading; else saleReady">
 		<div class="d-flex h-100 justify-content-center align-items-center three-balls-loader">
 			<div class="ball ball-1"></div>
@@ -30,42 +32,41 @@
 			</div>
 		</div>
 
-		<!--<div class = "container">-->
-			<!--<h1>Product Form</h1>-->
-			<!--<form>-->
-				<!--<div class = "form-group">-->
-					<!--<label for = "productid">ID</label>-->
-					<!--<input type = "text" class = "form-control" id = "productid" required-->
-						   <!--[(ngModel)] = "model.productid" name = "id">-->
-				<!--</div>-->
-
-				<!--<div class = "form-group">-->
-					<!--<label for = "name">Name</label>-->
-					<!--<input type = "text" class = "form-control" id = "name"-->
-						   <!--[(ngModel)] = "model.productname" name = "name">-->
-				<!--</div>-->
-			<!--</form>-->
-		<!--</div>-->
-		<div class = "container">
-			<form (ngSubmit)="onSubmit()">
-				<div *ngIf="sale.items; else noItem" class="row">
-					<div class = "form-group">
-						<div *ngFor="let item of sale.items">
-							<div>{{item.name}}</div>
-							<select class = "form-control" name = "nbPlaces">
-								<ng-container *ngFor="let val of tab(item.max_per_user)">
-									<option value='{{val}}'>{{val}}</option>
-								</ng-container>
-							</select>
-						</div>
-					</div>
+		<div *ngIf="sale.items; else noItem">
+			<div class="row mb-4">
+				<h2 class="col-md-8">Items en ventes</h2>
+				<div class="col-md-4">
+					<button class="mx-4 btn btn-primary waves-light" mdbWavesEffect (click)="buy()">
+						<i class="fa fa-shopping-cart mr-1"></i> Acheter
+					</button>
 				</div>
-				<button type="submit" class="btn btn-primary" >Valider</button>
-			</form>
-			<ng-template #noItem>
-				<p class="lead">Aucun item n'a été mis en vente pour le moment, revenez plus tard.</p>
-			</ng-template>
+			</div>
+			<table class="table align-middle">
+				<!--
+				<tr>
+					<th>Item</th>
+					<th>Prix</th>
+					<th>Quantité</th>
+				</tr>
+				-->
+				<tr *ngFor="let item of sale.items" class="hoverable">
+					<td class="align-middle lead">{{ item.name }}</td>
+					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
+					<td class="align-middle">
+						<div class="md-form my-0">
+							<input mdbInputDirective type="number" class="form-control my-0"
+								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id]"
+								min="0" max="{{ item.max_per_user }}" value="0">
+						</div>
+					</td>
+						
+				</tr>
+			</table>
 		</div>
+
+		<ng-template #noItem>
+			<p class="lead">Aucun item n'a été mis en vente pour le moment, revenez plus tard.</p>
+		</ng-template>
 
 		<!--<pre class="pre-scrollable mt-5">{{ sale | json }}</pre>-->
 	</ng-template>

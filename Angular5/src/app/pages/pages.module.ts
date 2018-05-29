@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
@@ -53,6 +54,7 @@ const routes: Routes = [{
 	],
 	imports: [
 		CommonModule,
+		FormsModule,
 		MDBBootstrapModule,
 		RouterModule.forChild(routes),
 	],

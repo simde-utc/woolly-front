@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JsonApiQueryData } from 'angular2-jsonapi';
 import { JsonApiService } from '../../models/json-api.service';
@@ -8,38 +8,35 @@ import { Sale, Item } from '../../models/sale';
 	selector: 'app-sale-detail',
 	templateUrl: './sale-detail.component.html'
 })
-export class SaleDetailComponent implements OnInit {
+export class SaleDetailComponent {
 	sale: Sale;
-	loading = true;
+	loading: boolean = true;
+	cart = {};
 
 	constructor(
 		private jsonApiService: JsonApiService,
 		private route: ActivatedRoute
-	) { }
-
-	ngOnInit() {
+	) {
 		this.getSale(this.route.snapshot.params.id);
 	}
 
 	getSale(id) {
-		this.jsonApiService.findRecord(Sale, id).subscribe(
+		this.jsonApiService.findRecord(Sale, id, { include: 'items' }).subscribe(
 			(sale: Sale) => {
-				this.sale = sale;
-				this.loading = false;
-				console.log(this.sale);
-			}
+				this.sale = sale
+				this.initCart()
+			},
+			err => console.warn(err),
+			() => this.loading = false
 		);
 	}
 
-	tab(length) {
-		let res = new Array(length);
-		for (var i = 0; i <= length ; i++) {
-			res[i] = i;
-		}
-		return res;
+	private initCart() : void {
+		this.cart = {};
+		this.sale.items.forEach((item: Item) => this.cart[item.id] = 0)
 	}
 
-	onSubmit() {
-		
+	buy() {
+
 	}
 }

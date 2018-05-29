@@ -35,14 +35,14 @@ export class Sale extends JsonApiModel {
 export class Item extends JsonApiModel {
 	@Attribute() name: string;
 	@Attribute() description: string;
-	@Attribute() remaining_quantity: number;
-	@Attribute() initial_quantity: number;
+	@Attribute() quantity: number;
 	@Attribute() price: number;
-	@Attribute() userType: UserType;
-	@Attribute() nemopay_id: number;
 	@Attribute() max_per_user: number;
+	// @Attribute() remaining_quantity: number;
 
 	@BelongsTo() sale: Sale;
+	@BelongsTo() group: ItemGroup;
+	@BelongsTo() usertype: UserType;
 }
 
 

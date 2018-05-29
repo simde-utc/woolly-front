@@ -1,9 +1,10 @@
 // Main modules
 import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-
+ 
 // Json API Module & Service
 import { JsonApiModule } from 'angular2-jsonapi';
 import { JsonApiService } from './models/json-api.service';
@@ -20,6 +21,11 @@ import { MDBBootstrapModule } from 'angular-bootstrap-md';
 // Layout + AppComponent
 import { AppComponent } from './app.component';
 
+// Locales
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+registerLocaleData(localeFr, 'fr');
+
 // Routes
 const routes: Routes = [
 	// { path: 'login', 	component: LoginComponent },
@@ -35,6 +41,7 @@ const routes: Routes = [
 		AppComponent,
 	],
 	imports: [			// Modules
+		FormsModule,
 		BrowserModule,
 		HttpClientModule,
 		HttpClientXsrfModule.withOptions({
