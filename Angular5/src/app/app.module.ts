@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { LOCALE_ID } from '@angular/core';
  
 // Json API Module & Service
 import { JsonApiModule } from 'angular2-jsonapi';
@@ -17,6 +18,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 // UI
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
+import { ToastrModule } from 'ngx-toastr';
 
 // Layout + AppComponent
 import { AppComponent } from './app.component';
@@ -57,10 +59,12 @@ const routes: Routes = [
 		}),
 		JsonApiModule,
 		RouterModule.forRoot(routes),
-		MDBBootstrapModule.forRoot(),
 		BrowserAnimationsModule,
+		MDBBootstrapModule.forRoot(),
+		ToastrModule.forRoot(),
 	],
 	providers: [		// Services
+		{ provide: LOCALE_ID, useValue: 'fr' }
 		AuthService,
 		JsonApiService,
 	],
