@@ -14,6 +14,7 @@ import { environment } from '../environments/environment';
 // JWT Interceptor
 import { AuthService, jwtTokenGetter } from './models/auth.service';
 import { JwtModule } from '@auth0/angular-jwt';
+import { HttpInterceptorProviders } from './models/interceptors/';
 
 // UI
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -61,12 +62,16 @@ const routes: Routes = [
 		RouterModule.forRoot(routes),
 		BrowserAnimationsModule,
 		MDBBootstrapModule.forRoot(),
-		ToastrModule.forRoot(),
+		ToastrModule.forRoot({
+			timeOut: 3000,
+			progressBar: true
+		}),
 	],
 	providers: [		// Services
 		{ provide: LOCALE_ID, useValue: 'fr' }
 		AuthService,
 		JsonApiService,
+		HttpInterceptorProviders,
 	],
 	bootstrap: [ AppComponent ]
 })
