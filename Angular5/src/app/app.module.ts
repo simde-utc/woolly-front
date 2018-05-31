@@ -5,7 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { LOCALE_ID } from '@angular/core';
- 
+
 // Json API Module & Service
 import { JsonApiModule } from 'angular2-jsonapi';
 import { JsonApiService } from './models/json-api.service';
@@ -68,7 +68,7 @@ const routes: Routes = [
 		}),
 	],
 	providers: [		// Services
-		{ provide: LOCALE_ID, useValue: 'fr' }
+		{ provide: LOCALE_ID, useValue: 'fr' },
 		AuthService,
 		JsonApiService,
 		HttpInterceptorProviders,
