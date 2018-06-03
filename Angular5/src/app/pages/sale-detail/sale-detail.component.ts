@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { JsonApiQueryData } from 'angular2-jsonapi';
 import { JsonApiService } from '../../models/json-api.service';
 import { Sale, Item, Order, OrderLine } from '../../models/sale';
@@ -15,7 +15,8 @@ export class SaleDetailComponent {
 
 	constructor(
 		private jsonApiService: JsonApiService,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private router: Router
 	) {
 		this.getSale(this.route.snapshot.params.id);
 	}
@@ -26,7 +27,10 @@ export class SaleDetailComponent {
 				this.sale = sale
 				this.initCart()
 			},
-			err => console.warn(err),
+			err => {
+				console.log("*******************************")
+				this.router.navigate['/ventes']
+			},
 			() => this.loading = false
 		);
 	}
@@ -39,20 +43,23 @@ export class SaleDetailComponent {
 	buy() {
 		// Create order ??
 		let order: Order = this.jsonApiService.createRecord(Order, {
-			'sale': this.sale
+			'sale': this.sale,
 		});
+		console.log(order)
 		order.save().subscribe(o => console.log(o));
 		// Add orderlines
+		/*
 		let orderlines: OrderLine[] = [];
 		for (let i in this.cart) {
 			let orderline = this.jsonApiService.createRecord(OrderLine, {
 				item: this.cart[i].item,
 				quantity: this.cart[i].quantity,
-				// order: order.id
+				order: order.id
 			});
 			orderline.save().subscribe(o => console.log(o));
 			orderlines.push(orderline);
 		}
+		*/
 
 	}
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { ErrorResponse } from "angular2-jsonapi";
 import { ToastrService } from 'ngx-toastr';
 
 import { Router } from '@angular/router';
@@ -19,19 +20,23 @@ export class ErrorInterceptor implements HttpInterceptor {
 					// do stuff with response if you want
 				}
 			},
-			(err: any) => {
-				if (err instanceof HttpErrorResponse) {
-					switch(err.status) {
+			(errorResp: any) => {
+				// JSON Api Errors: Useless
+				if (errorResp instanceof ErrorResponse) {
+					console.log("*****************************")
+					console.log(errorResp.errors);
+				} else if (errorResp instanceof HttpErrorResponse) {
+					switch(errorResp.status) {
 						case 302:	// Found
 							break;
 						case 400:	// BadRequest
-							let errors = "";
-							err.error.errors.forEach(e => errors += " - " + e.detail + "<br>")
-							this.toastr.error(errors, "Mauvaise requête", { enableHtml: true });
+							let errorMessage = "";
+							errorResp.error.errors.forEach(e => errorMessage += ' - ' + e.detail + ' (' + e.source.pointer + ')<br>')
+							this.toastr.error(errorMessage, "Mauvaise requête", { enableHtml: true, timeOut: 10000 });
 							break;
 						case 422:
-							Object.keys(err.error.errors).map((key, i) => {
-								err.error.errors[key].forEach(e => {
+							Object.keys(errorResp.error.errors).map((key, i) => {
+								errorResp.error.errors[key].forEach(e => {
 									this.toastr.error(e)
 								});
 							});
@@ -49,7 +54,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 							this.router.navigate(['/login']);
 							break;
 						case 404:	// NotFound
-							this.toastr.error(err.error.errors[0].detail, "Impossible de trouver la ressource demandée");
+							this.toastr.error(errorResp.error.errors[0].detail, "Impossible de trouver la ressource demandée");
 							break;
 						case 500:	// InternalServerError
 							this.toastr.error("Erreur serveur", "Veuillez contactez l'administrateur");
