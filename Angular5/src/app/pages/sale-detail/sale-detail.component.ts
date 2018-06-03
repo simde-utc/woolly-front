@@ -37,29 +37,35 @@ export class SaleDetailComponent {
 
 	private initCart() : void {
 		this.cart = {};
-		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 })
+		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 });
 	}
 
 	buy() {
 		// Create order ??
-		let order: Order = this.jsonApiService.createRecord(Order, {
-			'sale': this.sale,
-		});
-		console.log(order)
-		order.save().subscribe(o => console.log(o));
-		// Add orderlines
-		/*
-		let orderlines: OrderLine[] = [];
-		for (let i in this.cart) {
-			let orderline = this.jsonApiService.createRecord(OrderLine, {
-				item: this.cart[i].item,
-				quantity: this.cart[i].quantity,
-				order: order.id
-			});
-			orderline.save().subscribe(o => console.log(o));
-			orderlines.push(orderline);
-		}
-		*/
+		// let order: Order = this.jsonApiService.createRecord(Order, {
+		// 	'sale': this.sale,
+		// });
+		// console.log(order);
+		// order.save().subscribe(o => console.log(o));
 
+		let order: Order = null;
+		let orderlines: OrderLine[] = [];
+		this.jsonApiService.findRecord(Order, '11', {include: 'sale'}).subscribe(
+			(o: Order) => {
+				order = o;
+				for (let i in this.cart) {
+					let orderline: OrderLine = this.jsonApiService.createRecord(OrderLine, {
+						'order': order,
+						'item': this.cart[i].item,
+						'quantity': this.cart[i].quantity
+					});
+					if (orderline.quantity > 0) {
+						orderline.save().subscribe((o: OrderLine) => console.log(o));
+						orderlines.push(orderline);
+					}
+				}
+				order.orderlines = orderlines;
+				console.log(orderlines);
+			});
 	}
 }
