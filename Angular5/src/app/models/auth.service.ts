@@ -7,6 +7,8 @@ import { Observable } from 'rxjs';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { JsonApiService } from '../models/json-api.service';
+import { User } from '../models/user';
 
 export function jwtTokenGetter() {
 	return localStorage.getItem('jwt_token');
@@ -23,7 +25,8 @@ export class AuthService {
 
 	constructor(
 		private http: HttpClient,
-		private jwtHelper: JwtHelperService
+		private jwtHelper: JwtHelperService,
+		private jsonApiService: JsonApiService
 	) {
 		const currentToken = jwtTokenGetter();
 		if (currentToken) {
@@ -87,12 +90,28 @@ export class AuthService {
 		);
 	}
 
-	getUserId(): Observable<number> {
+	getUserId(): number {
 		if (!Boolean(this.token))
-			return of(null);
+			return null;
 		let claims = this.jwtHelper.decodeToken(this.token)
-		return of(claims.data.user_id);
+		return claims.data.user_id;
 	}
+
+	getUser(includes: string = 'usertype'): Observable<User> {
+		let id = this.getUserId();
+		if (id == null)
+			return of(null)
+		let params = {};
+		if (includes && includes != '')
+			params['include'] = includes
+		return this.jsonApiService.findRecord(User, String(id), params).pipe(
+			catchError(err => {
+				console.log("ererrerere", err)
+				return of(null)
+			}
+		));
+	}
+
 	/**
 	 * Start & Clear Refresher interval
 	 */
