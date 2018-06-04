@@ -31,18 +31,18 @@ export class SaleDetailComponent {
 		private http: HttpClient
 	) {
 		this.getSale(this.route.snapshot.params.id);
-		this.authService.getUser('').subscribe((user: User) => this.me = user)
+		this.authService.getUser('').subscribe((user: User) => this.me = user);
 	}
 
 	getSale(id) {
 		this.jsonApiService.findRecord(Sale, id, { include: 'items' }).subscribe(
 			(sale: Sale) => {
-				this.sale = sale
-				this.initCart()
+				this.sale = sale;
+				this.initCart();
 			},
 			err => {
-				console.log("*******************************")
-				this.router.navigate['/ventes']
+				console.log('*******************************'),
+				this.router.navigate['/ventes'];
 			},
 			() => this.loading = false
 		);

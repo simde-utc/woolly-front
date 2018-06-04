@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 // Models
 import { User, UserType } from './user';
-import { Sale, Item, Association } from './sale';
+import {Sale, Item, Association, OrderLine, Order} from './sale';
 
 
 const config: DatastoreConfig = {
@@ -19,10 +19,14 @@ const config: DatastoreConfig = {
 		// Sales
 		sales: Sale,
 
+		// Orders
+		orders: Order,
+		orderlines: OrderLine,
+
 		// Items & Fields
 		items: Item,
 	}
-}
+};
 
 @Injectable()
 @JsonApiDatastoreConfig(config)

@@ -11,8 +11,8 @@ export class AccountComponent {
 	loading: boolean = false;
 
 	constructor(private authService: AuthService) {
-		this.authService.getUser('usertype,orders').subscribe(
-			(user: User) => this.me = user,
+		this.authService.getUser('orders,usertype,orders.orderlines,orders.orderlines.item').subscribe(
+			(user: User) => {this.me = user; console.log(user)},
 			err => console.warn(err),
 			() => this.loading = false
 		);
