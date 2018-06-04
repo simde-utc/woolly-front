@@ -21,26 +21,31 @@
 				<p class="lead">Description</p>
 				<p class="m-0">{{ sale.description }}</p>
 			</div>
-			<div class="col-md-3 my-2">
+			<div class="col-sm-6 col-md-3 my-2">
 				<p class="lead">Dates</p>
 				<p class="m-0">Ouverture&nbsp;: {{ sale.begin_at | date:'dd/MM/yyyy' }}</p>
 				<p class="m-0">Fermeture&nbsp;: {{ sale.end_at | date:'dd/MM/yyyy' }}</p>
 			</div>
-			<div class="col-md-3 my-2">
+			<div *ngIf="sale.max_item_quantity" class="col-sm-6 col-md-3 my-2">
 				<p class="lead">Quantités</p>
 				<p class="m-0">{{ sale.max_item_quantity }}</p>
 			</div>
 		</div>
 
 		<div *ngIf="sale.items; else noItem">
-			<div class="row mb-4">
-				<h2 class="col-md-8">Items en ventes</h2>
-				<div class="col-md-4">
-					<button class="mx-4 btn btn-primary waves-light" mdbWavesEffect (click)="buy()">
+			<div class="d-flex flex-column flex-md-row justify-content-between mb-4">
+				<h2 class="text-center">Items en ventes</h2>
+				<div class="d-flex flex-column flex-sm-row">
+					<button class="mx-4 btn btn-outline-warning waves-light" mdbWavesEffect (click)="initCart()">
+						<i class="fa fa-trash mr-1"></i> Reset
+					</button>
+					<button class="mx-4 btn btn-primary waves-light" 
+							[class.disabled]="isCartEmpty()||!me" mdbWavesEffect (click)="buy()">
 						<i class="fa fa-shopping-cart mr-1"></i> Acheter
 					</button>
 				</div>
 			</div>
+			<p *ngIf="!me" class="lead text-center my-5">Veuillez vous connecter pour acheter.</p>
 			<table class="table align-middle">
 				<!--
 				<tr>

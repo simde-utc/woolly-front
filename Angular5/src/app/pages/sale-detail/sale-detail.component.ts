@@ -3,6 +3,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 
+import { Observable } from 'rxjs';
+import { of } from 'rxjs/observable/of';
+import { forkJoin } from 'rxjs/observable/forkJoin';
+import { catchError, map, tap, finalize } from 'rxjs/operators';
+
 import { JsonApiQueryData } from 'angular2-jsonapi';
 import { JsonApiService } from '../../models/json-api.service';
 import { AuthService } from '../../models/auth.service';
@@ -22,7 +27,6 @@ export class SaleDetailComponent {
 	order: Order;
 	loading: boolean = true;
 	cart = {};
-	tra_url: string = null;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -36,75 +40,81 @@ export class SaleDetailComponent {
 		this.authService.getUser('').subscribe((user: User) => this.me = user);
 	}
 
-	getSale(id) {
+	getSale(id): void {
 		this.jsonApiService.findRecord(Sale, id, { include: 'items' }).subscribe(
 			(sale: Sale) => {
 				this.sale = sale;
 				this.initCart();
 			},
-			err => {
-				console.log('*******************************'),
-				this.router.navigate['/ventes'];
-			},
+			err => this.router.navigate['/ventes'],
 			() => this.loading = false
 		);
 	}
-
-	buy(): void {
-		this.createOrder();
-		console.log(this.cart)
-	}
-
-	/*
-	|--------------------------------------------------------------------------
-	|	Private Functions
-	|--------------------------------------------------------------------------
-	*/
 
 	private initCart() : void {
 		this.cart = {};
 		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 })
 	}
 
-	// Create order
-	private createOrder(): void {
+	isCartEmpty() : boolean {
+		let sum = Object.values(this.cart).reduce((acc: number, item: any) => acc + item.quantity, 0);
+		return sum <= 0;
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	|	Order Management Functions
+	|--------------------------------------------------------------------------
+	| buy, createOrder, addOrderlines, getTransaction
+	*/
+
+	buy(): void {
+		if (this.isCartEmpty())
+			return;
+		this.createOrder().subscribe(
+			(order: Order) => {
+				this.order = order;
+				this.addOrderlines().subscribe(
+					(orderlines: OrderLine[]) => {
+						console.log(orderlines);
+						this.getTransaction().subscribe(
+							transaction => {
+								console.log(transaction)
+								// window.location.href = transaction.url
+							}
+						)
+					}
+				);
+			}
+		);
+	}
+
+	private createOrder(): Observable<Order> {
 		let order: Order = this.jsonApiService.createRecord(Order, {
 			'sale': this.sale,
 			'owner': this.me,
 		});
-		order.save().subscribe(order => {
-			this.order = order;
-			this.addOrderlines();
-		});
+		return order.save();
 	}
 
-	private addOrderlines() {
-		// Add orderlines
-		let orderlines: OrderLine[] = [];
-		for (let i in this.cart) {
+	private addOrderlines(): Observable<OrderLine[]> {
+		// Add orderline subscriptions to array
+		let orderlines: Observable<OrderLine>[] = [];
+		for (let id in this.cart) {
 			let orderline = this.jsonApiService.createRecord(OrderLine, {
 				order: this.order,
-				item: this.cart[i].item,
-				quantity: this.cart[i].quantity,
+				item: this.cart[id].item,
+				quantity: this.cart[id].quantity,
 			});
-			orderline.save().subscribe(o => console.log(o));
-			orderlines.push(orderline);
+			orderlines.push(orderline.save());
 		}
-		this.pay()
+		// ForkJoin subscription to get all orderlines once created
+		return forkJoin(orderlines);
 	}
 
-	private pay() {
-		this.http.get<any>(environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl).subscribe(
-			resp => {
-				console.log(resp)
-				if (resp['error']) {
-					let errorMessage = "";
-					resp.errors.forEach(e => errorMessage += ' - ' + e + '<br>')
-					this.toastr.error(errorMessage, "Erreur lors de la commande", { enableHtml: true, timeOut: 20000 });
-				} else {
-					this.tra_url = resp.url
-				}
-			},
-		)
+	private getTransaction() {
+		return this.http.get<any>(
+			environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl
+		);
 	}
 }
