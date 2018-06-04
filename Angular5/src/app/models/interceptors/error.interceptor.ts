@@ -31,7 +31,11 @@ export class ErrorInterceptor implements HttpInterceptor {
 							break;
 						case 400:	// BadRequest
 							let errorMessage = "";
-							errorResp.error.errors.forEach(e => errorMessage += ' - ' + e.detail + ' (' + e.source.pointer + ')<br>')
+							errorResp.error.errors.forEach(e => {
+								errorMessage += ' - ' + e.detail;
+								if (e.source) errorMessage += ' (' + e.source.pointer + ')';
+								errorMessage += '<br>';
+							});
 							this.toastr.error(errorMessage, "Mauvaise requête", { enableHtml: true, timeOut: 10000 });
 							break;
 						case 422:

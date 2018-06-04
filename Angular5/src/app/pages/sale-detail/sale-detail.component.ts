@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 
 import { JsonApiQueryData } from 'angular2-jsonapi';
 import { JsonApiService } from '../../models/json-api.service';
@@ -21,14 +22,15 @@ export class SaleDetailComponent {
 	order: Order;
 	loading: boolean = true;
 	cart = {};
-	url: string = null;
+	tra_url: string = null;
 
 	constructor(
 		private jsonApiService: JsonApiService,
 		private authService: AuthService,
 		private route: ActivatedRoute,
 		private router: Router,
-		private http: HttpClient
+		private http: HttpClient,
+		private toastr: ToastrService
 	) {
 		this.getSale(this.route.snapshot.params.id);
 		this.authService.getUser('').subscribe((user: User) => this.me = user);
@@ -50,6 +52,7 @@ export class SaleDetailComponent {
 
 	buy(): void {
 		this.createOrder();
+		console.log(this.cart)
 	}
 
 	/*
@@ -77,18 +80,15 @@ export class SaleDetailComponent {
 
 	private addOrderlines() {
 		// Add orderlines
-		// Filter ? Add ? Remove ? Update at 0 ? on API ???
 		let orderlines: OrderLine[] = [];
 		for (let i in this.cart) {
-			if (this.cart[i].quantity > 0) {
-				let orderline = this.jsonApiService.createRecord(OrderLine, {
-					order: this.order,
-					item: this.cart[i].item,
-					quantity: this.cart[i].quantity,
-				});
-				orderline.save().subscribe(o => console.log(o));
-				orderlines.push(orderline);
-			}
+			let orderline = this.jsonApiService.createRecord(OrderLine, {
+				order: this.order,
+				item: this.cart[i].item,
+				quantity: this.cart[i].quantity,
+			});
+			orderline.save().subscribe(o => console.log(o));
+			orderlines.push(orderline);
 		}
 		this.pay()
 	}
@@ -97,8 +97,14 @@ export class SaleDetailComponent {
 		this.http.get<any>(environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl).subscribe(
 			resp => {
 				console.log(resp)
-				this.tra_url = resp.url
-			}
+				if (resp['error']) {
+					let errorMessage = "";
+					resp.errors.forEach(e => errorMessage += ' - ' + e + '<br>')
+					this.toastr.error(errorMessage, "Erreur lors de la commande", { enableHtml: true, timeOut: 20000 });
+				} else {
+					this.tra_url = resp.url
+				}
+			},
 		)
 	}
 }
