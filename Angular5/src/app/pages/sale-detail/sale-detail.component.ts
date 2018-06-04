@@ -21,6 +21,7 @@ export class SaleDetailComponent {
 	order: Order;
 	loading: boolean = true;
 	cart = {};
+	url: string = null;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -31,11 +32,6 @@ export class SaleDetailComponent {
 	) {
 		this.getSale(this.route.snapshot.params.id);
 		this.authService.getUser('').subscribe((user: User) => this.me = user)
-	}
-
-	private initCart() : void {
-		this.cart = {};
-		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 })
 	}
 
 	getSale(id) {
@@ -52,8 +48,23 @@ export class SaleDetailComponent {
 		);
 	}
 
-	buy() {
-		// Create order ??
+	buy(): void {
+		this.createOrder();
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	|	Private Functions
+	|--------------------------------------------------------------------------
+	*/
+
+	private initCart() : void {
+		this.cart = {};
+		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 })
+	}
+
+	// Create order
+	private createOrder(): void {
 		let order: Order = this.jsonApiService.createRecord(Order, {
 			'sale': this.sale,
 			'owner': this.me,
@@ -79,13 +90,15 @@ export class SaleDetailComponent {
 				orderlines.push(orderline);
 			}
 		}
-		console.log(orderlines)
 		this.pay()
 	}
 
 	private pay() {
 		this.http.get<any>(environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl).subscribe(
-			resp => console.log(resp)
+			resp => {
+				console.log(resp)
+				this.tra_url = resp.url
+			}
 		)
 	}
 }

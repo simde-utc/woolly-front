@@ -49,7 +49,7 @@
 					<th>Quantité</th>
 				</tr>
 				-->
-				<tr *ngFor="let item of sale.items" class="hoverable px-2">
+				<tr *ngFor="let item of sale.items" class="hoverable px-2 px-md-4">
 					<td class="align-middle lead">{{ item.name }}</td>
 					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
 					<td class="align-middle">
