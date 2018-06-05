@@ -11,9 +11,7 @@ export class User extends JsonApiModel {
 	@Attribute() email: string;
 	@Attribute() first_name: string;
 	@Attribute() last_name: string;
-	@Attribute() type: string;
 
 	@BelongsTo() usertype: UserType;
-
 	@HasMany() orders: Order[];
 }

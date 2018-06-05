@@ -12,7 +12,7 @@ export class AccountComponent {
 
 	constructor(private authService: AuthService) {
 		this.authService.getUser('orders,usertype,orders.orderlines,orders.orderlines.item').subscribe(
-			(user: User) => {this.me = user; console.log(user)},
+			(user: User) => this.me = user,
 			err => console.warn(err),
 			() => this.loading = false
 		);

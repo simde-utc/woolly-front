@@ -65,7 +65,7 @@ export class SaleDetailComponent {
 	|--------------------------------------------------------------------------
 	|	Order Management Functions
 	|--------------------------------------------------------------------------
-	| buy, createOrder, addOrderlines, getTransaction
+	| buy, createOrder, createOrderlines, getTransaction
 	*/
 
 	buy(): void {
@@ -74,9 +74,8 @@ export class SaleDetailComponent {
 		this.createOrder().subscribe(
 			(order: Order) => {
 				this.order = order;
-				this.addOrderlines().subscribe(
+				this.createOrderlines().subscribe(
 					(orderlines: OrderLine[]) => {
-						console.log(orderlines);
 						this.getTransaction().subscribe(
 							transaction => {
 								console.log(transaction)
@@ -97,7 +96,7 @@ export class SaleDetailComponent {
 		return order.save();
 	}
 
-	private addOrderlines(): Observable<OrderLine[]> {
+	private createOrderlines(): Observable<OrderLine[]> {
 		// Add orderline subscriptions to array
 		let orderlines: Observable<OrderLine>[] = [];
 		for (let id in this.cart) {
