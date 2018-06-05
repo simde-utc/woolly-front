@@ -9,7 +9,7 @@ import { JsonApiService } from '../../models/json-api.service';
 import { AuthService } from '../../models/auth.service';
 import { PaymentService } from '../../models/payment.service';
 
-import { Sale, Item, Order, OrderLine, Field } from '../../models/sale';
+import { Sale, Item, Order, OrderLine, Field, OrderLineItem } from '../../models/sale';
 import { User } from '../../models/user';
 
 import { environment } from '../../../environments/environment';
@@ -29,13 +29,18 @@ export class OrderDetailComponent {
 		private route: ActivatedRoute,
 		private router: Router,
 	) {
-		this.getOrder(this.route.snapshot.params.id).subscribe(
-			(order: Order) => {
-				this.order = order
-				console.log(order)
-			},
-			err => this.router.navigate['/ventes'],
-			() => this.loading = false
+		const id = this.route.snapshot.params.id;
+		this.paymentService.checkOrder(id).subscribe(
+			resp => console.log(resp),
+			err => console.warn(err),
+			() => this.getOrder(id).subscribe(
+				(order: Order) => {
+					this.order = order
+					console.log(order)
+				},
+				err => this.router.navigate['/ventes'],
+				() => this.loading = false
+			)
 		);
 	}
 
@@ -44,6 +49,18 @@ export class OrderDetailComponent {
 		let includes = ['sale', 'orderlines', 'orderlines.item', 
 				'orderlines.orderlineitems', 'orderlines.orderlineitems.orderlinefields']
 		return this.jsonApiService.findRecord(Order, id, { include: includes.join(',') });
+	}
+
+	private hasEditableField(orderlineitem: OrderLineItem) : boolean {
+		orderlineitem.orderlinefields.forEach(olfield => {
+			if (olfield.editable)
+				return true;
+		});
+		return false;
+	}
+
+	private modifyOrderLineFields(orderlineitem: OrderLineItem) {
+
 	}
 
 	private mapFieldType(type: string) {

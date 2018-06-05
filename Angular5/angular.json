@@ -22,7 +22,7 @@
             ],
             "styles": [
               "node_modules/font-awesome/scss/font-awesome.scss",
-              "src/resources/bootstrap/bootstrap.scss",
+              "node_modules/angular-bootstrap-md/scss/bootstrap/bootstrap.scss",
               "node_modules/angular-bootstrap-md/scss/mdb-free.scss",
               "node_modules/ngx-toastr/toastr.css",
               "src/resources/styles.scss"
