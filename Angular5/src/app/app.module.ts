@@ -68,6 +68,9 @@ const routes: Routes = [
 			progressBar: true
 		}),
 	],
+	exports: [
+		MDBBootstrapModule
+	],
 	providers: [		// Services
 		{ provide: LOCALE_ID, useValue: 'fr' },
 		JsonApiService,

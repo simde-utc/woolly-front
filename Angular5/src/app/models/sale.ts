@@ -116,7 +116,7 @@ export class ItemField extends JsonApiModel {
 @JsonApiModelConfig({ type: 'orderlineitems' })
 export class OrderLineItem extends JsonApiModel {
 	@BelongsTo() orderline: OrderLine;
-	@HasMany() orderlinefield: OrderLineField[];
+	@HasMany() orderlinefields: OrderLineField[];
 }
 
 @JsonApiModelConfig({ type: 'orderlinefields' })
@@ -125,6 +125,7 @@ export class OrderLineField extends JsonApiModel {
 	
 	@Attribute() name: string;
 	@Attribute() type: string;
+	@Attribute() editable: boolean;
 
 	@BelongsTo() orderlineitem: OrderLineItem;
 	@BelongsTo() field: Field;

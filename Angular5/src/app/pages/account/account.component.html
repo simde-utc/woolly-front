@@ -52,16 +52,16 @@
 								<span *ngSwitchCase="6" class="red-text">Annulée</span>
 							</td>
 							<td [ngSwitch]="order.status">
-								<a *ngSwitchCase="0" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
 									Terminer la commande</a>
-								<a *ngSwitchCase="0" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
 									Annuler la commande</a>
 								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a>
-								<a *ngSwitchCase="3" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+								<a *ngSwitchCase="3" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
 									Payer</a>
 								<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">
 									Télécharger mes billets</a>
-								<a *ngSwitchCase="4" class="text-primary" routerLink="ventes/{{order.id}}/details">
+								<a *ngSwitchCase="4" class="text-primary" routerLink="/commandes/{{order.id}}">
 									Modifier ma commande</a>
 							</td>
 							<td>

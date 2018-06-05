@@ -60,7 +60,7 @@ export class SaleDetailComponent {
 		);
 	}
 
-	getSale(id): Observable<Sale> {
+	getSale(id: string): Observable<Sale> {
 		return this.jsonApiService.findRecord(Sale, id, { include: 'items' });
 	}
 

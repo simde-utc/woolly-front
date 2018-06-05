@@ -25,7 +25,7 @@ const config: DatastoreConfig = {
 
 		// Item & ItemGroup
 		items: Item,
-		items: ItemGroup,
+		itemgroups: ItemGroup,
 
 		// Field & ItemField
 		fields: Field,

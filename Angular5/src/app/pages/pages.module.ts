@@ -13,6 +13,7 @@ import { SalesComponent } from './sales/sales.component';
 import { SaleDetailComponent } from './sale-detail/sale-detail.component';
 import { LoginComponent } from './login/login.component';
 import { LogoutComponent } from './logout/logout.component';
+import { OrderDetailComponent } from './order-detail/order-detail.component';
 
 // Routes
 const routes: Routes = [{
@@ -26,7 +27,10 @@ const routes: Routes = [{
 		// Public sales
 		{ path: 'ventes', 		component: SalesComponent },
 		{ path: 'ventes/:id', 	component: SaleDetailComponent },
-		{ path: 'paiement/:id', component: SaleDetailComponent },
+		// { path: 'paiement/:id', component: SaleDetailComponent },
+
+		// Commandes
+		{ path: 'commandes/:id',	component: OrderDetailComponent },
 
 		// Account
 		{ path: 'mon_compte', 	component: AccountComponent },
@@ -51,6 +55,7 @@ const routes: Routes = [{
 		SaleDetailComponent,
 		LoginComponent,
 		LogoutComponent,
+		OrderDetailComponent,
 	],
 	imports: [
 		CommonModule,

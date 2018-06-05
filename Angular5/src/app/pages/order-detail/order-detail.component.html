@@ -1,0 +1,116 @@
+<main class="container p-5">
+
+	<div *ngIf="loading; else orderReady">
+		<div class="d-flex h-100 justify-content-center align-items-center three-balls-loader">
+			<div class="ball ball-1"></div>
+			<div class="ball ball-2"></div>
+			<div class="ball ball-3"></div>
+		</div>
+	</div>
+
+	<ng-template #orderReady>
+		<div class="pb-3 mb-2">
+			<h1>Votre commande - {{ order.sale.name }}</h1>
+		</div>
+
+		<div class="">
+			<div *ngFor="let orderline of order.orderlines" class="py-4">
+				<h3>{{ orderline.id }} - {{ orderline.item.name }} (x{{ orderline.quantity }})</h3>
+				<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row">
+					<div class="col-12">
+						id: {{ orderlineitem.id }}
+					</div>
+
+					<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-5">
+							<input mdbInputDirective type="{{mapFieldType(orderlinefield.type)}}"
+								class="form-control" [disabled]="!orderlinefield.editable"
+								id="{{ orderlinefield.id }}" value="{{ orderlinefield.value }}">
+							<label for="{{ orderlinefield.id }}">{{ orderlinefield.name }}</label>
+
+						<!-- {{ orderlinefield.name }} -->
+						<!-- {{ orderlinefield.type }} -->
+						<!-- {{ orderlinefield.value }} -->
+						<!-- {{ orderlinefield.editable }} -->
+					</div>
+					<div class="col-md-2">OK</div>
+				</div>
+			</div>
+			
+		</div>
+
+
+		<!-- 
+		<div class="row py-4 my-4">
+			<div class="col-md-6 my-2">
+				<p class="lead">Description</p>
+				<p class="m-0">{{ sale.description }}</p>
+			</div>
+			<div class="col-sm-6 col-md-3 my-2">
+				<p class="lead">Dates</p>
+				<p class="m-0">Ouverture&nbsp;: {{ sale.begin_at | date:'dd/MM/yyyy' }}</p>
+				<p class="m-0">Fermeture&nbsp;: {{ sale.end_at | date:'dd/MM/yyyy' }}</p>
+			</div>
+			<div *ngIf="sale.max_item_quantity" class="col-sm-6 col-md-3 my-2">
+				<p class="lead">Quantités</p>
+				<p class="m-0">{{ sale.max_item_quantity }}</p>
+			</div>
+		</div>
+
+		<div *ngIf="hasOngoingOrder" class="row justify-content-center my-5">
+			<div class="col-11 col-md-8 px-0 card z-depth-2">
+				<div class="card-header lead orange white-text text-center">Attention</div>
+				<div class="card-body">
+					<p class="text-justify">
+						Vous avez déjà une commande non payée en cours pour cette vente.
+						Veuillez la traiter avant d'en commencer une nouvelle. 						
+					</p>
+					<div class="text-center">
+						<a class="btn btn-outline-warning waves-light" mdbWavesEffect (click)="cancelOrder()">Annuler</a>
+						<a class="btn btn-success waves-light" mdbWavesEffect (click)="payOrder()">Payer</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div *ngIf="sale.items; else noItem">
+			<div class="d-flex flex-column flex-md-row justify-content-between mb-4">
+				<h2 class="text-center">Items en ventes</h2>
+				<div class="d-flex flex-column flex-sm-row">
+					<button class="mx-4 btn btn-outline-warning waves-light" mdbWavesEffect (click)="initCart()">
+						<i class="fa fa-trash mr-1"></i> Reset
+					</button>
+					<button class="mx-4 btn btn-success waves-light" 
+							[class.disabled]="isCartEmpty() || !me || hasOngoingOrder" mdbWavesEffect (click)="buy()">
+						<i class="fa fa-shopping-cart mr-1"></i> Acheter
+					</button>
+				</div>
+			</div>
+			<p *ngIf="!me" class="lead text-center my-5">Veuillez vous connecter pour acheter.</p>
+			<table class="table align-middle">
+				<tr>
+					<th>Item</th>
+					<th>Prix</th>
+					<th>Quantité</th>
+				</tr>
+				<tr *ngFor="let item of sale.items" class="hoverable px-2 px-md-4">
+					<td class="align-middle lead">{{ item.name }}</td>
+					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
+					<td class="align-middle">
+						<div class="md-form my-0">
+							<input mdbInputDirective type="number" class="form-control my-0" [class.disabled]="!me || hasOngoingOrder"
+								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id].quantity"
+								min="0" max="{{ item.max_per_user }}" value="0">
+						</div>
+					</td>
+						
+				</tr>
+			</table>
+		</div>
+
+		<ng-template #noItem>
+			<p class="lead">Aucun item n'a été mis en vente pour le moment, revenez plus tard.</p>
+		</ng-template>
+
+		 -->
+	</ng-template>
+</main>

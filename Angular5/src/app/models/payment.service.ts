@@ -16,7 +16,9 @@ export class PaymentService {
 	) { }
 
 	payOrder(id: string) : Observable<any> {
-		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay?return_url=' + environment.frontUrl);
+		const url = environment.apiUrl + '/orders/' + id + '/pay?return_url='
+					+ environment.frontUrl + 'commandes/' + id
+		return this.http.get<any>(url);
 	}
 	// cancelOrder(id: string)
 
