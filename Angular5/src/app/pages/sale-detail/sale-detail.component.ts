@@ -27,6 +27,7 @@ export class SaleDetailComponent {
 	order: Order;
 	loading: boolean = true;
 	cart = {};
+	hasOngoingOrder: boolean = false;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -36,19 +37,29 @@ export class SaleDetailComponent {
 		private http: HttpClient,
 		private toastr: ToastrService
 	) {
-		this.getSale(this.route.snapshot.params.id);
-		this.authService.getUser('').subscribe((user: User) => this.me = user);
-	}
-
-	getSale(id): void {
-		this.jsonApiService.findRecord(Sale, id, { include: 'items' }).subscribe(
+		this.getSale(this.route.snapshot.params.id).subscribe(
 			(sale: Sale) => {
 				this.sale = sale;
 				this.initCart();
+				this.authService.getUser('').subscribe((user: User) => {
+					this.me = user
+					if (user) {
+						this.getOrder().subscribe((order: Order) => {
+							this.order = order;
+							console.log(order)
+							if (order.status != 0)
+								this.hasOngoingOrder = true;
+						});
+					}
+				});
 			},
 			err => this.router.navigate['/ventes'],
 			() => this.loading = false
 		);
+	}
+
+	getSale(id): Observable<Sale> {
+		return this.jsonApiService.findRecord(Sale, id, { include: 'items' });
 	}
 
 	private initCart() : void {
@@ -61,34 +72,25 @@ export class SaleDetailComponent {
 		return sum <= 0;
 	}
 
+
 	/*
 	|--------------------------------------------------------------------------
 	|	Order Management Functions
 	|--------------------------------------------------------------------------
-	| buy, createOrder, createOrderlines, getTransaction
+	| buy, getOrder, addOrderlines, payOrder
 	*/
 
 	buy(): void {
 		if (this.isCartEmpty())
 			return;
-		this.createOrder().subscribe(
-			(order: Order) => {
-				this.order = order;
-				this.createOrderlines().subscribe(
-					(orderlines: OrderLine[]) => {
-						this.getTransaction().subscribe(
-							transaction => {
-								console.log(transaction)
-								// window.location.href = transaction.url
-							}
-						)
-					}
-				);
+		this.addOrderlines().subscribe(
+			(orderlines: OrderLine[]) => {
+				this.payOrder();
 			}
 		);
 	}
 
-	private createOrder(): Observable<Order> {
+	private getOrder(): Observable<Order> {
 		let order: Order = this.jsonApiService.createRecord(Order, {
 			'sale': this.sale,
 			'owner': this.me,
@@ -96,7 +98,7 @@ export class SaleDetailComponent {
 		return order.save();
 	}
 
-	private createOrderlines(): Observable<OrderLine[]> {
+	private addOrderlines(): Observable<OrderLine[]> {
 		// Add orderline subscriptions to array
 		let orderlines: Observable<OrderLine>[] = [];
 		for (let id in this.cart) {
@@ -111,9 +113,16 @@ export class SaleDetailComponent {
 		return forkJoin(orderlines);
 	}
 
-	private getTransaction() {
-		return this.http.get<any>(
-			environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl
-		);
+	private payOrder(): void {
+		this.http.get<any>(environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl)
+			.subscribe(transaction => {
+				console.log(transaction)
+				if (transaction.url)
+					window.location.href = transaction.url
+			});
+	}
+
+	private cancelOrder(): void {
+		
 	}
 }
