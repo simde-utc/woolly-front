@@ -1,113 +1,114 @@
-<main class="container p-5">
-	<h1>Mon Compte</h1>
+<main class="p-5">
+	<div class="container">
+		<h1>Mon Compte</h1>
+	</div>
 
-	<div class="row py-4">
-		<div class="col-md-5">
-			<h3>Mes informations</h3>
-			<table class="table">
-				<tbody>
-					<tr>
-						<th>Email</th>
-						<td>{{ me?.email }}</td>
-					</tr>
-					<tr>
-						<th>Prénom</th>
-						<td>{{ me?.first_name }}</td>
-					</tr>
-					<tr>
-						<th>Nom</th>
-						<td>{{ me?.last_name }}</td>
-					</tr>
-					<tr>
-						<th>Type</th>
-						<td>{{ me?.usertype.name }}</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-		<div class="col-md-7">
-			<h3>Mes commandes</h3>
-			<div *ngIf="me?.orders && me?.orders?.length>0; else noOrders">
+	<div class="container-fluid">
+		<div class="row py-4">
+			<div class="col-md-5">
+				<h3>Mes informations</h3>
 				<table class="table">
 					<tbody>
-					<tr>
-						<td>ID</td>
-						<td>Statut</td>
-						<td>Vente</td>
-						<td></td>
-					</tr>
-					<tr *ngFor="let order of me.orders">
-						<td>{{order.id}}</td>
-						<td [ngSwitch]="order.status">
-							<div *ngSwitchCase="0">Commande en cours</div>
-							<div *ngSwitchCase="1">En attente de validation</div>
-							<div *ngSwitchCase="2">Validée</div>
-							<div *ngSwitchCase="3">Pas payée</div>
-							<div *ngSwitchCase="4">Payée</div>
-							<div *ngSwitchCase="5">Expirée</div>
-							<div *ngSwitchCase="6">Annulée</div>
-						</td>
-						<td>
-							<table>
-								<tr>
-									<td>Identifiant</td>
-									<td>Article</td>
-									<td>Quantité</td>
-								</tr>
-								<tr *ngFor="let orderline of order.orderlines">
-									<td>{{orderline.id}}</td>
-									<td>{{orderline.item.name}}</td>
-									<td>{{orderline.quantity}}</td>
-								</tr>
-							</table>
-						</td>
-						<td [ngSwitch]="order.status">
-							<div>
-								<button type="button" *ngSwitchCase="0" class="btn btn-primary">
-									Terminer commande
-								</button>
-							</div>
-							<div>
-								<button type="button" *ngSwitchCase="1" class="btn btn-success">
-									Valider commande
-								</button>
-							</div>
-							<div>
-								<button *ngSwitchCase="3" class="btn btn-success">
-									Payer
-								</button>
-							</div>
-							<div>
-								<button type="button" *ngSwitchCase="4" class="btn btn-primary"> <!-- (click)="generatePDF(order)"> -->
-									Télécharger ma place
-								</button>
-							</div>
-							<div>
-								<button type="button" *ngSwitchCase="5" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-									Commande expirée
-								</button>
-							</div>
-							<div>
-								<button type="button" *ngSwitchCase="6" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-									Commande annulée
-								</button>
-							</div>
-						</td>
-					</tr>
+						<tr>
+							<th>Email</th>
+							<td>{{ me?.email }}</td>
+						</tr>
+						<tr>
+							<th>Prénom</th>
+							<td>{{ me?.first_name }}</td>
+						</tr>
+						<tr>
+							<th>Nom</th>
+							<td>{{ me?.last_name }}</td>
+						</tr>
+						<tr>
+							<th>Type</th>
+							<td>{{ me?.usertype.name }}</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
-			<ng-template #noOrders>
-				<p>Vous n'avez encore fait aucune commande.</p>
-				<div class="text-center">
-					<a routerLink="/ventes" class="mx-auto my-4 btn btn-primary waves-light" mdbWavesEffect>Voir les ventes</a>
+			<div class="col-md-7">
+				<h3>Mes commandes</h3>
+				<div *ngIf="me?.orders && me?.orders?.length>0; else noOrders">
+					<table class="table">
+						<tbody>
+						<tr>
+							<td>ID</td>
+							<td>Statut</td>
+							<td>Vente</td>
+							<td></td>
+						</tr>
+						<tr *ngFor="let order of me.orders">
+							<td>{{order.id}}</td>
+							<td [ngSwitch]="order.status">
+								<div *ngSwitchCase="0">Commande en cours</div>
+								<div *ngSwitchCase="1">En attente de validation</div>
+								<div *ngSwitchCase="2">Validée</div>
+								<div *ngSwitchCase="3">Pas payée</div>
+								<div *ngSwitchCase="4">Payée</div>
+								<div *ngSwitchCase="5">Expirée</div>
+								<div *ngSwitchCase="6">Annulée</div>
+							</td>
+							<td>
+								<table>
+									<tr>
+										<td>Identifiant</td>
+										<td>Article</td>
+										<td>Quantité</td>
+									</tr>
+									<tr *ngFor="let orderline of order.orderlines">
+										<td>{{orderline.id}}</td>
+										<td>{{orderline.item.name}}</td>
+										<td>{{orderline.quantity}}</td>
+									</tr>
+								</table>
+							</td>
+							<td [ngSwitch]="order.status">
+								<div>
+									<button type="button" *ngSwitchCase="0" class="btn btn-primary">
+										Terminer commande
+									</button>
+								</div>
+								<div>
+									<button type="button" *ngSwitchCase="1" class="btn btn-success">
+										Valider commande
+									</button>
+								</div>
+								<div>
+									<button *ngSwitchCase="3" class="btn btn-success">
+										Payer
+									</button>
+								</div>
+								<div>
+									<button type="button" *ngSwitchCase="4" class="btn btn-primary"> <!-- (click)="generatePDF(order)"> -->
+										Télécharger ma place
+									</button>
+								</div>
+								<div>
+									<button type="button" *ngSwitchCase="5" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
+										Commande expirée
+									</button>
+								</div>
+								<div>
+									<button type="button" *ngSwitchCase="6" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
+										Commande annulée
+									</button>
+								</div>
+							</td>
+						</tr>
+						</tbody>
+					</table>
 				</div>
-			</ng-template>
-			<!--<pre>-->
-				<!--{{ me?.orders | json }}-->
-			<!--</pre>-->
-		</div>
+				<ng-template #noOrders>
+					<p>Vous n'avez encore fait aucune commande.</p>
+					<div class="text-center">
+						<a routerLink="/ventes" class="mx-auto my-4 btn btn-primary waves-light" mdbWavesEffect>Voir les ventes</a>
+					</div>
+				</ng-template>
+			</div>
 
+		</div>
 	</div>
 
 </main>

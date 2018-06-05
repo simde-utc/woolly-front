@@ -32,6 +32,22 @@
 			</div>
 		</div>
 
+		<div *ngIf="hasOngoingOrder" class="row justify-content-center my-5">
+			<div class="col-11 col-md-8 px-0 card z-depth-2">
+				<div class="card-header lead orange white-text text-center">Attention</div>
+				<div class="card-body">
+					<p class="text-justify">
+						Vous avez déjà une commande non payée en cours pour cette vente.
+						Veuillez la traiter avant d'en commencer une nouvelle. 						
+					</p>
+					<div class="text-center">
+						<a class="btn btn-outline-warning waves-light" mdbWavesEffect (click)="cancelOrder()">Annuler</a>
+						<a class="btn btn-success waves-light" mdbWavesEffect (click)="payOrder()">Payer</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div *ngIf="sale.items; else noItem">
 			<div class="d-flex flex-column flex-md-row justify-content-between mb-4">
 				<h2 class="text-center">Items en ventes</h2>
@@ -40,7 +56,7 @@
 						<i class="fa fa-trash mr-1"></i> Reset
 					</button>
 					<button class="mx-4 btn btn-success waves-light" 
-							[class.disabled]="isCartEmpty()||!me" mdbWavesEffect (click)="buy()">
+							[class.disabled]="isCartEmpty() || !me || hasOngoingOrder" mdbWavesEffect (click)="buy()">
 						<i class="fa fa-shopping-cart mr-1"></i> Acheter
 					</button>
 				</div>
@@ -59,7 +75,7 @@
 					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
 					<td class="align-middle">
 						<div class="md-form my-0">
-							<input mdbInputDirective type="number" class="form-control my-0"
+							<input mdbInputDirective type="number" class="form-control my-0" [class.disabled]="!me || hasOngoingOrder"
 								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id].quantity"
 								min="0" max="{{ item.max_per_user }}" value="0">
 						</div>

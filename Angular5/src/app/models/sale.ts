@@ -50,7 +50,7 @@ export class Item extends JsonApiModel {
 export class Order extends JsonApiModel {
 	@Attribute() created_at: Date;
 	@Attribute() updated_at: Date;
-	@Attribute() status: string;
+	@Attribute() status: number;
 	@Attribute() tra_id: number;
 
 	@BelongsTo() owner: User;
