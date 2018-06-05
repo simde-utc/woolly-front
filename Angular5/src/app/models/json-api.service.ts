@@ -5,31 +5,35 @@ import { environment } from '../../environments/environment';
 
 // Models
 import { User, UserType } from './user';
-import {Sale, Item, Association, OrderLine, Order, Field, OrderLineField, ItemField} from './sale';
+import { Sale, Item, ItemGroup, Association, OrderLine, Order, Field, ItemField, OrderLineItem, OrderLineField } from './sale';
 
 
 const config: DatastoreConfig = {
 	baseUrl: environment.apiUrl,
 	models: {
-		// Users & Association
+		// User & UserType
 		users: User,
 		usertypes: UserType,
-		associations: Association,
 
-		// Sales
+		// Sale & Association
+		associations: Association,
 		sales: Sale,
 
-		// Orders
+		// Order & OrderLine
 		orders: Order,
 		orderlines: OrderLine,
 
-		// Items & Fields
+		// Item & ItemGroup
 		items: Item,
+		items: ItemGroup,
+
+		// Field & ItemField
 		fields: Field,
-		ordelinefields: OrderLineField,
-		itemfields: ItemField
+		itemfields: ItemField,
 
-
+		// OrderLineItem & OrderLineField
+		orderlineitems: OrderLineItem,
+		orderlinefields: OrderLineField,
 	}
 };
 

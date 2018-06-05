@@ -5,7 +5,7 @@
 
 	<div class="container-fluid">
 		<div class="row py-4">
-			<div class="col-md-4">
+			<div class="col-lg-4 col-md-5">
 				<h3>Mes informations</h3>
 				<table class="table">
 					<tbody>
@@ -28,66 +28,62 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="col-md-8">
+			<div class="col-lg-8 col-md-7">
 				<h3>Mes commandes</h3>
-				<div *ngIf="me?.orders && me?.orders?.length>0; else noOrders">
-					<table class="table">
-						<tbody>
+				<table *ngIf="me?.orders && me?.orders?.length>0; else noOrders"
+					class="table table-responsive">
+					<tr>
+						<th>ID</th>
+						<th>Vente</th>
+						<th>Statut</th>
+						<th colspan="2">Action</th>
+					</tr>
+					<ng-container *ngFor="let order of me.orders">
 						<tr>
-							<td>ID</td>
-							<td>Statut</td>
-							<td>Vente</td>
-							<td></td>
-						</tr>
-						<tr *ngFor="let order of me.orders">
 							<td>{{order.id}}</td>
+							<td>{{ order.sale.name }}</td>
 							<td [ngSwitch]="order.status">
-								<span *ngSwitchCase="0">En cours</span>
-								<span *ngSwitchCase="1">En attente de validation</span>
-								<span *ngSwitchCase="2">Validée</span>
-								<span *ngSwitchCase="3">Non payée</span>
-								<span *ngSwitchCase="4">Payée</span>
-								<span *ngSwitchCase="5">Expirée</span>
-								<span *ngSwitchCase="6">Annulée</span>
+								<span *ngSwitchCase="0" class="blue-text">En cours</span>
+								<span *ngSwitchCase="1" class="purple-text">En attente de validation</span>
+								<span *ngSwitchCase="2" class="green-text">Validée</span>
+								<span *ngSwitchCase="3" class="orange-text">Non payée</span>
+								<span *ngSwitchCase="4" class="green-text">Payée</span>
+								<span *ngSwitchCase="5" class="red-text">Expirée</span>
+								<span *ngSwitchCase="6" class="red-text">Annulée</span>
+							</td>
+							<td [ngSwitch]="order.status">
+								<a *ngSwitchCase="0" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+									Terminer la commande</a>
+								<a *ngSwitchCase="0" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+									Annuler la commande</a>
+								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a>
+								<a *ngSwitchCase="3" class="text-primary" routerLink="ventes/{{order.sale.id}}">
+									Payer</a>
+								<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">
+									Télécharger mes billets</a>
+								<a *ngSwitchCase="4" class="text-primary" routerLink="ventes/{{order.id}}/details">
+									Modifier ma commande</a>
 							</td>
 							<td>
-								<table>
-									<tr>
-										<td>Identifiant</td>
-										<td>Article</td>
-										<td>Quantité</td>
-									</tr>
-									<tr *ngFor="let orderline of order.orderlines">
-										<td>{{orderline.id}}</td>
-										<td>{{orderline.item.name}}</td>
-										<td>{{orderline.quantity}}</td>
-									</tr>
-								</table>
-							</td>
-							<td [ngSwitch]="order.status">
-								<button type="button" *ngSwitchCase="0" class="btn btn-primary">
-									Terminer commande
-								</button>
-								<button type="button" *ngSwitchCase="1" class="btn btn-success">
-									Valider commande
-								</button>
-								<button *ngSwitchCase="3" class="btn btn-success">
-									Payer
-								</button>
-								<button type="button" *ngSwitchCase="4" class="btn btn-primary"> <!-- (click)="generatePDF(order)"> -->
-									Télécharger ma place
-									</button>
-								<button type="button" *ngSwitchCase="5" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-									Commande expirée
-									</button>
-								<button type="button" *ngSwitchCase="6" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-									Commande annulée
-									</button>
+								<!-- <a class="text-info" (click)="order-{{order.id}}-items.toggle()" mdbWavesEffect> -->
+									 <!-- <i class="fa fa-chevron-down"></i> Montrer les items</a> -->
 							</td>
 						</tr>
-						</tbody>
-					</table>
-				</div>
+						<!-- <div [mdbCollapse]="isCollapsed" #test="bs-collapse"> -->
+							<tr>
+								<th class="py-2">ID</th>
+								<th class="py-2">Article</th>
+								<th class="py-2">Quantité</th>
+							</tr>
+							<tr *ngFor="let orderline of order.orderlines">
+								<td class="py-2">{{orderline.id}}</td>
+								<td class="py-2">{{orderline.item.name}}</td>
+								<td class="py-2">{{orderline.quantity}}</td>
+							</tr>
+						<!-- </div> -->
+					</ng-container>
+				</table>
+
 				<ng-template #noOrders>
 					<p>Vous n'avez encore fait aucune commande.</p>
 					<div class="text-center">
