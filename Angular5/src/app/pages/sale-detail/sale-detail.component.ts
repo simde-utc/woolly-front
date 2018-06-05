@@ -11,6 +11,7 @@ import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { JsonApiQueryData } from 'angular2-jsonapi';
 import { JsonApiService } from '../../models/json-api.service';
 import { AuthService } from '../../models/auth.service';
+import { PaymentService } from '../../models/payment.service';
 
 import { Sale, Item, Order, OrderLine } from '../../models/sale';
 import { User } from '../../models/user';
@@ -32,6 +33,7 @@ export class SaleDetailComponent {
 	constructor(
 		private jsonApiService: JsonApiService,
 		private authService: AuthService,
+		private paymentService: PaymentService,
 		private route: ActivatedRoute,
 		private router: Router,
 		private http: HttpClient,
@@ -114,12 +116,11 @@ export class SaleDetailComponent {
 	}
 
 	private payOrder(): void {
-		this.http.get<any>(environment.apiUrl+'/orders/'+this.order.id+'/pay?return_url='+environment.frontUrl)
-			.subscribe(transaction => {
-				console.log(transaction)
-				if (transaction.url)
-					window.location.href = transaction.url
-			});
+		this.paymentService.payOrder(this.order.id).subscribe(transaction => {
+			console.log(transaction)
+			if (transaction.url)
+				window.location.href = transaction.url
+		});
 	}
 
 	private cancelOrder(): void {

@@ -5,7 +5,7 @@
 
 	<div class="container-fluid">
 		<div class="row py-4">
-			<div class="col-md-5">
+			<div class="col-md-4">
 				<h3>Mes informations</h3>
 				<table class="table">
 					<tbody>
@@ -28,7 +28,7 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="col-md-7">
+			<div class="col-md-8">
 				<h3>Mes commandes</h3>
 				<div *ngIf="me?.orders && me?.orders?.length>0; else noOrders">
 					<table class="table">
@@ -42,13 +42,13 @@
 						<tr *ngFor="let order of me.orders">
 							<td>{{order.id}}</td>
 							<td [ngSwitch]="order.status">
-								<div *ngSwitchCase="0">Commande en cours</div>
-								<div *ngSwitchCase="1">En attente de validation</div>
-								<div *ngSwitchCase="2">Validée</div>
-								<div *ngSwitchCase="3">Pas payée</div>
-								<div *ngSwitchCase="4">Payée</div>
-								<div *ngSwitchCase="5">Expirée</div>
-								<div *ngSwitchCase="6">Annulée</div>
+								<span *ngSwitchCase="0">En cours</span>
+								<span *ngSwitchCase="1">En attente de validation</span>
+								<span *ngSwitchCase="2">Validée</span>
+								<span *ngSwitchCase="3">Non payée</span>
+								<span *ngSwitchCase="4">Payée</span>
+								<span *ngSwitchCase="5">Expirée</span>
+								<span *ngSwitchCase="6">Annulée</span>
 							</td>
 							<td>
 								<table>
@@ -65,36 +65,24 @@
 								</table>
 							</td>
 							<td [ngSwitch]="order.status">
-								<div>
-									<button type="button" *ngSwitchCase="0" class="btn btn-primary">
-										Terminer commande
+								<button type="button" *ngSwitchCase="0" class="btn btn-primary">
+									Terminer commande
+								</button>
+								<button type="button" *ngSwitchCase="1" class="btn btn-success">
+									Valider commande
+								</button>
+								<button *ngSwitchCase="3" class="btn btn-success">
+									Payer
+								</button>
+								<button type="button" *ngSwitchCase="4" class="btn btn-primary"> <!-- (click)="generatePDF(order)"> -->
+									Télécharger ma place
 									</button>
-								</div>
-								<div>
-									<button type="button" *ngSwitchCase="1" class="btn btn-success">
-										Valider commande
+								<button type="button" *ngSwitchCase="5" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
+									Commande expirée
 									</button>
-								</div>
-								<div>
-									<button *ngSwitchCase="3" class="btn btn-success">
-										Payer
+								<button type="button" *ngSwitchCase="6" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
+									Commande annulée
 									</button>
-								</div>
-								<div>
-									<button type="button" *ngSwitchCase="4" class="btn btn-primary"> <!-- (click)="generatePDF(order)"> -->
-										Télécharger ma place
-									</button>
-								</div>
-								<div>
-									<button type="button" *ngSwitchCase="5" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-										Commande expirée
-									</button>
-								</div>
-								<div>
-									<button type="button" *ngSwitchCase="6" class="btn btn-danger" disabled> <!-- (click)="generatePDF(order)"> -->
-										Commande annulée
-									</button>
-								</div>
 							</td>
 						</tr>
 						</tbody>

@@ -106,7 +106,7 @@ export class AuthService {
 			params['include'] = includes;
 		return this.jsonApiService.findRecord(User, String(id), params).pipe(
 			catchError(err => {
-				console.log("ererrerere", err)
+				console.log("[AuthService] ", err)
 				return of(null)
 			}
 		));

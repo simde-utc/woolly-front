@@ -9,6 +9,7 @@ import { LOCALE_ID } from '@angular/core';
 // Json API Module & Service
 import { JsonApiModule } from 'angular2-jsonapi';
 import { JsonApiService } from './models/json-api.service';
+import { PaymentService } from './models/payment.service';
 import { environment } from '../environments/environment';
 
 // JWT Interceptor
@@ -69,8 +70,9 @@ const routes: Routes = [
 	],
 	providers: [		// Services
 		{ provide: LOCALE_ID, useValue: 'fr' },
-		AuthService,
 		JsonApiService,
+		AuthService,
+		PaymentService,
 		HttpInterceptorProviders,
 	],
 	bootstrap: [ AppComponent ]
