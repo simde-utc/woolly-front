@@ -55,6 +55,7 @@ export class Order extends JsonApiModel {
 
 	@BelongsTo() owner: User;
 	@BelongsTo() sale: Sale;
+
 	@HasMany() orderlines: OrderLine[];
 }
 
@@ -64,6 +65,34 @@ export class OrderLine extends JsonApiModel {
 
 	@BelongsTo() item: Item;
 	@BelongsTo() order: Order;
+
+	@HasMany() orderlinefields: OrderLineField[];
+	@HasMany() fields: Field[];
+}
+
+@JsonApiModelConfig({ type: 'orderlines' })
+export class OrderLineField extends JsonApiModel {
+	@Attribute() value: string;
+
+	@BelongsTo() orderline: OrderLine;
+	@BelongsTo() field: Field;
+}
+
+@JsonApiModelConfig({ type: 'fields' })
+export class Field extends JsonApiModel {
+	@Attribute() name: string;
+	@Attribute() type: string;
+	@Attribute() default: string;
+
+	@HasMany() item: Item[];
+}
+
+@JsonApiModelConfig({ type: 'itemfields' })
+export class ItemField extends JsonApiModel {
+	@Attribute() editable: boolean;
+
+	@HasMany() item: Item[];
+	@HasMany() field: Field[];
 }
 /*
 @JsonApiModelConfig({ type: 'paymentmethods' })

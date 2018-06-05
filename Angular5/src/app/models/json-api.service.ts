@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 // Models
 import { User, UserType } from './user';
-import {Sale, Item, Association, OrderLine, Order} from './sale';
+import {Sale, Item, Association, OrderLine, Order, Field, OrderLineField, ItemField} from './sale';
 
 
 const config: DatastoreConfig = {
@@ -25,6 +25,11 @@ const config: DatastoreConfig = {
 
 		// Items & Fields
 		items: Item,
+		fields: Field,
+		ordelinefields: OrderLineField,
+		itemfields: ItemField
+
+
 	}
 };
 
