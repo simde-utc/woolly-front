@@ -21,7 +21,7 @@ import { environment } from '../../../environments/environment';
 export class OrderDetailComponent {
 	order: Order;
 	loading: boolean = true;
-	editmode: boolean = false;
+	editmode: boolean;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -52,30 +52,36 @@ export class OrderDetailComponent {
 		return this.jsonApiService.findRecord(Order, id, { include: includes.join(',') });
 	}
 
-	private hasEditableField(orderline: OrderLine): boolean {
+	private hasEditableField(order: Order): boolean {
 		let res = true;
-		orderline.item.itemfields.forEach(field => {
-			if (field.editable)
-				res = false;
+		order.orderlines.forEach(orderline => {
+			orderline.item.itemfields.forEach(field => {
+				if (field.editable)
+					res = false;
+			});
 		});
 		return res;
 	}
 
-	private modifyOrderLineFields(orderline: OrderLine) {
+	private modifyOrderLineFields(order: Order) {
+		let order_save = order;
 		if (this.editmode) {
 			// console.log(orderlineitem.orderline.id);
-			this.jsonApiService.findRecord(OrderLine, orderline.id, {include: 'orderlineitems'}).subscribe(
-				(orderlinestore: OrderLine) => {
-					for (var i = 0; i < orderlinestore.orderlineitems.length; i++) {
-						for (var j = 0; j < orderlinestore.orderlineitems[i].orderlinefields.length; j++) {
-							orderlinestore.orderlineitems[i].orderlinefields[j].save().subscribe();
+			this.jsonApiService.findRecord(Order, order.id, {include: 'orderlines'}).subscribe(
+				(orderstore: Order) => {
+					orderstore.orderlines.forEach(orderline => {
+						for (let i = 0; i < orderline.orderlineitems.length; i++) {
+							for (let j = 0; j < orderline.orderlineitems[i].orderlinefields.length; j++) {
+								orderline.orderlineitems[i].orderlinefields[j].save().subscribe();
+							}
 						}
-					}
+					});
 				},
 				err => console.error('Erreur lors de la modification des champs')
 			);
 			this.editmode = false;
-			this.getOrder(this.route.snapshot.params.id).subscribe();
+			// this.getOrder(this.route.snapshot.params.id).subscribe();
+			this.order = order_save;
 		} else {
 			this.editmode = true;
 		}
@@ -92,13 +98,12 @@ export class OrderDetailComponent {
 		}
 	}
 
-	private isEditableField(i: ItemField[], idF: number, idIt: number) {
+	private isEditableField(i: ItemField[], idF: number, idIt: number): boolean {
 		let res: boolean = false;
 		i.forEach(f => {
-			if (f.field.id == idF && f.item.id == idIt)
+			if (f.field.id === idF.toString() && f.item.id === idIt.toString())
 				res = f.editable && this.editmode;
 		});
 		return !res;
 	}
-
 }

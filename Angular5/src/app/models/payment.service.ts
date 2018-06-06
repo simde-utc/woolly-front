@@ -23,7 +23,10 @@ export class PaymentService {
 	checkOrder(id: string): Observable<any> {
 		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay_callback');
 	}
-	// cancelOrder(id: string)
+
+	// cancelOrder(id: string) {
+	//
+	// }
 
 	// getTicket() { }
 }

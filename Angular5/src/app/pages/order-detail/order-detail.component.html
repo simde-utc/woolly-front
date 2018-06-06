@@ -22,24 +22,22 @@
 				<span *ngSwitchCase="6" class="my-0">Annulée</span>
 			</p>
 		</div>
-
 		<div *ngFor="let orderline of order?.orderlines" class="py-4">
 			<h3>{{ orderline.item.name }} (x{{ orderline.quantity }})</h3>
 			<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-4">
 				<div class="col-12 d-none">{{ orderlineitem.id }}</div>
-
 				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3">
 						<span>{{ orderlinefield.name }}</span>
 						<input type="{{ mapFieldType(orderlinefield.type) }}"
 							class="form-control" [disabled]="isEditableField(orderline.item.itemfields, orderlinefield.field.id, orderline.item.id)" [(ngModel)]="orderlinefield.value" id="{{ orderlinefield.id }}" value="{{ orderlinefield.value }}">
 				</div>
 			</div>
-			<div class="col-md-2">
-				<button type="button" class="btn btn-primary" [hidden]="editmode" [disabled]="hasEditableField(orderline)"
-						(click)="modifyOrderLineFields(orderline)">Modifier</button>
-				<button type="button" class="btn btn-success" [hidden]="!editmode"
-						(click)="modifyOrderLineFields(orderline)">Valider</button>
-			</div>
+		</div>
+		<div class="col-md-2">
+			<button type="button" class="btn btn-primary" [hidden]="editmode" [disabled]="hasEditableField(order)"
+					(click)="modifyOrderLineFields(order)">Modifier</button>
+			<button type="button" class="btn btn-success" [hidden]="!editmode"
+					(click)="modifyOrderLineFields(order)">Valider</button>
 		</div>
 	</ng-template>
 </main>
