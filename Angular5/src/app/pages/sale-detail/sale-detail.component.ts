@@ -104,12 +104,14 @@ export class SaleDetailComponent {
 		// Add orderline subscriptions to array
 		let orderlines: Observable<OrderLine>[] = [];
 		for (let id in this.cart) {
-			let orderline = this.jsonApiService.createRecord(OrderLine, {
-				order: this.order,
-				item: this.cart[id].item,
-				quantity: this.cart[id].quantity,
-			});
-			orderlines.push(orderline.save());
+			if(this.cart[id].quantity > 0) {
+				let orderline = this.jsonApiService.createRecord(OrderLine, {
+					order: this.order,
+					item: this.cart[id].item,
+					quantity: this.cart[id].quantity,
+				});
+				orderlines.push(orderline.save());
+			}
 		}
 		// ForkJoin subscription to get all orderlines once created
 		return forkJoin(orderlines);
@@ -117,7 +119,7 @@ export class SaleDetailComponent {
 
 	private payOrder(): void {
 		this.paymentService.payOrder(this.order.id).subscribe(transaction => {
-			console.log(transaction)
+			console.log(transaction);
 			if (transaction.url)
 				window.location.href = transaction.url
 		});

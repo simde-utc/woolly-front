@@ -15,12 +15,12 @@ export class PaymentService {
 		private http: HttpClient
 	) { }
 
-	payOrder(id: string) : Observable<any> {
+	payOrder(id: string): Observable<any> {
 		const url = environment.apiUrl + '/orders/' + id + '/pay?return_url='
 					+ environment.frontUrl + 'commandes/' + id
 		return this.http.get<any>(url);
 	}
-	checkOrder(id: string) : Observable<any> {
+	checkOrder(id: string): Observable<any> {
 		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay_callback');
 	}
 	// cancelOrder(id: string)

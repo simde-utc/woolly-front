@@ -122,7 +122,7 @@ export class OrderLineItem extends JsonApiModel {
 @JsonApiModelConfig({ type: 'orderlinefields' })
 export class OrderLineField extends JsonApiModel {
 	@Attribute() value: string;
-	
+
 	@Attribute() name: string;
 	@Attribute() type: string;
 	@Attribute() editable: boolean;

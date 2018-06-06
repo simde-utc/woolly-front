@@ -33,10 +33,11 @@
 				<table *ngIf="me?.orders && me?.orders?.length>0; else noOrders"
 					class="table table-responsive">
 					<tr>
-						<th>ID</th>
-						<th>Vente</th>
-						<th>Statut</th>
-						<th colspan="2">Action</th>
+						<th scope="col">ID</th>
+						<th scope="col">Vente</th>
+						<th scope="col">Statut</th>
+						<th scope="col">Action</th>
+						<th>Article</th>
 					</tr>
 					<ng-container *ngFor="let order of me.orders">
 						<tr>
@@ -53,33 +54,36 @@
 							</td>
 							<td [ngSwitch]="order.status">
 								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
-									Terminer la commande</a>
+									Terminer la commande</a><br/>
 								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
-									Annuler la commande</a>
-								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a>
+									Annuler la commande</a><br/>
+								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a><br/>
 								<a *ngSwitchCase="3" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
-									Payer</a>
+									Payer</a><br/>
 								<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">
-									Télécharger mes billets</a>
+									Télécharger mes billets</a><br/>
 								<a *ngSwitchCase="4" class="text-primary" routerLink="/commandes/{{order.id}}">
-									Modifier ma commande</a>
+									Modifier ma commande</a><br/>
 							</td>
-							<td>
+							<!--<td>-->
 								<!-- <a class="text-info" (click)="order-{{order.id}}-items.toggle()" mdbWavesEffect> -->
 									 <!-- <i class="fa fa-chevron-down"></i> Montrer les items</a> -->
+							<!--</td>-->
+							<td>
+								<tr>
+									<th class="py-2">ID</th>
+									<th class="py-2">Article</th>
+									<th class="py-2">Quantité</th>
+								</tr>
+								<tr *ngFor="let orderline of order.orderlines">
+									<td class="py-2">{{orderline.id}}</td>
+									<td class="py-2">{{orderline.item.name}}</td>
+									<td class="py-2">{{orderline.quantity}}</td>
+								</tr>
 							</td>
 						</tr>
 						<!-- <div [mdbCollapse]="isCollapsed" #test="bs-collapse"> -->
-							<tr>
-								<th class="py-2">ID</th>
-								<th class="py-2">Article</th>
-								<th class="py-2">Quantité</th>
-							</tr>
-							<tr *ngFor="let orderline of order.orderlines">
-								<td class="py-2">{{orderline.id}}</td>
-								<td class="py-2">{{orderline.item.name}}</td>
-								<td class="py-2">{{orderline.quantity}}</td>
-							</tr>
+
 						<!-- </div> -->
 					</ng-container>
 				</table>

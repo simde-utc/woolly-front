@@ -10,26 +10,35 @@
 
 	<ng-template #orderReady>
 		<div class="pb-3 mb-2">
-			<h1 class="my-4">Votre commande n°{{ order.id }}</h1>
-			<p class="my-0">Vente : {{ order.sale.name }}</p>
-			<p class="my-0">Status : {{ order.status }}</p>
+			<h1 class="my-4">Votre commande n°{{ order?.id }}</h1>
+			<p class="my-0">Vente : {{ order?.sale.name }}</p>
+			<p [ngSwitch]="order?.status">Statut :
+				<span *ngSwitchCase="0" class="my-0">En cours</span>
+				<span *ngSwitchCase="1" class="my-0">En attente de validation</span>
+				<span *ngSwitchCase="2" class="my-0">Validée</span>
+				<span *ngSwitchCase="3" class="my-0">Non payée</span>
+				<span *ngSwitchCase="4" class="my-0">Payée</span>
+				<span *ngSwitchCase="5" class="my-0">Expirée</span>
+				<span *ngSwitchCase="6" class="my-0">Annulée</span>
+			</p>
 		</div>
 
-		<div *ngFor="let orderline of order.orderlines" class="py-4">
-			<h3>{{ orderline.id }} - {{ orderline.item.name }} (x{{ orderline.quantity }})</h3>
+		<div *ngFor="let orderline of order?.orderlines" class="py-4">
+			<h3>{{ orderline.item.name }} (x{{ orderline.quantity }})</h3>
 			<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-4">
 				<div class="col-12 d-none">{{ orderlineitem.id }}</div>
 
-				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-5">
+				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3">
 						<span>{{ orderlinefield.name }}</span>
-						<input mdbInputDirective type="{{ mapFieldType(orderlinefield.type) }}"
-							class="form-control" [disabled]="!orderlinefield.editable"
-							id="{{ orderlinefield.id }}" value="{{ orderlinefield.value }}">
+						<input type="{{ mapFieldType(orderlinefield.type) }}"
+							class="form-control" [disabled]="isEditableField(orderline.item.itemfields, orderlinefield.field.id, orderline.item.id)" [(ngModel)]="orderlinefield.value" id="{{ orderlinefield.id }}" value="{{ orderlinefield.value }}">
 				</div>
-				<div class="col-md-2">
-					<button type="button" class="btn btn-success" [disabled]="hasEditableField(orderlineitem)"
-							(click)="modifyOrderLineFields(orderlineitem)">Modifier</button>
-				</div>
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-primary" [hidden]="editmode" [disabled]="hasEditableField(orderline)"
+						(click)="modifyOrderLineFields(orderline)">Modifier</button>
+				<button type="button" class="btn btn-success" [hidden]="!editmode"
+						(click)="modifyOrderLineFields(orderline)">Valider</button>
 			</div>
 		</div>
 	</ng-template>
