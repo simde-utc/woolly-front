@@ -15,10 +15,10 @@
 			<p class="lead text-center">Aucune vente n'est disponible pour le moment, revenez plus tard !</p>
 		</div>
 
-		<div class="row mb-4">
-			<div *ngFor="let sale of sales" class="py-3 col-md-4 col-sm-6 col-xl-3 animated fadeInRight">
+		<div class="row mb-4 justify-content-center">
+			<div *ngFor="let sale of sales" class="py-3 col-xl-3 col-md-4 col-sm-6 animated fadeInRight">
 				<div class="card card-image view hm-white-slight waves-light" mdbRippleRadius
-					style="background-image: url(https://mdbootstrap.com/img/Photos/Horizontal/Work/4-col/img%20%2814%29.jpg);">
+					style="background-image: url('/assets/sdf.jpg'); background-size: cover;">
 					<div class="card-body text-white rgba-black-strong d-flex align-items-center py-5 px-4">
 						<div>
 							<h3 class="card-title"><strong>{{ sale.name }}</strong></h3>
@@ -32,24 +32,6 @@
 					</div>
 				</div>
 			</div>
-
 		</div>
-
-		<!--<div class="container">-->
-			<!--<ul class="list-group list-group-flush">-->
-				<!--<li *ngFor="let sale of sales.$toArray" class="list-group-item">-->
-					<!--<div class="row">-->
-						<!--<div class="col-md-9">-->
-							<!--<h4>{{ sale.attributes.name }}</h4>-->
-							<!--<p class="lead">{{ sale.attributes.description }}</p>-->
-						<!--</div>-->
-						<!--<div class="col-md-3">-->
-							<!--<p class="my-1">Organisé par : <b>{{sale.attributes.association}}</b></p>-->
-							<!--<p class="my-1">Début des ventes le : {{sale.attributes.begin_date | date: 'dd/MM/yyyy'}}</p>-->
-						<!--</div>-->
-					<!--</div>-->
-				<!--</li>-->
-			<!--</ul>-->
-		<!--</div>-->
 	</ng-template>
 </main>
