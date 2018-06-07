@@ -29,7 +29,7 @@
 				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3 my-2">
 						<span>{{ orderlinefield.name }}</span>
 						<input type="{{ mapFieldType(orderlinefield.type) }}" id="{{ orderlinefield.id }}"
-							class="form-control mb-1" [disabled]="orderlinefield.editable" [(ngModel)]="orderlinefield.value">
+							class="form-control mb-1" [disabled]="!orderlinefield.editable" [(ngModel)]="orderlinefield.value">
 				</div>
 			</div>
 		</div>
