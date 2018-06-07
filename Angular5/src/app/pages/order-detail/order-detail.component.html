@@ -22,22 +22,22 @@
 				<span *ngSwitchCase="6" class="my-0">Annulée</span>
 			</p>
 		</div>
-		<div *ngFor="let orderline of order?.orderlines" class="py-4">
-			<h3>{{ orderline.item.name }} (x{{ orderline.quantity }})</h3>
-			<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-4">
+		<div *ngFor="let orderline of order?.orderlines" class="py-3">
+			<h3>{{ orderline.item.name }} <span *ngIf="orderline.quantity>1">(x{{ orderline.quantity }})</span></h3>
+			<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-1 hoverable">
 				<div class="col-12 d-none">{{ orderlineitem.id }}</div>
-				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3">
+				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3 my-2">
 						<span>{{ orderlinefield.name }}</span>
-						<input type="{{ mapFieldType(orderlinefield.type) }}"
-							class="form-control" [disabled]="isEditableField(orderline.item.itemfields, orderlinefield.field.id, orderline.item.id)" [(ngModel)]="orderlinefield.value" id="{{ orderlinefield.id }}" value="{{ orderlinefield.value }}">
+						<input type="{{ mapFieldType(orderlinefield.type) }}" id="{{ orderlinefield.id }}"
+							class="form-control mb-1" [disabled]="orderlinefield.editable" [(ngModel)]="orderlinefield.value">
 				</div>
 			</div>
 		</div>
-		<div class="col-md-2">
-			<button type="button" class="btn btn-primary" [hidden]="editmode" [disabled]="hasEditableField(order)"
+		<div class="text-center">
+			<button type="button" class="btn btn-outline-warning" (click)="getOrder(order.id)">Reset</button>
+			<!-- [disabled]="hasNoEditableField(order)" -->
+			<button type="button" class="btn btn-primary" 
 					(click)="modifyOrderLineFields(order)">Modifier</button>
-			<button type="button" class="btn btn-success" [hidden]="!editmode"
-					(click)="modifyOrderLineFields(order)">Valider</button>
 		</div>
 	</ng-template>
 </main>
