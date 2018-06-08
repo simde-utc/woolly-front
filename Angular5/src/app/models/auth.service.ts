@@ -97,13 +97,10 @@ export class AuthService {
 		return claims.data.user_id;
 	}
 
-	getUser(includes: string): Observable<User> {
+	getUser(params: any = {}): Observable<User> {
 		let id = this.getUserId();
 		if (id == null)
 			return of(null)
-		let params = {};
-		if (includes && includes != '')
-			params['include'] = includes;
 		return this.jsonApiService.findRecord(User, String(id), params).pipe(
 			catchError(err => {
 				console.log("[AuthService] ", err)

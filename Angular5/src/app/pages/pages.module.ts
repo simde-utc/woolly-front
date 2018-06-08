@@ -21,8 +21,8 @@ const routes: Routes = [{
 	component: PagesComponent,
 	children: [
 		// Main pages
-		{ path: '', 			component: HomeComponent },
-		{ path: 'about', 		component: AboutComponent },
+		{ path: '', 			component: SalesComponent },
+		// { path: 'about', 		component: AboutComponent },
 		
 		// Public sales
 		{ path: 'ventes', 		component: SalesComponent },

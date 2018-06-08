@@ -42,18 +42,17 @@ export class SaleDetailComponent {
 		this.getSale(this.route.snapshot.params.id).subscribe(
 			(sale: Sale) => {
 				this.sale = sale;
-				this.initCart();
-				this.authService.getUser('').subscribe((user: User) => {
+				this.authService.getUser().subscribe((user: User) => {
 					this.me = user
+					this.initCart();
 					if (user) {
 						this.getOrder().subscribe((order: Order) => {
 							this.order = order;
-							console.log(order)
 							if (order.status != 0)
 								this.hasOngoingOrder = true;
 						});
 					}
-				});
+				})
 			},
 			err => this.router.navigate['/ventes'],
 			() => this.loading = false
@@ -104,25 +103,27 @@ export class SaleDetailComponent {
 		// Add orderline subscriptions to array
 		let orderlines: Observable<OrderLine>[] = [];
 		for (let id in this.cart) {
-			if(this.cart[id].quantity > 0) {
+			// if(this.cart[id].quantity > 0) {
 				let orderline = this.jsonApiService.createRecord(OrderLine, {
 					order: this.order,
 					item: this.cart[id].item,
 					quantity: this.cart[id].quantity,
 				});
 				orderlines.push(orderline.save());
-			}
+			// }
 		}
 		// ForkJoin subscription to get all orderlines once created
 		return forkJoin(orderlines);
 	}
 
 	private payOrder(): void {
-		this.paymentService.payOrder(this.order.id).subscribe(transaction => {
-			console.log(transaction);
-			if (transaction.url)
-				window.location.href = transaction.url
-		});
+		this.paymentService.payOrder(this.order.id).subscribe(
+			transaction => {
+				if (transaction.url && transaction.url != '')
+					window.location.href = transaction.url
+			},
+			err => console.warn(err)
+		);
 	}
 
 	private cancelOrder(): void {

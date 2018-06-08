@@ -48,7 +48,7 @@
 			</div>
 		</div>
 
-		<div *ngIf="sale.items; else noItem">
+		<div *ngIf="sale.items.length>0; else noItem">
 			<div class="d-flex flex-column flex-md-row justify-content-between mb-4">
 				<h2 class="text-center">Items en ventes</h2>
 				<div class="d-flex flex-column flex-sm-row">
