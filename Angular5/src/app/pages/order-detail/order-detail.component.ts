@@ -63,14 +63,17 @@ export class OrderDetailComponent {
 	private modifyOrderLineFields(order: Order) {
 		this.loading = true;
 		let orderlineList: Observable<OrderLineField>[] = [];
-		this.order.orderlines.forEach((orderline: OrderLine) => {
-			orderline.orderlineitems.forEach((orderlineitem: OrderLineItem) => {
-				orderlineitem.orderlinefields.forEach((orderlinefield: OrderLineField) => {		
-					if (orderlinefield.editable)
-						orderlineList.push(orderlinefield.save());
-				})
+		this.jsonApiService.findRecord(Order, order.id, {include: 'orderlines'}).subscribe(
+			(orderstore: Order) => {
+				orderstore.orderlines.forEach((orderline: OrderLine) => {
+					orderline.orderlineitems.forEach((orderlineitem: OrderLineItem) => {
+						orderlineitem.orderlinefields.forEach((orderlinefield: OrderLineField) => {
+							if (orderlinefield.editable)
+								orderlineList.push(orderlinefield.save());
+						});
+					});
+				});
 			});
-		});
 		forkJoin(orderlineList).subscribe(
 			(orderlinefields: OrderLineField[]) => console.log(orderlinefields),
 			err => console.warn(err),

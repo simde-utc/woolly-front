@@ -24,6 +24,10 @@ export class PaymentService {
 		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay_callback');
 	}
 
+	getPDF(id: string): Observable<any> {
+		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pdf/');
+	}
+
 	// cancelOrder(id: string) {
 	//
 	// }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../models/auth.service';
+import {PaymentService} from '../../models/payment.service';
 import { User } from '../../models/user';
 import { Order } from '../../models/sale';
 
@@ -19,5 +20,7 @@ export class AccountComponent {
 			() => this.loading = false
 		);
 	}
-	generatePDF(order: Order) { }
+	generatePDF(order: Order) {
+			this.paymentService.getPDF(order.id);
+	}
 }
