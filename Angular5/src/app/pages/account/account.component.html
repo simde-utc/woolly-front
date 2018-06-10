@@ -60,8 +60,8 @@
 								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a><br/>
 								<a *ngSwitchCase="3" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
 									Payer</a><br/>
-								<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">
-									Télécharger mes billets</a><br/>
+								<!--<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">-->
+									<!--Télécharger mes billets</a><br/>-->
 								<a *ngSwitchCase="4" class="text-primary" routerLink="/commandes/{{order.id}}">
 									Modifier ma commande</a><br/>
 							</td>

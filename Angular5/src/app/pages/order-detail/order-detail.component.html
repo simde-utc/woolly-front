@@ -37,7 +37,7 @@
 			<button type="button" class="btn btn-outline-warning" (click)="getOrder(order.id)">Reset</button>
 			<!-- [disabled]="hasNoEditableField(order)" -->
 			<button type="button" class="btn btn-primary" 
-					(click)="modifyOrderLineFields(order)">Modifier</button>
+					(click)="modifyOrderLineFields(order)" [disabled]="hasNoEditableField(order)">Modifier</button>
 		</div>
 	</ng-template>
 </main>
