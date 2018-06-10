@@ -127,6 +127,17 @@ export class SaleDetailComponent {
 	}
 
 	private cancelOrder(): void {
-		
+		this.jsonApiService.deleteRecord(Order, this.order.id).subscribe(
+			() => {
+				this.initCart();
+				if (this.me) {
+					this.getOrder().subscribe((order: Order) => {
+						this.order = order;
+						if (order.status != 0)
+							this.hasOngoingOrder = true;
+					});
+				}
+			}
+		)
 	}
 }

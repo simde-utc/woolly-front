@@ -23,7 +23,7 @@
 			</p>
 		</div>
 		<div *ngFor="let orderline of order?.orderlines" class="py-3">
-			<h3>{{ orderline.item.name }} <span *ngIf="orderline.quantity>1">(x{{ orderline.quantity }})</span></h3>
+			<h3>{{ orderline.item.name }} <span *ngIf="orderline.quantity>1">(x{{ orderline?.quantity }})</span></h3>
 			<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-1 hoverable">
 				<div class="col-12 d-none">{{ orderlineitem.id }}</div>
 				<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3 my-2">
