@@ -21,9 +21,10 @@ const routes: Routes = [{
 	component: PagesComponent,
 	children: [
 		// Main pages
-		{ path: '', 			component: SalesComponent },
+		{ path: '', redirectTo: '/ventes', pathMatch: 'full' },
 		// { path: 'about', 		component: AboutComponent },
-		
+		// { path: '**', component: SalesComponent },
+
 		// Public sales
 		{ path: 'ventes', 		component: SalesComponent },
 		{ path: 'ventes/:id', 	component: SaleDetailComponent },
@@ -31,17 +32,19 @@ const routes: Routes = [{
 
 		// Commandes
 		{ path: 'commandes/:id',	component: OrderDetailComponent },
+		{ path: 'commandes', redirectTo: '/ventes', pathMatch: 'full' },
 
 		// Account
 		{ path: 'mon_compte', 	component: AccountComponent },
 		{ path: 'login', 		component: LoginComponent },
 		{ path: 'logout', 		component: LogoutComponent },
+		{ path: '**', redirectTo: '/ventes', pathMatch: 'full' }
 
 		// Administration
-		{ path: 'admin', 					component: HomeComponent },
-		{ path: 'admin/ventes', 			component: HomeComponent },
-		{ path: 'admin/ventes/nouvelle', 	component: HomeComponent },
-		{ path: 'admin/ventes/:id', 		component: HomeComponent },
+		// { path: 'admin', 					component: HomeComponent },
+		// { path: 'admin/ventes', 			component: HomeComponent },
+		// { path: 'admin/ventes/nouvelle', 	component: HomeComponent },
+		// { path: 'admin/ventes/:id', 		component: HomeComponent },
 	]
 }];
 
