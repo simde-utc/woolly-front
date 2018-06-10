@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../models/auth.service';
-import {PaymentService} from '../../models/payment.service';
 import { User } from '../../models/user';
 import { Order } from '../../models/sale';
+import {PaymentService} from '../../models/payment.service';
 
 @Component({
 	selector: 'app-account',
@@ -12,7 +12,7 @@ export class AccountComponent {
 	me: User;
 	loading: boolean = false;
 
-	constructor(private authService: AuthService) {
+	constructor(private authService: AuthService, private paymentService: PaymentService) {
 		const includes = 'usertype,orders,orders.sale,orders.orderlines,orders.orderlines.item';
 		this.authService.getUser({ include: includes }).subscribe(
 			(user: User) => this.me = user,
@@ -21,6 +21,6 @@ export class AccountComponent {
 		);
 	}
 	generatePDF(order: Order) {
-			this.paymentService.getPDF(order.id);
+		this.paymentService.getPDF(order.id);
 	}
 }
