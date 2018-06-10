@@ -42,9 +42,9 @@ export class SaleDetailComponent {
 		this.getSale(this.route.snapshot.params.id).subscribe(
 			(sale: Sale) => {
 				this.sale = sale;
+				this.initCart();
 				this.authService.getUser().subscribe((user: User) => {
-					this.me = user;
-					this.initCart();
+					this.me = user
 					if (user) {
 						this.getOrder().subscribe((order: Order) => {
 							this.order = order;

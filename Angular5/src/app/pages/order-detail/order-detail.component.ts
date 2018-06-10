@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { Observable } from 'rxjs';
 import { of } from 'rxjs/observable/of';
-import { catchError, map, tap, finalize } from 'rxjs/operators';
+import { catchError, map, tap, finalize, delay } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { JsonApiService } from '../../models/json-api.service';
@@ -33,7 +33,9 @@ export class OrderDetailComponent {
 	) {
 		const id = this.route.snapshot.params.id;
 		// Appel callback
-		this.paymentService.checkOrder(id).subscribe(
+		this.paymentService.checkOrder(id).pipe(
+			delay(250) // Evite la superposition de callback avec payutc
+		).subscribe(
 			// resp => console.log(resp),
 			// err => console.warn(err),
 			() => this.getOrder(id)
@@ -42,7 +44,8 @@ export class OrderDetailComponent {
 
 	private getOrder(id: string) {
 		this.loading = true;
-		let includes = ['sale', 'orderlines', 'orderlines.item', 'orderlines.orderlineitems', 'orderlines.orderlineitems.orderlinefields', 'orderlines.item.itemfields']
+		let includes = ['sale', 'orderlines', 'orderlines.item', 'orderlines.orderlineitems', 
+			'orderlines.orderlineitems.orderlinefields', 'orderlines.item.itemfields']
 		return this.jsonApiService.findRecord(Order, id, { include: includes.join(',') }).subscribe(
 			(order: Order) => this.order = order,
 			err => this.router.navigate['/ventes'],
