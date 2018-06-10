@@ -43,18 +43,18 @@ export class SaleDetailComponent {
 			(sale: Sale) => {
 				this.sale = sale;
 				this.authService.getUser().subscribe((user: User) => {
-					this.me = user
+					this.me = user;
 					this.initCart();
 					if (user) {
 						this.getOrder().subscribe((order: Order) => {
 							this.order = order;
-							if (order.status != 0)
+							if (order.status !== 0)
 								this.hasOngoingOrder = true;
 						});
 					}
-				})
+				});
 			},
-			err => this.router.navigate['/ventes'],
+			err => console.log('slt'),
 			() => this.loading = false
 		);
 	}
@@ -65,10 +65,10 @@ export class SaleDetailComponent {
 
 	private initCart() : void {
 		this.cart = {};
-		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 })
+		this.sale.items.forEach((item: Item) => this.cart[item.id] = { item: item, quantity: 0 });
 	}
 
-	isCartEmpty() : boolean {
+	isCartEmpty(): boolean {
 		let sum = Object.values(this.cart).reduce((acc: number, item: any) => acc + item.quantity, 0);
 		return sum <= 0;
 	}

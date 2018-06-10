@@ -59,6 +59,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 							break;
 						case 404:	// NotFound
 							this.toastr.error(errorResp.error.errors[0].detail, "Impossible de trouver la ressource demandée");
+							this.router.navigate(['/ventes']);
 							break;
 						case 500:	// InternalServerError
 							this.toastr.error("Erreur serveur", "Veuillez contactez l'administrateur");

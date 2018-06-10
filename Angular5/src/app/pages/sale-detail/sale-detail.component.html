@@ -73,13 +73,13 @@
 				<tr *ngFor="let item of sale.items" class="hoverable px-2 px-md-4">
 					<td class="align-middle lead">{{ item.name }}</td>
 					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
-					<!--<td class="align-middle">-->
-						<!--<div class="md-form my-0">-->
-							<!--<input mdbInputDirective type="number" class="form-control my-0" [class.disabled]="!me || hasOngoingOrder"-->
-								<!--data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id].quantity"-->
-								<!--min="0" max="{{ item.max_per_user }}" value="0">-->
-						<!--</div>-->
-					<!--</td>-->
+					<td class="align-middle">
+						<div class="md-form my-0">
+							<input mdbInputDirective type="number" class="form-control my-0" [class.disabled]="!me || hasOngoingOrder"
+								data-error="wrong" data-success="valid" [(ngModel)]="cart[item.id].quantity"
+								min="0" max="{{ item.max_per_user }}" value="0">
+						</div>
+					</td>
 						
 				</tr>
 			</table>
