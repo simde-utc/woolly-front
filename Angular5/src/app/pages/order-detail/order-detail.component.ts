@@ -54,34 +54,37 @@ export class OrderDetailComponent {
 	}
 
 	private hasNoEditableField(order: Order): boolean {
+		let resp: boolean = true;
 		order.orderlines.forEach((orderline: OrderLine) => {
 			orderline.item.itemfields.forEach((itemfield: ItemField) => {
 				if (itemfield.editable)
-					return false;
+					resp = false;
 			});
 		});
-		return true;
+		return resp;
 	}
 
 	private modifyOrderLineFields(order: Order) {
 		this.loading = true;
 		let orderlineList: Observable<OrderLineField>[] = [];
-		this.jsonApiService.findRecord(Order, order.id, {include: 'orderlines'}).subscribe(
-			(orderstore: Order) => {
-				orderstore.orderlines.forEach((orderline: OrderLine) => {
-					orderline.orderlineitems.forEach((orderlineitem: OrderLineItem) => {
-						orderlineitem.orderlinefields.forEach((orderlinefield: OrderLineField) => {
-							if (orderlinefield.editable)
-								orderlineList.push(orderlinefield.save());
-						});
+		this.order.orderlines.forEach((orderline: OrderLine) => {
+			orderline.orderlineitems.forEach((orderlineitem: OrderLineItem) => {
+				if (orderlineitem.orderlinefields && orderlineitem.orderlinefields.length > 0)
+					orderlineitem.orderlinefields.forEach((orderlinefield: OrderLineField) => {
+						if (orderlinefield.editable)
+							orderlineList.push(orderlinefield.save());
 					});
-				});
 			});
-		forkJoin(orderlineList).subscribe(
-			(orderlinefields: OrderLineField[]) => console.log(orderlinefields),
-			err => console.warn(err),
-			() => this.loading = false
-		);
+		});
+		if (orderlineList.length > 0) {
+			forkJoin(orderlineList).subscribe(
+				// (orderlinefields: OrderLineField[]) => console.log(orderlinefields),
+				// err => console.warn(err),
+				() => this.loading = false
+			);
+		} else {
+			this.loading = false;
+		}
 	}
 
 	private mapFieldType(type: string) {
