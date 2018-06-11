@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 import { Observable } from 'rxjs';
@@ -7,6 +8,12 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
 import { JsonApiService } from '../models/json-api.service';
 import { User } from '../models/user';
+
+const jsonApiHeader = {
+	headers: new HttpHeaders({
+		'Accept':  'application/vnd.api+json, application/json'
+	})
+};
 
 @Injectable()
 export class PaymentService {
@@ -18,10 +25,10 @@ export class PaymentService {
 	payOrder(id: string): Observable<any> {
 		const url = environment.apiUrl + '/orders/' + id + '/pay?return_url='
 					+ environment.frontUrl + 'commandes/' + id
-		return this.http.get<any>(url);
+		return this.http.get<any>(url, jsonApiHeader);
 	}
 	checkOrder(id: string): Observable<any> {
-		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay_callback');
+		return this.http.get<any>(environment.apiUrl + '/orders/' + id + '/pay_callback', jsonApiHeader);
 	}
 
 	// cancelOrder(id: string) {
