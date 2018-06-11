@@ -10,17 +10,21 @@ import {PaymentService} from '../../models/payment.service';
 })
 export class AccountComponent {
 	me: User;
+	orders: Order[] = [];
 	loading: boolean = false;
 
 	constructor(private authService: AuthService, private paymentService: PaymentService) {
 		const includes = 'usertype,orders,orders.sale,orders.orderlines,orders.orderlines.item';
 		this.authService.getUser({ include: includes }).subscribe(
-			(user: User) => this.me = user,
+			(user: User) => {
+				this.me = user
+				this.orders = user.orders.filter((order: Order) => order.orderlines.length > 0)
+			},
 			err => console.warn(err),
 			() => this.loading = false
 		);
 	}
 	generatePDF(order: Order) {
-		this.paymentService.getPDF(order.id);
+		this.paymentService.getPDF(order.id).subscribe(url => console.log(url));
 	}
 }

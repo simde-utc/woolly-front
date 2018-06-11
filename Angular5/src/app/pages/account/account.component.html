@@ -30,7 +30,7 @@
 			</div>
 			<div class="col-lg-8 col-md-7">
 				<h3>Mes commandes</h3>
-				<table *ngIf="me?.orders && me?.orders?.length>0; else noOrders"
+				<table *ngIf="orders && orders?.length>0; else noOrders"
 					class="table table-responsive">
 					<tr>
 						<th scope="col">ID</th>
@@ -39,7 +39,7 @@
 						<th scope="col">Action</th>
 						<th>Article</th>
 					</tr>
-					<ng-container *ngFor="let order of me.orders">
+					<ng-container *ngFor="let order of orders">
 						<tr>
 							<td>{{order.id}}</td>
 							<td>{{ order.sale.name }}</td>

@@ -62,7 +62,6 @@
 				</div>
 			</div>
 			<p *ngIf="!me" class="lead text-center my-5 red-text">Veuillez vous connecter pour acheter.</p>
-			<div class="table-responsive">
 			<table class="table align-middle">
 				<!--
 				<tr>
@@ -71,7 +70,8 @@
 					<th>Quantité</th>
 				</tr>
 				-->
-				<tr *ngFor="let item of sale.items" class="hoverable px-2 px-md-4">
+				<tr *ngFor="let item of sale.items" class="hoverable px-2 px-md-4" [hidden]="!item.is_active"
+					[ngClass]="{'disabled grey-text': item.quantity_left === 0}">
 					<td class="align-middle lead">{{ item.name }}</td>
 					<td class="align-middle">{{ item.price | currency:'€':'symbol':'1.2':'fr' }}</td>
 					<td class="align-middle">
@@ -83,8 +83,6 @@
 					</td>
 				</tr>
 			</table>
-			</div>
-
 		</div>
 
 		<ng-template #noItem>

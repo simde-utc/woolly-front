@@ -46,7 +46,7 @@ export class Item extends JsonApiModel {
 	@Attribute() quantity: number;
 	@Attribute() price: number;
 	@Attribute() max_per_user: number;
-	// @Attribute() remaining_quantity: number;
+	@Attribute() quantity_left: number;
 
 	@BelongsTo() sale: Sale;
 	@BelongsTo() group: ItemGroup;
