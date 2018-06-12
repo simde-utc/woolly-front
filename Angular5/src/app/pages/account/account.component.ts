@@ -18,7 +18,7 @@ export class AccountComponent {
 		this.authService.getUser({ include: includes }).subscribe(
 			(user: User) => {
 				this.me = user
-				this.orders = user.orders.filter((order: Order) => order.orderlines.length > 0)
+				this.orders = user.orders.filter((order: Order) => order.orderlines && order.orderlines.length > 0)
 			},
 			err => console.warn(err),
 			() => this.loading = false
