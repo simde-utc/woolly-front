@@ -55,7 +55,7 @@
 							<td [ngSwitch]="order.status">
 								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
 									Continuer la commande</a><br/>
-								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
+								<a *ngSwitchCase="0" class="text-primary" (click)="cancelOrder(order.id)">
 									Annuler la commande</a><br/>
 								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a><br/>
 								<a *ngSwitchCase="3" class="text-primary" routerLink="/ventes/{{order.sale.id}}">

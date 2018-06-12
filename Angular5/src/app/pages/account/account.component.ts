@@ -3,6 +3,7 @@ import { AuthService } from '../../models/auth.service';
 import { User } from '../../models/user';
 import { Order } from '../../models/sale';
 import {PaymentService} from '../../models/payment.service';
+import {JsonApiService} from "../../models/json-api.service";
 
 @Component({
 	selector: 'app-account',
@@ -13,7 +14,11 @@ export class AccountComponent {
 	orders: Order[] = [];
 	loading: boolean = false;
 
-	constructor(private authService: AuthService, private paymentService: PaymentService) {
+	constructor(
+        private jsonApiService: JsonApiService,
+		private authService: AuthService,
+		private paymentService: PaymentService
+	) {
 		const includes = 'usertype,orders,orders.sale,orders.orderlines,orders.orderlines.item';
 		this.authService.getUser({ include: includes }).subscribe(
 			(user: User) => {
@@ -27,4 +32,11 @@ export class AccountComponent {
 	generatePDF(order: Order) {
 		this.paymentService.getPDF(order.id).subscribe(url => console.log(url));
 	}
+
+    private cancelOrder(orderId: string): void {
+        this.jsonApiService.deleteRecord(Order, orderId).subscribe(
+            () => 	this.orders = this.me.orders.filter((order: Order) => order.orderlines.length > 0)
+        )
+    }
+
 }
