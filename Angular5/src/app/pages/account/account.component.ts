@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { ICollection } from 'ngx-jsonapi';
-import { UserService } from '../../models/user/user.service';
-import { User } from '../../models/user/user';
+import { AuthService } from '../../models/auth.service';
+import { User } from '../../models/user';
+import { Order } from '../../models/sale';
+import {PaymentService} from '../../models/payment.service';
+import {JsonApiService} from "../../models/json-api.service";
 
 @Component({
 	selector: 'app-account',
@@ -9,16 +11,34 @@ import { User } from '../../models/user/user';
 })
 export class AccountComponent {
 	me: User;
+	orders: Order[] = [];
+	loading: boolean = false;
 
-	constructor(private userService: UserService) {
-		let id = String(this.userService.user_id)
-		// TODO id
-		this.userService.get(id).subscribe(
+	constructor(
+        private jsonApiService: JsonApiService,
+		private authService: AuthService,
+		private paymentService: PaymentService
+	) {
+		const includes = 'usertype,orders,orders.sale,orders.orderlines,orders.orderlines.item';
+		this.authService.getUser({ include: includes }).subscribe(
 			(user: User) => {
-				console.log(user)
 				this.me = user
-			}
-		)
+				this.orders = user.orders.filter((order: Order) => order.orderlines && order.orderlines.length > 0)
+			},
+			err => console.warn(err),
+			() => this.loading = false
+		);
 	}
+	generatePDF(order: Order) {
+		// window.location.href = this.paymentService.getPDF(order.id);
+		return this.paymentService.getPDF(order.id);
+		// .subscribe(url => console.log(url));
+	}
+
+    private cancelOrder(orderId: string): void {
+        this.jsonApiService.deleteRecord(Order, orderId).subscribe(
+            () => 	this.orders = this.me.orders.filter((order: Order) => order.orderlines.length > 0)
+        )
+    }
 
 }

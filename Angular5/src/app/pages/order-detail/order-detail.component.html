@@ -1,0 +1,45 @@
+<main class="container p-5">
+
+	<div *ngIf="loading; else orderReady">
+		<div class="d-flex h-100 justify-content-center align-items-center three-balls-loader">
+			<div class="ball ball-1"></div>
+			<div class="ball ball-2"></div>
+			<div class="ball ball-3"></div>
+		</div>
+	</div>
+
+	<ng-template #orderReady>
+		<div class="pb-3 mb-2">
+			<h1 class="my-4">Votre commande n°{{ order?.id }}</h1>
+			<p class="my-0">Vente : {{ order?.sale.name }}</p>
+			<p [ngSwitch]="order?.status">Statut :
+				<span *ngSwitchCase="0" class="my-0">En cours</span>
+				<span *ngSwitchCase="1" class="my-0">En attente de validation</span>
+				<span *ngSwitchCase="2" class="my-0">Validée</span>
+				<span *ngSwitchCase="3" class="my-0">Non payée</span>
+				<span *ngSwitchCase="4" class="my-0">Payée</span>
+				<span *ngSwitchCase="5" class="my-0">Expirée</span>
+				<span *ngSwitchCase="6" class="my-0">Annulée</span>
+			</p>
+		</div>
+		<div *ngFor="let orderline of order?.orderlines" class="py-3">
+			<div *ngIf="orderline.quantity>0">
+				<h3>{{ orderline.item.name }} <span *ngIf="orderline.quantity>1">(x{{ orderline?.quantity }})</span></h3>
+				<div *ngFor="let orderlineitem of orderline.orderlineitems" class="row py-1 hoverable">
+					<div class="col-12 d-none">{{ orderlineitem.id }}</div>
+					<div *ngFor="let orderlinefield of orderlineitem.orderlinefields" class="md-form col-md-3 my-2">
+							<span>{{ orderlinefield.name }}</span>
+							<input type="{{ mapFieldType(orderlinefield.type) }}" id="{{ orderlinefield.id }}"
+								class="form-control mb-1" [disabled]="!orderlinefield.editable" [(ngModel)]="orderlinefield.value">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="text-center">
+			<button type="button" class="btn btn-outline-warning" (click)="getOrder(order.id)">Reset</button>
+			<!-- [disabled]="hasNoEditableField(order)" -->
+			<button type="button" class="btn btn-primary" 
+					(click)="modifyOrderLineFields(order)" [disabled]="hasNoEditableField(order)">Modifier</button>
+		</div>
+	</ng-template>
+</main>

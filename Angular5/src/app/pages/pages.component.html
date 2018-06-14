@@ -13,9 +13,11 @@
 			<li *ngIf="isLogged" class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/mon_compte">Mon compte</a>
 			</li>
+			<!-- 
 			<li class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/admin">Administration</a>
 			</li>
+			 -->
 			<li *ngIf="!isLogged" class="nav-item waves-light" mdbRippleRadius>
 				<a class="nav-link" routerLink="/login">Se connecter</a>
 			</li>
@@ -34,8 +36,8 @@
 
 <router-outlet></router-outlet>
 
-<footer class="footer fixed-bottom">
+<footer class="footer fixed-bottom bg-white">
 	<p class="container my-2 text-center">
-		Made with <i class="fa fa-heart" aria-hidden="true"></i> by SiMDE. <a routerLink="/about">Contact</a>
+		Made with <i class="fa fa-heart" aria-hidden="true"></i> by SiMDE. <a href="mailto:simde@assos.utc.fr">Contact</a>
 	</p>
 </footer>
