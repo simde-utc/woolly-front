@@ -30,7 +30,9 @@ export class AccountComponent {
 		);
 	}
 	generatePDF(order: Order) {
-		this.paymentService.getPDF(order.id).subscribe(url => console.log(url));
+		// window.location.href = this.paymentService.getPDF(order.id);
+		return this.paymentService.getPDF(order.id);
+		// .subscribe(url => console.log(url));
 	}
 
     private cancelOrder(orderId: string): void {

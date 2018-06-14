@@ -53,17 +53,17 @@
 								<span *ngSwitchCase="6" class="red-text">Annulée</span>
 							</td>
 							<td [ngSwitch]="order.status">
-								<a *ngSwitchCase="0" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
-									Continuer la commande</a><br/>
-								<a *ngSwitchCase="0" class="text-primary" (click)="cancelOrder(order.id)">
-									Annuler la commande</a><br/>
-								<a *ngSwitchCase="1" class="text-primary">Valider la commande</a><br/>
-								<a *ngSwitchCase="3" class="text-primary" routerLink="/ventes/{{order.sale.id}}">
-									Payer</a><br/>
-								<a *ngSwitchCase="4" class="text-primary" (click)="generatePDF(order)">
-									Télécharger mes billets</a><br/>
-								<a *ngSwitchCase="4" class="text-primary" routerLink="/commandes/{{order.id}}">
-									Modifier ma commande</a><br/>
+								<a *ngSwitchCase="0" class="d-block text-primary mb-2" routerLink="/ventes/{{order.sale.id}}">
+									Continuer la commande</a>
+								<a *ngSwitchCase="0" class="d-block text-primary mb-2" (click)="cancelOrder(order.id)">
+									Annuler la commande</a>
+								<a *ngSwitchCase="1" class="d-block text-primary mb-2">Valider la commande</a>
+								<a *ngSwitchCase="3" class="d-block text-primary mb-2" routerLink="/ventes/{{order.sale.id}}">
+									Payer</a>
+								<a *ngSwitchCase="4" class="d-block text-primary mb-2" href="{{ generatePDF(order) }}" target="_blank">
+									Télécharger mes billets</a>
+								<a *ngSwitchCase="4" class="d-block text-primary mb-2" routerLink="/commandes/{{order.id}}">
+									Modifier ma commande</a>
 							</td>
 							<!--<td>-->
 								<!-- <a class="text-info" (click)="order-{{order.id}}-items.toggle()" mdbWavesEffect> -->
