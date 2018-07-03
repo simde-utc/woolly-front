@@ -26,6 +26,7 @@ To start the development server, use `ng serve --o` and go to`http://localhost:4
 
 
 To learn how to develop with Angular, read the [Angular tutorial](https://angular.io/tutorial).
+
 For more help about Angular CLI, use`ng help` ou read the  [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 
@@ -43,4 +44,5 @@ To build the project, use :
 ng build --base-href /woolly/ --build-optimizer --prod
 ```
 Replace `/woolly/` by the base URL of your deployment server.
+
 Then you only need to put all the content of the`dist/` folder in your deployment folder.
