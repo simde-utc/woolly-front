@@ -1,68 +1,48 @@
-# woolly-front
-The brand new online ticket office for UTC student organizations - user interface
+# Woolly - Front
 
-## Getting Started
+Woolly is the online shop of all the [associations of the Université de Technologie de Compiègne](https://assos.utc.fr/).
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Installation
 
-### Prerequisites
+The user interface was developped with [Angular 6](https://angular.io/guide/quickstart).
 
-First of all, you need to set up the environement. Put yourself in the directory of your choice and follow the following instructions : 
 
-If you don't have it yet, install npm legacy
-```
-sudo apt-get update
-sudo apt-get install nodejs npm
-sudo apt install nodejs-legacy
-sudo npm install -g n
-sudo n stable
-```
-Bower installation :
-```
-sudo npm install -g bower
-```
-Yo installation :
-```
-sudo npm install -g yo
-```
-Angular installation :
-```
-sudo npm install -g generator-angular
-```
-### Installing
 
-Once you have install all the prerequisites, you can clone this repo
+First of all, install [Angular CLI](https://github.com/angular/angular-cli), clone the repo et install the dependancies :
 
-```
-git clone https://github.com/obledaym/woolly-front.git
-```
 
-Then you will need to go into the woolly-front app
-
-```
+```sh
+sudo npm install -g @angular/cli
+git clone https://github.com/simde-utc/woolly-front.git
 cd woolly-front
+sudo npm install
 ```
 
-Now you will to build the server, like this :
 
+## Development
+
+To start the development server, use `ng serve --o` and go to`http://localhost:4200/`. The application will rebuild automatically if you modify the source files.
+
+
+
+To learn how to develop with Angular, read the [Angular tutorial](https://angular.io/tutorial).
+
+For more help about Angular CLI, use`ng help` ou read the  [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+
+
+To test the application, you can :
+
+- run unit tests with [Karma](https://karma-runner.github.io) : `ng test`
+- run end-to-end tests with [Protractor](http://www.protractortest.org/) : `ng e2e`
+
+
+## Deployment
+
+To build the project, use :
+```sh
+ng build --base-href /woolly/ --build-optimizer --prod
 ```
-grunt build
-```
+Replace `/woolly/` by the base URL of your deployment server.
 
-Finally you can launch the server
-
-```
-grunt serve
-```
-
-You can now play with the server on [localhost:9000](http://localhost:9000)
-
-## Authors
-
-* **[Aymeric OBLED](https://github.com/obledaym)** - *Initial work*
-
-## License
-
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details
-
-
+Then you only need to put all the content of the`dist/` folder in your deployment folder.

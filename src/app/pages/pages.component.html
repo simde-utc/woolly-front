@@ -1,0 +1,43 @@
+<mdb-navbar SideClass="navbar fixed-top navbar-expand-md navbar-dark bg-blue scrolling-navbar ie-nav" [containerInside]="true">
+	<logo>
+		<a class="logo navbar-brand" routerLink="/"><strong>Woolly</strong></a>
+	</logo>
+	<links>
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/">Accueil</a>
+			</li>
+			<li class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/ventes">Liste des ventes</a>
+			</li>
+			<li *ngIf="isLogged" class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/mon_compte">Mon compte</a>
+			</li>
+			<!-- 
+			<li class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/admin">Administration</a>
+			</li>
+			 -->
+			<li *ngIf="!isLogged" class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/login">Se connecter</a>
+			</li>
+			<li *ngIf="isLogged" class="nav-item waves-light" mdbRippleRadius>
+				<a class="nav-link" routerLink="/logout">Se déconnecter</a>
+			</li>
+		</ul>
+		<!-- 
+		<div class="collapse nav navbar-nav nav-collapse slide-down" style="padding-top:8px;" id="menu">
+			<a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="http://localhost:8000/login" >UTC / Escom</a>
+			<a class="btn btn-default btn-outline btn-circle collapsed"  ng-href="#!/login" >Extérieur</a>
+		</div>
+		 -->
+	</links>
+</mdb-navbar>
+
+<router-outlet></router-outlet>
+
+<footer class="footer fixed-bottom bg-white">
+	<p class="container my-2 text-center">
+		Made with <i class="fa fa-heart" aria-hidden="true"></i> by SiMDE. <a href="mailto:simde@assos.utc.fr">Contact</a>
+	</p>
+</footer>
