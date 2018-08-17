@@ -126,7 +126,7 @@ export class AuthService {
 	*/
 
 	getLoginUrl(): string {
-		return environment.apiUrl + '/auth/login' + '?redirect=' + environment.frontUrl + 'login'
+		return environment.apiUrl + '/auth/login' + '?redirect=' + window.location.href
 	}
 
 	/**

@@ -5,10 +5,8 @@
 
 export const environment = {
 	production: false,
-	// apiUrl: 'http://woolly.etu-utc.fr',
-	// apiDomain: 'woolly.etu-utc.fr',
-	// frontUrl: 'http://assos.utc.fr/soireedesfinaux/billetterie/',
-	apiUrl: 'http://localhost:8000',
-	apiDomain: 'localhost:8000',
-	frontUrl: 'http://localhost:4200/'
+	apiUrl: 'http://woolly.etu-utc.fr',
+	apiDomain: 'woolly.etu-utc.fr',
+	// apiUrl: 'http://localhost:8000',
+	// apiDomain: 'localhost:8000',
 };
