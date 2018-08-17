@@ -5,6 +5,8 @@ import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
+
+import { Router } from '@angular/router';
 import { JsonApiService } from '../models/json-api.service';
 import { User } from '../models/user';
 import { jwtTokenGetter } from './auth.service';
@@ -26,12 +28,13 @@ const pdfOptions = {
 export class PaymentService {
 
 	constructor(
-		private http: HttpClient
+		private http: HttpClient,
+		private router: Router
 	) { }
 
 	payOrder(id: string): Observable<any> {
-		const url = environment.apiUrl + '/orders/' + id + '/pay?return_url='
-					+ environment.frontUrl + 'commandes/' + id
+		const base_url = window.location.href.replace(this.router.url, '')
+		const url = environment.apiUrl + '/orders/' + id + '/pay?return_url=' + base_url + '/commandes/' + id
 		return this.http.get<any>(url, jsonApiOptions);
 	}
 	checkOrder(id: string): Observable<any> {

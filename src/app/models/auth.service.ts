@@ -6,6 +6,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap, finalize } from 'rxjs/operators';
+
+import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { JsonApiService } from '../models/json-api.service';
 import { User } from '../models/user';
@@ -26,7 +28,8 @@ export class AuthService {
 	constructor(
 		private http: HttpClient,
 		private jwtHelper: JwtHelperService,
-		private jsonApiService: JsonApiService
+		private jsonApiService: JsonApiService,
+		private router: Router,
 	) {
 		const currentToken = jwtTokenGetter();
 		if (currentToken) {
@@ -126,7 +129,8 @@ export class AuthService {
 	*/
 
 	getLoginUrl(): string {
-		return environment.apiUrl + '/auth/login' + '?redirect=' + window.location.href
+		const base_url = window.location.href.replace(this.router.url, '')
+		return environment.apiUrl + '/auth/login' + '?redirect=' + base_url + '/login'
 	}
 
 	/**
