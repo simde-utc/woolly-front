@@ -16,18 +16,20 @@
 		</div>
 
 		<div class="row mb-4 justify-content-center">
-			<div *ngFor="let sale of sales" class="py-3 col-xl-3 col-md-4 col-sm-12 animated fadeInRight">
+			<div *ngFor="let sale of sales" class="py-3 col-md-4 col-sm-12 animated fadeInRight">
 				<div class="card card-image view hm-white-slight waves-light" mdbRippleRadius
-					style="background-image: url('./assets/sdf.jpg'); background-size: cover;">
+					style="background-color: '#ffffff'; background-image: url('./assets/bdo.png'); background-size: cover;">
 					<div class="card-body text-white rgba-black-strong d-flex align-items-center py-5 px-4">
 						<div>
 							<h3 class="card-title"><strong>{{ sale.name }}</strong></h3>
 							<h5 class="font-italic">Organisé par {{ sale.association.name }}</h5>
 							<hr>
 							<p>{{ sale.description }}</p>
-							<a class="btn btn-blue waves-light" mdbRippleRadius routerLink="/ventes/{{ sale.id }}">
-								<i class="fa fa-hand-o-right" aria-hidden=true></i> Accéder à la vente
-							</a>
+							<p class="text-center">
+								<a class="btn btn-blue waves-light" mdbRippleRadius routerLink="/ventes/{{ sale.id }}">
+									<i class="fa fa-hand-o-right" aria-hidden=true></i> Accéder à la vente
+								</a>
+							</p>
 						</div>
 					</div>
 				</div>
