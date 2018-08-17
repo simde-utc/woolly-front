@@ -9,7 +9,6 @@ import { User, UserType } from './user';
 */
 @JsonApiModelConfig({ type: 'associations' })
 export class Association extends JsonApiModel {
-	@Attribute() login: string;
 	@Attribute() name: string;
 }
 
@@ -17,14 +16,22 @@ export class Association extends JsonApiModel {
 export class Sale extends JsonApiModel {
 	@Attribute() name: string;
 	@Attribute() description: string;
+	@BelongsTo() association: Association;
+	
+	// Visibility
+	@Attribute() is_active: boolean;
+	@Attribute() public: boolean;
+
+	// Timestamps
 	@Attribute() created_at: Date;
 	@Attribute() begin_at: Date;
 	@Attribute() end_at: Date;
+
 	@Attribute() max_payment_date: Date;
 	@Attribute() max_item_quantity: string;
 
-	@HasMany() items: Item[];
-	@BelongsTo() association: Association;
+	// Relations
+	@HasMany() items?: Item[];
 }
 
 
