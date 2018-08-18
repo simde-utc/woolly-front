@@ -23,6 +23,7 @@ export class OrderDetailComponent {
 	order: Order;
 	loading: boolean = true;
 	editmode: boolean;
+	pdfUrl: string;
 
 	constructor(
 		private jsonApiService: JsonApiService,
@@ -47,19 +48,26 @@ export class OrderDetailComponent {
 		let includes = ['sale', 'orderlines', 'orderlines.item', 'orderlines.orderlineitems', 
 			'orderlines.orderlineitems.orderlinefields', 'orderlines.item.itemfields']
 		return this.jsonApiService.findRecord(Order, id, { include: includes.join(',') }).subscribe(
-			(order: Order) => this.order = order,
-			err => this.router.navigate['/ventes'],
+			(order: Order) => {
+				this.order = order;
+				this.pdfUrl = this.paymentService.getPDF(this.order.id);
+			},
+			err => this.router.navigate(['/ventes']),
 			() => this.loading = false
 		);
 	}
 
 	private hasNoEditableField(order: Order): boolean {
 		let resp: boolean = true;
+		if (!order.orderlines) return false;
 		order.orderlines.forEach((orderline: OrderLine) => {
-			orderline.item.itemfields.forEach((itemfield: ItemField) => {
-				if (itemfield.editable)
-					resp = false;
-			});
+			if (orderline.item && orderline.item.itemfields)
+				orderline.item.itemfields.forEach((itemfield: ItemField) => {
+					if (itemfield.editable)
+						resp = false;
+				});
+			else
+				resp = false;
 		});
 		return resp;
 	}
@@ -78,7 +86,7 @@ export class OrderDetailComponent {
 		});
 		if (orderlineList.length > 0) {
 			forkJoin(orderlineList).subscribe(
-				// (orderlinefields: OrderLineField[]) => console.log(orderlinefields),
+				// (orderlinefields: OrderLineField[]) => this.router.navigate(['mon_compte']),
 				// err => console.warn(err),
 				() => this.loading = false
 			);
