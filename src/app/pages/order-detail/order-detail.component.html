@@ -38,8 +38,9 @@
 		<div class="text-center">
 			<button type="button" class="btn btn-outline-warning" (click)="getOrder(order.id)">Reset</button>
 			<!-- [disabled]="hasNoEditableField(order)" -->
-			<button type="button" class="btn btn-primary" 
-					(click)="modifyOrderLineFields(order)" [disabled]="hasNoEditableField(order)">Modifier</button>
+			<button type="button" class="btn btn-primary" (click)="modifyOrderLineFields(order)"
+				[disabled]="hasNoEditableField(order)">Modifier</button>
+			<a class="btn btn-success" href="{{ pdfUrl }}" target="_blank">Télécharger mes billets</a>
 		</div>
 	</ng-template>
 </main>
