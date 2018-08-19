@@ -29,6 +29,7 @@ export class SaleDetailComponent {
 	loading: boolean = true;
 	cart = {};
 	hasOngoingOrder: boolean = false;
+	cgvAccepted: boolean = false;
 
 	constructor(
 		private jsonApiService: JsonApiService,
