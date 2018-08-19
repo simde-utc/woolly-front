@@ -45,4 +45,4 @@ ng build --base-href /woolly/ --build-optimizer --prod
 ```
 Replace `/woolly/` by the base URL of your deployment server.
 
-Then you only need to put all the content of the`dist/` folder in your deployment folder.
+Then you only need to put all the content of the`dist/` folder in your deployment folder. Also add the `.htaccess` file to redirect all urls to `index.html`.
