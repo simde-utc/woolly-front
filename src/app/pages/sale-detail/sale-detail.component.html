@@ -56,12 +56,19 @@
 						<i class="fa fa-trash mr-1"></i> Reset
 					</button>
 					<button class="mx-4 btn btn-success waves-light" 
-							[class.disabled]="isCartEmpty() || !me || hasOngoingOrder" mdbWavesEffect (click)="buy()">
+							[class.disabled]="isCartEmpty() || !me || !cgvAccepted || hasOngoingOrder" mdbWavesEffect (click)="buy()">
 						<i class="fa fa-shopping-cart mr-1"></i> Acheter
 					</button>
 				</div>
 			</div>
-			<p *ngIf="!me" class="lead text-center my-5 red-text">Veuillez vous connecter pour acheter.</p>
+			<p *ngIf="!me" class="lead text-center my-4 red-text">Veuillez vous connecter pour acheter.</p>
+			<p *ngIf="!cgvAccepted" class="lead text-center my-4 red-text">Veuillez accepter les CGV pour acheter.</p>
+
+			<label class="form-check-label text-center d-block my-4">
+				<input class="form-check-input" type="checkbox" name="cgv-accepted" [(ngModel)]="cgvAccepted">
+				J'accepte les <a href="http://assos.utc.fr/baignoirutc/ressources/reglement.pdf" target="_blank">conditions générales de ventes</a>.
+			</label>
+
 			<table class="table align-middle">
 				<!--
 				<tr>
