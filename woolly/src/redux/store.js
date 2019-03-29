@@ -54,6 +54,15 @@ if (process.env.NODE_ENV === 'development') {
 }
 /* eslint-enable */
 
+function processPagination(payload) {
+	if ('results' in payload) {
+		const { results, ...rest } = payload;
+		return { data: results, pagination: rest };
+	} else {
+		return { data: payload, pagination: {} };
+	}
+}
+
 // La racine du store
 export const store = {
 	// Converti tout simple une route uri (string) en array | ex: 'assos/calendars' => ['assos', 'calendars']
@@ -136,6 +145,9 @@ export const store = {
 	isFetched(props, replacement = false, forceReplacement = true) {
 		return this.get(this.propsToArray(props).concat(['fetched']), replacement, forceReplacement);
 	},
+	getPagination(props, replacement = false, forceReplacement = true) {
+		return this.get(this.propsToArray(props).concat(['pagination']), replacement, forceReplacement);
+	},
 	// Permet de savoir si une requête s'est terminée
 	hasFinished(props, replacement = false, forceReplacement = true) {
 		return (
@@ -156,6 +168,7 @@ export const initialCrudState = {
 	fetching: false,
 	fetched: false,
 	lastUpdate: null,
+	pagination: {},
 	resources: {},
 };
 
@@ -254,7 +267,10 @@ export default createStore((state = store, action) => {
 				action.meta.validStatus.includes(action.payload.status || action.payload.response.status)
 			) {
 				if (action.type.endsWith(`_${ASYNC_SUFFIXES.success}`)) {
-					const { timestamp, status, data } = action.payload;
+					const { timestamp, status } = action.payload;
+					const { data, pagination } = processPagination(action.payload.data);
+					if (pagination)
+						place.pagination = pagination
 					place = makeResourceSuccessed(place, timestamp, status);
 
 					if (action.meta.action === 'updateAll') {
