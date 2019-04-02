@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { MoreVert } from '@material-ui/icons';
 import { AppBar, Toolbar, Button, Menu, MenuItem, Divider } from '@material-ui/core';
 import NavButton from './common/NavButton.jsx';
+import { NavLink } from 'react-router-dom';
 
 class Header extends React.Component {
 	constructor(props) {
@@ -15,8 +16,17 @@ class Header extends React.Component {
 		};
 	}
 
-	openDropdown = event => this.setState({ dropdownTarget: event.currentTarget })
-	closeDropdown = () => this.setState({ dropdownTarget: null })
+	openDropdown = (event) =>{
+		this.setState({ dropdownTarget: event.currentTarget })
+		document.addEventListener('mouseup', this.closeDropdown)
+	}
+
+	closeDropdown = () => {
+		document.removeEventListener('mouseup',this.closeDropdown)
+		if(this.state.dropdownTarget){
+			this.setState({ dropdownTarget: null })
+		}
+	}
 
 	render() {
 		const { classes } = this.props;
@@ -26,13 +36,13 @@ class Header extends React.Component {
 		return (
 			<AppBar position="fixed" style={{ height: this.props.height }}>
 				<Toolbar className={classes.toolbar + ' container'}>
-					<span className={classes.brand}>Woolly</span>
+					<NavLink className={classes.brand} to="/">Woolly</NavLink>
 					<div>
 						<NavButton to="/">Accueil</NavButton>
 						<NavButton to="/ventes">Ventes</NavButton>
 						{isConnected ? (
 							<React.Fragment>
-								<Button color="inherit" onClick={this.openMenu}>Alexandre <MoreVert /></Button>
+								<Button color="inherit" onClick={this.openDropdown}>Alexandre <MoreVert /></Button>
 								<Menu
 									anchorEl={this.state.dropdownTarget}
 									open={Boolean(this.state.dropdownTarget)}
@@ -70,7 +80,10 @@ const styles = theme => ({
 		margin: 'auto',
 	},
 	brand: {
-		fontSize: 24,
+		fontSize: 20,
+		color: "white",
+		textDecoration: "none",
+		fontFamily: "roboto, sans-serif"
 	},
 	logo: {
 		maxHeigth: 70,
