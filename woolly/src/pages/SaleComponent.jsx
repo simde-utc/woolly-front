@@ -5,7 +5,9 @@ import { Button, TextField } from '@material-ui/core/';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
-const OBJECT = {
+// L'objet JSX ci-dessous ne sert qu'à la simulation de données qu'on aurait récupérées depuis la DB
+// TODO : à supprimer après connection avec la BDD ainsi qu'après avoir changer les lignes utilisant l'objet
+const CURRENT_SALE_DATA = {
     titre: "Courses de Baignoires dans l'Oise",
     soustitre: "Organisé par Baignoires dans l'Oise",
     description: "Les baignoires dans l’Oise, c’est pas n’importe quelle course ! Rien que pour vous régaler, le BDE organise un événement frappant cette année : une descente d’un kilomètre le long de notre magnifique et somptueuse rivière.",
@@ -18,10 +20,10 @@ const OBJECT = {
     ]
 }
 
-class Sale extends React.Component{
+class SaleComponent extends React.Component{
     constructor(props){
         super(props)
-        let tempArray = Array(OBJECT.items.length)
+        let tempArray = Array(CURRENT_SALE_DATA.items.length) // Utilisation de CURRENT_SALE_DATA à supprimer plus tard
         tempArray = this.toZeroArray(tempArray)
         this.state = {
             itemsValues: tempArray
@@ -49,7 +51,7 @@ class Sale extends React.Component{
     }
 
     renderItems = (classes) => {
-        const itemsTable = OBJECT.items.map((element, key) => {
+        const itemsTable = CURRENT_SALE_DATA.items.map((element, key) => { // Utilisation de CURRENT_SALE_DATA à supprimer plus tard
             let nbString = "" + element.prix;
             if(!nbString.match(/\d+,\d\d/g)){ // sous format "n chiffres , 2 chiffres"
                 let separatedString = nbString.split(".");
@@ -72,7 +74,7 @@ class Sale extends React.Component{
                             value={this.state.itemsValues[key]}
                             onChange={(e) => this.handleChange(e, key)}
                             type="number"
-                            inputProps={{ min: "0", max: OBJECT.quantites}}
+                            inputProps={{ min: "0", max: CURRENT_SALE_DATA.quantites}}
                             className={classes.textField}
                             style={{width: "3em"}}
                             InputLabelProps={{
@@ -100,22 +102,28 @@ class Sale extends React.Component{
 
         return(
             <div class="container" style={{paddingTop: "60px"}}>
-                <h1 className={classes.title}>{OBJECT.titre}</h1>
-                <h2 className={classes.subtitle}>{OBJECT.soustitre}</h2>
+
+                {/* Utilisation de CURRENT_SALE_DATA à supprimer plus tard */}
+                <h1 className={classes.title}>{CURRENT_SALE_DATA.titre}</h1>
+
+                {/* Utilisation de CURRENT_SALE_DATA à supprimer plus tard */}
+                <h2 className={classes.subtitle}>{CURRENT_SALE_DATA.soustitre}</h2>
                 <div className={classes.details}>
                     <div className={classes.description} style={{textAlign: "justify", paddingRight: "24px", fontFamily: "roboto", fontWeight: "100"}}>
                         <h4 className={classes.detailsTitles}>Description</h4>
-                        <p>{OBJECT.description}</p>
+                        
+                        {/* Utilisation de CURRENT_SALE_DATA à supprimer plus tard */}
+                        <p>{CURRENT_SALE_DATA.description}</p> 
                     </div>
                     <div className={classes.numbers}>
                         <h4 className={classes.detailsTitles}>Dates</h4>
-                        {OBJECT.dates.map((element, key) => {
+                        {CURRENT_SALE_DATA.dates.map((element, key) => {
                             return <span style={{display: "block", fontFamily: "roboto", fontWeight: "100"}} key={key}>{element}</span>
                         })}
                     </div>
                     <div className={classes.numbers}>
                         <h4 className={classes.detailsTitles}>Quantités</h4>
-                        <p style={{fontSize: "1.6em"}}>{OBJECT.quantites}</p>
+                        <p style={{fontSize: "1.6em"}}>{CURRENT_SALE_DATA.quantites}</p>
                     </div>
                 </div>
                 <div>
