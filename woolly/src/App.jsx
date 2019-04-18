@@ -8,7 +8,7 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import Error404 from './pages/Error404';
 import Sales from './pages/Sales';
-import SaleDetail from './pages/Sale';
+import SaleDetail from './pages/SaleDetail';
 import Login from './pages/Login';
 
 const HEADER_HEIGHT = 64;
