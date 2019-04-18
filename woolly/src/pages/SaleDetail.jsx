@@ -2,8 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableCell,
-				 Button, TextField } from '@material-ui/core/';
+				 Button, TextField, Paper } from '@material-ui/core/';
 import { ShoppingCart, Delete } from '@material-ui/icons';
+
 
 // import { FontAwesomeIcon } from '@fontawesome/react-fontawesome';
 // import { faShoppingCart, faTrashAlt } from '@fontawesome/free-solid-svg-icons';
@@ -105,15 +106,17 @@ class SaleDetail extends React.Component{
 						<h4 className={classes.detailsTitles}>Description</h4>
 						<p>{sale.description}</p> 
 					</div>
-					<div className={classes.numbers}>
-						<h4 className={classes.detailsTitles}>Dates</h4>
-						{sale.dates.map((date, key) => (
-							<span key={key} className={classes.date}>{date}</span>
-						))}
-					</div>
-					<div className={classes.numbers}>
-						<h4 className={classes.detailsTitles}>Quantités</h4>
-						<p style={{fontSize: "1.6em"}}>{sale.quantites}</p>
+					<div className={classes.numbersContainer}>
+						<div className={classes.numbers}>
+							<h4 className={classes.detailsTitles}>Dates</h4>
+							{sale.dates.map((date, key) => (
+								<span key={key} className={classes.date}>{date}</span>
+							))}
+						</div>
+						<div className={classes.numbers}>
+							<h4 className={classes.detailsTitles}>Quantités</h4>
+							<p style={{fontSize: "1.6em"}}>{sale.quantites}</p>
+						</div>
 					</div>
 				</div>
 
@@ -140,7 +143,9 @@ class SaleDetail extends React.Component{
 				</div>
 
 				{!isConnected && <p className={classes.alert}>Veuillez vous connecter pour acheter.</p>}
+				<Paper className={classes.tableRoot}>
 				{this.renderItemsTable()}
+				</Paper>
 			</div>
 		)
 	}
@@ -181,6 +186,9 @@ const styles = theme => ({
 	details: {
 		display: 'flex',
 		flexDirection: 'row',
+		[theme.breakpoints.down('xs')]: {
+			flexDirection: 'column'
+		}
 	},
 	description: {
 		textAlign: "justify",
@@ -188,11 +196,17 @@ const styles = theme => ({
 		fontFamily: "roboto",
 		fontWeight: "100",
 		flex: "0 0 50%",
-		maxWidth: "50%"
+		maxWidth: "50%",
+		[theme.breakpoints.down('xs')]:{
+			maxWidth: "100%",
+			paddingRight: 0
+		}
 	},
-	numbers: {
-		flex: "0 0 25%",
-		maxWidth: "25%",
+	numbersContainer: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-around",
+		flexGrow: 2
 	},
 	text: {
 		margin: 0,
@@ -227,6 +241,15 @@ const styles = theme => ({
 		display: "flex",
 		flexDirection: "row",
 		alignItems: "center",
+		[theme.breakpoints.down('sm')]: {
+			flexDirection: "column"
+		}
+	},
+	tableRoot: {
+		width: "100%",
+		overflowX: 'auto',
+		marginTop: theme.spacing.unit*3,
+		marginBottom: theme.spacing.unit*3
 	},
 	alert: {
 		textAlign: "center",
