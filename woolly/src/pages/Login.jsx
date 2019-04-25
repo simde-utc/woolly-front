@@ -2,9 +2,18 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Button } from '@material-ui/core';
-
+import axios from 'axios';
 
 class Login extends React.Component{
+
+    componentDidMount(){
+        this.login();
+    }
+
+    login = () => {
+        window.location.assign(axios.defaults.baseURL + '/auth/login?redirect=' + window.location);
+    }
+     
     render(){
         const { classes } = this.props;
 
@@ -12,7 +21,7 @@ class Login extends React.Component{
             <div className="container" style={{display: "flex", flexDirection: "column",alignItems: "center"}}>
                 <h1 className={classes.title}>Espace de connexion</h1>
                 <a href="#" style={{textDecoration: "none"}}>
-                    <Button variant="contained" color="primary" className={classes.button}>Se connecter</Button>
+                    <Button variant="contained" color="primary" className={classes.button} onClick={this.login}>Se connecter</Button>
                 </a>
             </div>
         )
