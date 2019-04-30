@@ -23,7 +23,7 @@ class AssoCard extends React.Component {
 				
 			</CardContent>
 			<CardActions>
-				<NavButton to={'/ventes/'+asso.id}>Consulter</NavButton>
+				<NavButton to={'/admin/'+asso.login+'/'}>Consulter</NavButton>
 			</CardActions>
 		</Card>
 		);

@@ -19,7 +19,7 @@ class SaleCard extends React.Component {
 
 			</CardContent>
 			<CardActions>
-				<NavButton to={'/ventes/'+sale.id}>Accéder à la vente</NavButton>
+				<NavButton to={'./ventes/'+sale.id}>Accéder à la vente</NavButton>
 			</CardActions>
 		</Card>
 		);
