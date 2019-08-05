@@ -5,20 +5,27 @@ import store from './redux/store';
 import actions from './redux/actions';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
+// Layout components
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MainLoader from './components/MainLoader';
+import Loader from './components/common/Loader';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
+// Main pages
 import Home from './pages/Home';
 import Error404 from './pages/Error404';
 import Account from './pages/Account';
 import LoginLogout from './pages/LoginLogout';
 
-import Sales from './pages/Sales';
-import SaleDetail from './pages/SaleDetail';
-import Orders from './pages/Orders';
-import OrderDetail from './pages/OrderDetail';
+// Public pages
+import Sales from './pages/public/Sales';
+import SaleDetail from './pages/public/SaleDetail';
+import Orders from './pages/public/Orders';
+import OrderDetail from './pages/public/OrderDetail';
+
+// Lazy loaded pages
+const Admin = React.lazy(() => import('./pages/admin/'));
 
 // TODO Set in theme
 const HEADER_HEIGHT = 64;
@@ -41,19 +48,24 @@ class App extends React.Component {
 							height: '100%', boxSizing: 'border-box', overflowY: 'auto',
 						}}>
 							<Header height={HEADER_HEIGHT} />
-							<Switch>
-								<Route path="/" exact component={Home} />
-								<Route path="/sales" exact component={Sales} />
-								<Route path="/sales/:sale_id" exact component={SaleDetail} />
+							<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
+								<Switch>
+									<Route path="/" exact component={Home} />
+									<ProtectedRoute path="/admin" component={Admin} />
 
-								<ProtectedRoute path="/account" exact component={Account} />
-								<ProtectedRoute path="/orders" exact component={Orders} />
-								<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
+									<Route path="/sales" exact component={Sales} />
+									<Route path="/sales/:sale_id" exact component={SaleDetail} />
 
-								<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
-								<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
-								<Route component={Error404} />
-							</Switch>
+									<ProtectedRoute path="/account" exact component={Account} />
+									<ProtectedRoute path="/orders" exact component={Orders} />
+									<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
+
+									<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
+									<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
+
+									<Route component={Error404} />
+								</Switch>
+							</React.Suspense>
 							<Footer height={FOOTER_HEIGHT} />
 						</div>
 					</BrowserRouter>

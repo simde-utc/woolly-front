@@ -1,13 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../redux/actions';
+import actions from '../../redux/actions';
 import axios from 'axios';
 
-import Loader from '../components/common/Loader';
-import ItemsTable from '../components/sales/ItemsTable';
-import UnpaidOrderDialog from '../components/orders/UnpaidOrderDialog';
-import { Link } from '../components/common/Nav';
+import Loader from '../../components/common/Loader';
+import ItemsTable from '../../components/sales/ItemsTable';
+import UnpaidOrderDialog from '../../components/orders/UnpaidOrderDialog';
+import { Link } from '../../components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, FormControlLabel, Checkbox } from '@material-ui/core';

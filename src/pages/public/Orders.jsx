@@ -1,10 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux';
-import actions from '../redux/actions';
+import actions from '../../redux/actions';
 import { withStyles } from '@material-ui/core/styles';
 
-import Loader from '../components/common/Loader';
-import OrdersList from '../components/orders/OrdersList';
+import Loader from '../../components/common/Loader';
+import OrdersList from '../../components/orders/OrdersList';
 
 const ORDERS_PATH = ['auth', 'orders'];
 const connector = connect(store => ({
@@ -38,7 +38,7 @@ class Orders extends React.Component {
 			<div className="container">
 				<h1>Mes commandes</h1>
 
-				<Loader fluid loading={this.props.fetching} text=" Récupération des commandes en cours...">
+				<Loader fluid loading={this.props.fetching} text="Récupération des commandes en cours...">
 					<div className={classes.container}>
 						<OrdersList orders={this.props.orders} updateOrders={this.fetchOrders} />
 					</div>

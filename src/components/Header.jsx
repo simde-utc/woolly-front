@@ -45,6 +45,9 @@ class Header extends React.Component {
 						<NavButton to="/sales">{textOrIcon('Ventes', ShoppingCart, largeDisplay)}</NavButton>
 						{auth.authenticated ? (
 							<React.Fragment>
+								{auth.user.is_admin && (
+									<NavButton to="/admin">Administration</NavButton>
+								)}
 								<Button color="inherit" onClick={this.openAuthMenu}>
 									{largeDisplay ? (
 										<React.Fragment>{auth.user.first_name} <MoreVert /></React.Fragment>
@@ -57,9 +60,6 @@ class Header extends React.Component {
 								>
 									<NavMenuItem to="/account">Mon compte</NavMenuItem>
 									<NavMenuItem to="/orders">Mes commandes</NavMenuItem>
-									{auth.user.is_admin && (
-										<NavMenuItem to="/admin">Administration</NavMenuItem>
-									)}
 									<Divider />
 									<NavMenuItem to="/logout">Se déconnecter</NavMenuItem>
 								</Menu>

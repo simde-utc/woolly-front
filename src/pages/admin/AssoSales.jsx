@@ -2,8 +2,8 @@ import React from 'react'
 import { connect } from 'react-redux';
 import actions from '../../redux/actions';
 
-import Loader from '../../components/Loader';
-import SaleCard from '../../components/common/SaleCard';
+import Loader from '../../components/common/Loader';
+import SaleCard from '../../components/sales/SaleCard';
 
 const decorator = connect(store => ({
 	sales: store.getData('sales'),

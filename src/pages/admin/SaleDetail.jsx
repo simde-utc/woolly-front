@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-import SaleSummary from '../../components/SaleSummary'
-import ItemSoldDetail from '../../components/ItemSoldDetail'
+import SaleSummary from '../../components/sales/SaleSummary'
+import ItemSoldDetail from '../../components/sales/ItemsSold'
 
 const CURRENT_ASSO_SALES_DATA = {
         titre: "Courses de Baignoires dans l'Oise",

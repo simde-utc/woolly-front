@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import actions from '../redux/actions';
+import actions from '../../redux/actions';
 import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, TextField } from '@material-ui/core';
-import Loader from '../components/common/Loader';
+import Loader from '../../components/common/Loader';
 
 const connector = connect((store, props) => ({
 	order: store.getData(['auth', 'currentOrder'], {}),

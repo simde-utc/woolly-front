@@ -4,7 +4,7 @@ import { shorten } from '../../utils';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Card, CardContent, CardActions, CardMedia, CardHeader } from '@material-ui/core';
-import NavButton from './NavButton.jsx';
+import { NavButton } from '../common/Nav.jsx';
 
 
 class AssoCard extends React.Component {
