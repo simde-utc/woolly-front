@@ -1,48 +1,83 @@
 # Woolly - Front
 
-Woolly is the online shop of all the [associations of the Université de Technologie de Compiègne](https://assos.utc.fr/).
+Woolly is the online shop for the [associations of the Université de Technologie de Compiègne](https://assos.utc.fr/).
+This project is built with [React](http://reactjs.org) and bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The backend can be found [here](https://github.com/simde-utc/woolly-api).
+
 
 ## Installation
 
-The user interface was developped with [Angular 6](https://angular.io/guide/quickstart).
-
-
-
-First of all, install [Angular CLI](https://github.com/angular/angular-cli), clone the repo et install the dependancies :
-
-
+First of all, clone the repository and install the required pages:
 ```sh
-sudo npm install -g @angular/cli
 git clone https://github.com/simde-utc/woolly-front.git
 cd woolly-front
-sudo npm install
+npm install
 ```
 
 
-## Development
+## Available Scripts
 
-To start the development server, use `ng serve --o` and go to`http://localhost:4200/`. The application will rebuild automatically if you modify the source files.
+In the project directory, you can run:
 
+### `npm start`
 
+Runs the app in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-To learn how to develop with Angular, read the [Angular tutorial](https://angular.io/tutorial).
+The page will reload if you make edits.<br>
+You will also see any lint errors in the console.
 
-For more help about Angular CLI, use`ng help` ou read the  [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### `npm test`
 
+Launches the test runner in the interactive watch mode.<br>
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+### `npm run build`
 
-To test the application, you can :
+Builds the app for production to the `build` folder.<br>
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-- run unit tests with [Karma](https://karma-runner.github.io) : `ng test`
-- run end-to-end tests with [Protractor](http://www.protractortest.org/) : `ng e2e`
+The build is minified and the filenames include the hashes.<br>
+Your app is ready to be deployed!
 
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## Deployment
+### `npm run eject`
 
-To build the project, use :
-```sh
-ng build --base-href /woolly/ --build-optimizer --prod
-```
-Replace `/woolly/` by the base URL of your deployment server.
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-Then you only need to put all the content of the`dist/` folder in your deployment folder. Also add the `.htaccess` file to redirect all urls to `index.html`.
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+
+### Analyzing the Bundle Size
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+
+### Making a Progressive Web App
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+
+### Advanced Configuration
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+
+### Deployment
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+
+### `npm run build` fails to minify
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
