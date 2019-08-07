@@ -2,6 +2,7 @@
  * Création et gestion automatique des actions que l'on dispatch via redux
  *
  * @author Samy Nastuzzi <samy@nastuzzi.fr>
+ * @author Alexandre Brasseur 
  *
  * @copyright Copyright (c) 2018, SiMDE-UTC
  * @license GNU GPL-3.0
@@ -14,8 +15,12 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.xsrfCookieName = 'csrftoken';
 
 
-// Liste de toutes les actions REST api possibles
-export const actionsData = {
+// =============================================================
+// 		Action Methods
+// =============================================================
+
+// Methods calling the API with alliases
+export const API_METHODS = {
 	all: {
 		type: 'ALL_',
 		method: 'get',
@@ -47,131 +52,119 @@ export const actionsData = {
 		action: 'delete',
 	},
 };
+API_METHODS.one = API_METHODS.find;
+API_METHODS.get = API_METHODS.find;
+API_METHODS.remove = API_METHODS.delete;
 
-// On crée des alias:
-actionsData.one = actionsData.find;
-actionsData.get = actionsData.find;
-actionsData.remove = actionsData.delete;
+// Methods modifying the action
+export const CONFIG_METHODS = {
+	/** Define the path for the resource in the store */
+	definePath: action => path => {
+		action.path = path.slice();
+		action.pathLocked = true;
+		return new Proxy(action, actionHandler);
+	},
 
-// Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
-export const actionHandler = {
-	get: (_target, prop) => {
-		const target = _target;
+	/** Add a valid status */
+	addValidStatus: action => validStatus => {
+		action.validStatus.push(validStatus);
+		return new Proxy(action, actionHandler);
+	},
 
-		// On crée la méthode de gestion de requête
-		/* eslint-disable no-fallthrough */
-		const method = (...args) => {
-			let id;
-			let queryParams;
-			let jsonData;
-			// On match si c'est une méthode HTTP connue et on wipe tout
-			switch (prop) {
-				case 'find':
-				case 'one':
-				case 'get':
-					if (args.length > 0 || target.idIsGiven || prop === 'one') {
-						if (target.idIsGiven || prop === 'one') {
-							[queryParams, jsonData] = args;
-						} else {
-							[id, queryParams, jsonData] = args;
-							target.addId(id);
-						}
+	/** Define the valid status */
+	defineValidStatus: action => validStatus => {
+		action.validStatus = validStatus;
+		return new Proxy(action, actionHandler);
+	},
 
-						return target.generateAction('get', queryParams, jsonData);
-					}
-
-				case 'all':
-					[queryParams, jsonData] = args;
-
-					return target.generateAction('all', queryParams, jsonData);
-
-				case 'create':
-				case 'update':
-				case 'remove':
-				case 'delete':
-					if (target.idIsGiven || prop === 'create') {
-						[queryParams, jsonData] = args;
-					} else {
-						[id, queryParams, jsonData] = args;
-						target.addUri(id);
-					}
-
-					return target.generateAction(prop, queryParams, jsonData);
-
-				default:
-					// On ajoute l'id s'il est renseigné
-					if (args.length === 1) {
-						target.addId(args[0]);
-					}
-
-					break;
-			}
-
-			// On retourne bien sûr un proxy sur sois-même pour se gérer de nouveau
-			return new Proxy(target, actionHandler);
-		};
-		/* eslint-enable no-fallthrough */
-
-		// Si c'est une action HTTP, l'exécuter
-		if (Object.keys(actionsData).includes(prop)) {
-			return method;
-		}
-		// Si c'est une méthode de l'objet Action, on l'exécute sans rechigner
-		if (target[prop] !== undefined) {
-			return target[prop];
-		}
-
-		/* eslint-disable no-fallthrough, default-case */
-		switch (prop) {
-			case 'setOptions':
-				return options => {
-					target.options = { ...target.options, ...options };
-					return new Proxy(target, actionHandler);
-				};
-
-			// Si on appelle une méthode qui agit directement sur la sauvegarde dans le store
-			case 'definePath':
-				return path => {
-					target.path = path.slice();
-					target.pathLocked = true;
-					return new Proxy(target, actionHandler);
-				};
-
-			// Si on appelle une méthode qui agit directement sur la sauvegarde dans le store
-			case 'addValidStatus':
-				return validStatus => {
-					target.validStatus.push(validStatus);
-					return new Proxy(target, actionHandler);
-				};
-
-			// Si on appelle une méthode qui agit directement sur la sauvegarde dans le store
-			case 'defineValidStatus':
-				return validStatus => {
-					target.validStatus = validStatus;
-					return new Proxy(target, actionHandler);
-				};
-		}
-		/* eslint-enable no-fallthrough, default-case */
-
-		// On ajoute la catégorie et on gère dynamiquement si c'est un appel propriété/méthode (expliqué sur un article de mon blog)
-		target.addUri(prop);
-		target.idIsGiven = false;
-
-		return new Proxy(method, {
-			get: (func, key) => func()[key],
-		});
+	/** Set Action options */
+	setOptions: action => options => {
+		action.options = { ...action.options, ...options };
+		return new Proxy(action, actionHandler);
 	},
 };
 
-// Classe de gestion des actions (génération automatique des routes et création des appels HTTP)
-export class Actions {
+
+// =============================================================
+// 		Handler and RestAction class
+// =============================================================
+
+// Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
+export const actionHandler = {
+	get(action, attr) {
+
+		// Real attribute of Action
+		if (action[attr] !== undefined)
+			return action[attr];
+
+		// Methods that configure the action
+		if (attr in CONFIG_METHODS)
+			return CONFIG_METHODS[attr](action);
+
+		// Build the API query method
+		const apiMethod = (...args) => {
+			let id, queryParams, jsonData;
+
+			// GET query on a single element
+			if (['find', 'one', 'get'].includes(attr)) {
+				if (args.length > 0 || action.idIsGiven || attr === 'one') {
+					if (action.idIsGiven || attr === 'one') {
+						[queryParams, jsonData] = args;
+					} else {
+						[id, queryParams, jsonData] = args;
+						action.addId(id);
+					}
+					return action.generateAction('get', queryParams, jsonData);
+				}
+				// ID not specified, fallback to all
+				return action.generateAction('all');
+			}
+
+			// GET on multiple elements
+			if (attr == 'all') {
+				[queryParams, jsonData] = args;
+				return action.generateAction('all', queryParams, jsonData);
+			}
+
+			// POST PUT DELETE an element
+			if (['create', 'update', 'remove', 'delete'].includes(attr)) {
+				if (action.idIsGiven || attr === 'create') {
+					[queryParams, jsonData] = args;
+				} else {
+					[id, queryParams, jsonData] = args;
+					action.addUri(id);
+				}
+				return action.generateAction(attr, queryParams, jsonData);
+			}
+
+			// Not an HTTP Method (ex: actions.users(1))
+			if (args.length === 1)
+				action.addId(args[0]);
+			return new Proxy(action, actionHandler);
+		};
+
+		// HTTP Action (ex: actions.users.get())
+		if (attr in API_METHODS)
+			return apiMethod;
+
+		// If not, callback the apiMethod and build the URI
+		// Example: `actions.users` build the URI /users
+		action.addUri(attr);
+		action.idIsGiven = false;
+
+		return new Proxy(apiMethod, {	get: (func, key) => func()[key] });
+	},
+};
+
+// REST Action management class
+export class RestAction {
 	constructor(rootUri) {
 		this.rootUri = rootUri || '';
 		this.uri = '';
 		this.idIsGiven = false;
 		this.path = [];
 		this.pathLocked = false;
-		this.actions = actionsData;
+		this.actions = API_METHODS;
 		this.validStatus = [200, 201, 202, 203, 204, 416];
 		this.options = {
 			type: undefined,
@@ -183,12 +176,11 @@ export class Actions {
 		return new Proxy(this, actionHandler);
 	}
 
-	addUri(uri) {
-		this.uri += `/${uri}`;
+	addUri(step) {
+		this.uri += `/${step}`;
 
-		if (!this.pathLocked) {
-			this.path.push(uri);
-		}
+		if (!this.pathLocked)
+			this.path.push(step);
 	}
 
 	addId(id) {
@@ -198,6 +190,31 @@ export class Actions {
 			this.path.push(id);
 			this.idIsGiven = true;
 		}
+	}
+
+	generateQueries(queryParams, prefix) {
+		const queries = [];
+
+		for (const key in queryParams) {
+			if (queryParams.hasOwnProperty(key)) {
+				const value = queryParams[key];
+
+				if (value !== undefined) {
+					if (Object.is(value)) 
+						queries.push(this.generateQueries(value, true));
+					else
+						queries.push(
+							`${encodeURIComponent(prefix ? `[${key}]` : key)}=${encodeURIComponent(value)}`
+						);
+				}
+			}
+		}
+		return queries.join('&');
+	}
+
+	generateUri(uri, queryParams) {
+		const queries = this.generateQueries(queryParams);
+		return uri + (queries.length === 0 ? '' : `?${queries}`);
 	}
 
 	generateType(action) {
@@ -225,49 +242,26 @@ export class Actions {
 			...this.options.action,
 		};
 	}
-
-	generateUri(uri, queryParams) {
-		const queries = this.generateQueries(queryParams);
-
-		return uri + (queries.length === 0 ? '' : `?${queries}`);
-	}
-
-	generateQueries(queryParams, prefix) {
-		const queries = [];
-
-		for (const key in queryParams) {
-			if (queryParams.hasOwnProperty(key)) {
-				const value = queryParams[key];
-
-				if (value !== undefined) {
-					if (Object.is(value)) queries.push(this.generateQuery(value, true));
-					else
-						queries.push(
-							`${encodeURIComponent(prefix ? `[${key}]` : key)}=${encodeURIComponent(value)}`
-						);
-				}
-			}
-		}
-
-		return queries.join('&');
-	}
 }
 
-// On crée dynamiquement nos actions (chaque action est une nouvelle génération de la classe)
-// Appelable: actions.category1 || actions('rootUri').category1
-const actions = new Proxy(rootUri => new Actions(rootUri), {
-	get: (target, prop) => {
-		if (prop === 'config') {
-			return modifications => {
-				return {
-					type: 'CONFIG',
-					config: modifications,
-				};
-			};
-		}
 
-		return new Actions()[prop];
+// TODO
+const CUSTOM_ACTIONS = {
+	config: payload => ({ type: 'CONFIG', payload }),
+};
+
+/**
+ * Actions are created dynamically (each use is a new RestAction instance)
+ * Examples:
+ *  - actions.users.all()
+ *  - actions('rootUri').users(1).orders.create(null, { status: 'ok' })
+ */
+export const actions = new Proxy(rootUri => new RestAction(rootUri), {
+	get(target, attr) {
+		if (attr in CUSTOM_ACTIONS)
+			return CUSTOM_ACTIONS[attr];
+		return new RestAction()[attr]
 	},
 });
 
-export default actions;
+export default actions; 
