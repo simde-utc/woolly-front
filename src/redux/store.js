@@ -32,7 +32,7 @@ const ASYNC_SUFFIXES = {
 let middlewares = applyMiddleware(
 	thunk,
 	createPromise({ promiseTypeSuffixes: Object.values(ASYNC_SUFFIXES) }),
-	// createLogger({ collapse: true })
+	// createLogger({ collapse: true }),
 );
 
 /* eslint-disable no-underscore-dangle */
@@ -153,12 +153,14 @@ export const store = {
 	},
 
 	// TODO
-	addToPath(path, ...steps) {
+	mergePath(path, ...steps) {
 		return this.pathToArray(path).concat(steps);
 	},
 
 	/**
 	 * Easy access an element in the store
+	 * Should NOT return copied data from the store (arr.map, Object.values) for better performance
+	 * 
 	 * @param      {<type>}   path                      The path to the target resource
 	 * @param      {<type>}   [replacement={}]          The returned Objet if the resource if infindable
 	 * @param      {boolean}  [forceReplacement=false]  Return remplacement resource is empty or null
@@ -178,27 +180,23 @@ export const store = {
 		}
 
 		// Return replacement if the data is empty or null
-		if (forceReplacement && (data == null && data instanceof Object && Object.keys(data).length === 0))
+		if (forceReplacement && (data == null || (data instanceof Object && Object.keys(data).length === 0)))
 			return replacement;
 
 		return data;
 	},
 
 	/** Retrieve the data object of a resource */
-	getData(path, replacement = [], forceReplacement = true) {
-		return this.get(this.addToPath(path, 'data'), replacement, forceReplacement);
+	getData(path, replacement = {}, forceReplacement = true) {
+		return this.get(this.mergePath(path, 'data'), replacement, forceReplacement);
 	},
 
 	/** Retrieve the data with a particuliar value of a resource */
-	findData(path, value, key = 'id', replacement, forceReplacement = true) {
+	findData(path, value, key = 'id', replacement = null, forceReplacement = true) {
 		// TODO
-		// Les ressources sont rangées par id:
+		// Resources are stored by id
 		if (key === 'id') {
-			return this.getData(
-				this.pathToArray(path).concat(['value']),
-				replacement,
-				forceReplacement
-			);
+			return this.getData(this.mergePath(path, value), replacement, forceReplacement);
 		}
 
 		const data = this.getData(path, []);
@@ -215,28 +213,28 @@ export const store = {
 
 	// TODO
 	getRessources(props, replacement = null, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['resources']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'resources'), replacement, forceReplacement);
 	},
 	getError(props, replacement = null, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['error']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'error'), replacement, forceReplacement);
 	},
 	hasFailed(props, replacement = false, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['failed']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'failed'), replacement, forceReplacement);
 	},
 	getStatus(props, replacement = null, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['status']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'status'), replacement, forceReplacement);
 	},
 	getLastUpdate(props, replacement = null, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['lastUpdate']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'lastUpdate'), replacement, forceReplacement);
 	},
 	isFetching(props, replacement = false, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['fetching']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'fetching'), replacement, forceReplacement);
 	},
 	isFetched(props, replacement = false, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['fetched']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'fetched'), replacement, forceReplacement);
 	},
 	getPagination(props, replacement = false, forceReplacement = true) {
-		return this.get(this.pathToArray(props).concat(['pagination']), replacement, forceReplacement);
+		return this.get(this.mergePath(props, 'pagination'), replacement, forceReplacement);
 	},
 	// Permet de savoir si une requête s'est terminée
 	hasFinished(path, replacement = false, forceReplacement = true) {
@@ -249,6 +247,7 @@ export const store = {
 	config: {},
 };
 
+// TODO Define accessors
 
 // TODO id ??
 
@@ -274,10 +273,10 @@ export const reducer = (state = store, action) => {
 
 			// Async call has failed
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.error}`)) {
-				if (id)
-					place = buildStorePath(draft, path.concat([id]));
+				// if (id) // TODO ????
+				// 	place = buildStorePath(draft, path.concat([id]));
 
-				place.data = [];
+				// place.data = {};
 				place.fetching = false;
 				place.fetched = statusIsValid;
 				place.error = action.payload;
@@ -291,7 +290,7 @@ export const reducer = (state = store, action) => {
 
 				// HTTP status is not acceptable
 				if (!statusIsValid) {
-					place.data = [];
+					// place.data = {};
 					place.fetching = false;
 					place.fetched = false;
 					place.error = 'NOT ACCEPTED';
@@ -308,44 +307,49 @@ export const reducer = (state = store, action) => {
 				id = id || data.id; // TODO
 
 				// Helper to build a store for the data if it has a key or an id
-				function buildSuccessfulDataStorePath(element, key = undefined) {
-					if (key || element.id) {
-						let placeForData = buildStorePath(draft, path.concat([key || element.id]));
+				function buildSuccessfulDataStorePath(element, key) {
+					if (key) {
+						let placeForData = buildStorePath(draft, path.concat([key]));
 						placeForData = makeResourceSuccessful(placeForData, timestamp, status);
 						placeForData.data = element;
 					}
 				}
 
 				// Update the data and resources according to the action required
-				// Multiple elements
 				if (action.meta.action === 'updateAll') {
-					// Replace data
-					place.data = data;
+					// Multiple elements
 
-					// Create places in resources for each element according to id
+					// Modify data and Create places in resources for each element according to id
 					if (Array.isArray(data)) {      // Array: Multiple elements with id
-						data.forEach(buildSuccessfulDataStorePath);
-					} else if (id) {                // Object with id: Single id
+						for (const element of data) {
+							const e_id = element.id; // TODO
+							place.data[e_id] = element;
+							buildSuccessfulDataStorePath(element, e_id);
+						}
+					} else if (id) {                // Resource with id: Single id
+						place.data = data;
 						buildSuccessfulDataStorePath(data, id);
-					} else {                        // Object without id: keys for resources
+					} else {                        // Resource without id: keys for resources
+						// TODO Check object, Useful ??
+						place.data = data;
 						for (const key in data)
 							buildSuccessfulDataStorePath(data[key], key);
 					}
-				}
-				// Single element
-				else {
+
+				} else {
+					// Single element 
+
 					// Modify place.data and place.resources
 					if (['create', 'insert', 'update'].includes(action.meta.action)) {
-							if (id) {
-								place.data[id] = data;
-								buildSuccessfulDataStorePath(data, id);
-							} else {
-								place.data = data;
-								for (const key in data)
-									buildSuccessfulDataStorePath(data[key], key);
-							}
-					}
-					if ('delete' === action.meta.action) {
+						if (id) {
+							place.data[id] = data;
+							buildSuccessfulDataStorePath(data, id);
+						} else {
+							place.data = data;
+							for (const key in data)
+								buildSuccessfulDataStorePath(data[key], key);
+						}
+					} else if ('delete' === action.meta.action) {
 							if (id) {
 								delete place.data[id];
 								delete place.resources[id];

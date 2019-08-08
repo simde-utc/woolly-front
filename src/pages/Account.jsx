@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions from '../redux/actions';
 
@@ -52,18 +51,13 @@ class Account extends React.Component {
 					<Grid item xs={12} md={8}>
 						<h2>Mes commandes</h2>
 						<Loader loading={this.props.fetching && !this.props.fetched}>
-							<OrdersList orders={this.props.orders} updateOrders={this.fetchOrders} />
+							<OrdersList orders={Object.values(this.props.orders)} updateOrders={this.fetchOrders} />
 						</Loader>
 					</Grid>
 				</Grid>
 			</div>
 		)
 	}
-}
-
-Account.propTypes = {
-	user: PropTypes.object.isRequired,
-	orders: PropTypes.arrayOf(PropTypes.object).isRequired,
 }
 
 export default connector(Account);

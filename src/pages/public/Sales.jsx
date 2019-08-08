@@ -7,7 +7,7 @@ import Loader from '../../components/common/Loader';
 import SaleCard from '../../components/sales/SaleCard';
 
 const connector = connect(store => ({
-	sales: store.getData('sales', []),
+	sales: store.getData('sales', {}),
 	fetching: store.isFetching('sales'),
 	fetched: store.isFetched('sales'),
 	// pagination: store.getPagination('sales'),
@@ -27,7 +27,7 @@ class Sales extends React.Component {
 
 				<Loader fluid loading={this.props.fetching} text="Récupération des ventes en cours...">
 					<div className={classes.container}>
-						{this.props.sales.map(sale => <SaleCard key={sale.id} sale={sale} /> )}
+						{Object.values(this.props.sales).map(sale => <SaleCard key={sale.id} sale={sale} /> )}
 					</div>
 				</Loader>
 			</div>

@@ -17,7 +17,7 @@ class AssoCard extends React.Component {
 			</CardHeader>
 			<CardContent className={classes.content}>
 				<CardMedia className={classes.img} title="logo_asso">
-					<img src={asso.image} height="75px" />
+					<img src={asso.image} alt={asso.name} height="75px" />
 				</CardMedia>
 				<p className={classes.description}>{shorten(asso.description, 150)}</p>
 				

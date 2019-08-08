@@ -4,12 +4,23 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import Loader from './common/Loader';
 
-const decorator = connect(store => ({
+
+import actions, { RestAction } from '../redux/actions'
+window.actions = actions // DEBUG
+window.RestAction = RestAction // DEBUG
+
+
+const decorator = connect(store => {
+	window.store = store // DEBUG
+	return ({
 	auth: store.get('auth', {}),
-}));
+})
+});
 
 class MainLoader extends React.Component {
 	render() {
+		window.dispatch = this.props.dispatch // DEBUG
+
 		const { classes, auth } = this.props
 		if (auth.fetched && auth.data && Object.entries(auth.data).length)
 			return this.props.children;

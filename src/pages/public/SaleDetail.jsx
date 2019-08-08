@@ -11,16 +11,15 @@ import { Link } from '../../components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, FormControlLabel, Checkbox } from '@material-ui/core';
-import { ShoppingCart, Save, Delete } from '@material-ui/icons';
+import { ShoppingCart, Delete } from '@material-ui/icons';
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
-	window.s = store
 	return {
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
-		sale: store.getData(['sales', saleId], null),
+		sale: store.findData('sales', saleId, 'id', null),
 		order: store.getData(['sales', saleId, 'userOrder'], null),
-		items: store.getData(['sales', saleId, 'items'], []),
+		items: store.getData(['sales', saleId, 'items'], {}),
 		itemsFetched: store.isFetched(['sales', saleId, 'items']),
 	};
 })
@@ -235,7 +234,7 @@ class SaleDetail extends React.Component{
 					<Paper className={classes.tableRoot}>
 						<ItemsTable
 							disabled={this.areItemsDisabled()}
-							items={this.props.items}
+							items={Object.values(this.props.items)}
 							quantities={this.state.quantities}
 							onQuantityChange={this.handleQuantityChange}
 						/>				
