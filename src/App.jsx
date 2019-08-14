@@ -34,7 +34,7 @@ const FOOTER_HEIGHT = 40;
 class App extends React.Component {
 	componentDidMount() {
 		// Get connected user
-		store.dispatch(actions('/auth/me').definePath(['auth']).all({ include: 'usertype' }));
+		store.dispatch(actions.auth().all({ include: 'usertype' }));
 	}
 
 	render() {

@@ -39,7 +39,7 @@ let middlewares = applyMiddleware(
 if (process.env.NODE_ENV === 'development') {
 	middlewares = (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose)(middlewares);
 }
-/* eslint-enable */
+/* eslint-enable no-underscore-dangle */
 
 
 // TODO
@@ -173,7 +173,7 @@ export const store = {
 		for (const step of path) {
 			if (data[step] !== undefined)
 				data = data[step];
-			else if (data.resources[step] !== undefined)
+			else if (data.resources && data.resources[step] !== undefined)
 				data = data.resources[step];
 			else
 				return replacement;
@@ -245,6 +245,14 @@ export const store = {
 	// TODO Storages
 	resources: {},
 	config: {},
+
+	// TODO Custom methods
+	getAuthUser(...steps) {
+		return this.get(['auth', 'data', 'user', ...steps], null, true);
+	},
+	getAuthRelated(...steps) {
+		return this.get(['auth', 'resources', ...steps], {}, true);
+	},
 };
 
 // TODO Define accessors
@@ -332,8 +340,8 @@ export const reducer = (state = store, action) => {
 					} else {                        // Resource without id: keys for resources
 						// TODO Check object, Useful ??
 						place.data = data;
-						for (const key in data)
-							buildSuccessfulDataStorePath(data[key], key);
+						// for (const key in data)
+						// 	buildSuccessfulDataStorePath(data[key], key);
 					}
 
 				} else {

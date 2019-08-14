@@ -82,6 +82,15 @@ export const CONFIG_METHODS = {
 		action.options = { ...action.options, ...options };
 		return new Proxy(action, actionHandler);
 	},
+
+
+	// TODO Custom methods
+	auth: action => (authId = null) => {
+		action.path = ['auth'];
+		action.uri = authId ? `/users/${authId}` : 'auth/me';
+		return new Proxy(action, actionHandler);
+	},
+
 };
 
 
@@ -121,7 +130,7 @@ export const actionHandler = {
 			}
 
 			// GET on multiple elements
-			if (attr == 'all') {
+			if (attr === 'all') {
 				[queryParams, jsonData] = args;
 				return action.generateAction('all', queryParams, jsonData);
 			}
