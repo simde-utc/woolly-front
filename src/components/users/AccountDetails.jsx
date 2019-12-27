@@ -2,8 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
+import { capitalFirst } from '../../utils';
 
 class AccountDetails extends React.Component{
+	reduceTypes = () => (
+		Object.entries(this.props.user.types || {})
+		      .filter(([key, value]) => value)
+		      .map(([key, value]) => capitalFirst(key))
+		      .join(', ')
+	)
+
 	render() {
 		const { classes, user } = this.props
 		return (
@@ -24,7 +32,7 @@ class AccountDetails extends React.Component{
 						</TableRow>
 						<TableRow>
 							<TableCell className={classes.label}>Type</TableCell>
-							<TableCell className={classes.value}>{user.usertype.name}</TableCell>
+							<TableCell className={classes.value}>{capitalFirst(user.type)}</TableCell>
 						</TableRow>
 					</TableBody>
 				</Table>
