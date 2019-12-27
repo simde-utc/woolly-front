@@ -4,29 +4,12 @@ import axios from 'axios';
 import { withRouter } from 'react-router';
 
 import { withStyles } from '@material-ui/core/styles';
-import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
 import { Table, TableBody, TableCell, TableHead, TableRow,
 				 List, ListItem, ListItemText, Button } from '@material-ui/core';
 import OrderlinesList from './OrderlinesList';
+import { ORDER_STATUS, ORDER_ACTIONS } from '../../utils';
 
 const OLL_PROPS = { dense: true, disablePadding: true };
-
-const ORDER_STATUS = {
-	0: { color: '#565656', actions: [ 'cancel', ],            label: 'En cours' },
-	1: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Validation' },
-	2: { color: '#008805', actions: [ 'download', 'modify' ], label: 'Validée' },
-	3: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Paiement' },
-	4: { color: '#008805', actions: [ 'download', 'modify' ], label: 'Payé' },
-	5: { color: '#000000', actions: [],                       label: 'Expirée' },
-	6: { color: '#e00000', actions: [],                       label: 'Annulée' },
-}
-
-const ACTIONS = {
-	download: { text: "Télécharger les billets", Icon: SaveAlt,           },
-	modify:   { text: "Modifier la commande",    Icon: Edit,              },
-	continue: { text: "Continuer la commande",   Icon: PlayCircleOutline, },
-	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
-}
 
 const ActionButton = ({ order, text, Icon, onClick }) => (
 	<Button size="small" title={text} onClick={onClick}
@@ -70,7 +53,7 @@ class OrdersList extends React.Component{
 		const status = ORDER_STATUS[order.status] || {};
 		const statusCell = <span style={{ color: status.color }}>{status.label}</span>;
 		const actionsCell = status.actions.map(key => (
-			<ActionButton key={key} {...ACTIONS[key]} order={order} onClick={this[`action_${key}`]} />
+			<ActionButton key={key} {...ORDER_ACTIONS[key]} order={order} onClick={this[`action_${key}`]} />
 		));
 
 		return (

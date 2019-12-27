@@ -4,7 +4,8 @@ import actions from '../redux/actions';
 import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Button, Paper, TextField } from '@material-ui/core';
+import { Button, Paper, TextField, Chip } from '@material-ui/core';
+import { ORDER_STATUS, isList } from '../utils';
 import Loader from '../components/common/Loader';
 
 const connector = connect((store, props) => ({
@@ -27,8 +28,18 @@ class OrderDetail extends React.Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		if (this.props.order.id && this.props.order !== prevProps.order)
-			this.setState(this.getStateFromOrder());
+		// New order: update order status or tickets state
+		if (this.props.order.id && this.props.order !== prevProps.order) {
+			if ([2, 4].includes(this.props.order.status)) {
+				this.setState(this.getStateFromOrder(), () => {
+					// Wait a bit for tickets to be generated if not there
+					if (Object.values(this.state.orderlineitems).length === 0)
+						setTimeout(this.fetchOrder, 1000);
+				});
+			}
+			else
+				this.updateStatus();
+		}
 	}
 
 	fetchOrder = () => {
@@ -39,8 +50,18 @@ class OrderDetail extends React.Component {
 													.definePath(['auth', 'currentOrder']).get())
 	}
 
+	updateStatus = async () => {
+		const orderId = this.props.match.params.order_id;
+		const resp = (await axios.get(`/orders/${orderId}/status`)).data
+		// Redirect to payment if needed or refresh order
+		if (resp.redirect_url )
+			window.location.href = resp.redirect_url
+		else
+			this.fetchOrder();
+	}
+
 	getStateFromOrder() {
-		const orderlineitems = {};
+		let orderlineitems = {};
 		this.props.order.orderlines.forEach(orderline => {
 			orderline.orderlineitems.forEach(({ orderlinefields, ...orderlineitem }) => {
 				// Add orderlineitem to the map
@@ -103,29 +124,40 @@ class OrderDetail extends React.Component {
 	render() {
 		const { classes, order } = this.props;
 		const { orderlineitems, saving, changing } = this.state;
+		const status = ORDER_STATUS[order.status] || {};
 		return (
 			<div className="container">
-				<h1>Informations de la commande n°{order.id}</h1>
+				<h1>Informations sur la commande n°{order.id}</h1>
+				<Chip 
+					onClick={this.updateStatus}
+					style={{ backgroundColor: status.color, color: '#fff' }}
+					label={status.label}
+				/>
+				{/* Change message // status */}
 				<p>Vous pouvez modifier les billets qui sont éditables en cliquant sur les différents champs.</p>
 				<div className={classes.ticketContainer}>
-					{Object.values(orderlineitems).map(orderlineitem =>  (
+					{Object.values(orderlineitems).map(orderlineitem => (
 						<Paper key={orderlineitem.id} className={classes.ticket}>
 							<h4 className={classes.ticketTitle}>{orderlineitem.item.name}</h4>
-							{Object.values(orderlineitem.orderlinefields).map(orderlinefield => (
-								<TextField
-									key={orderlinefield.id}
-									label={orderlinefield.name}
-									value={orderlinefield.value}
-									required
-									disabled={saving || !orderlinefield.editable}
-									onChange={this.handleChange}
-									classes={{ root: classes.input }}
-									inputProps={{
-										'data-orderlineitem-id': orderlineitem.id,
-										'data-orderlinefield-id': orderlinefield.id,
-									}}
-								/>
-							))}
+							{isList(orderlineitem.orderlinefields) ? (
+								Object.values(orderlineitem.orderlinefields).map(orderlinefield => (
+									<TextField
+										key={orderlinefield.id}
+										label={orderlinefield.name}
+										value={orderlinefield.value}
+										required
+										disabled={saving || !orderlinefield.editable}
+										onChange={this.handleChange}
+										classes={{ root: classes.input }}
+										inputProps={{
+											'data-orderlineitem-id': orderlineitem.id,
+											'data-orderlinefield-id': orderlinefield.id,
+										}}
+									/>
+								))
+							) : (
+								<p className={classes.empty}>Pas de champs</p>
+							)}
 						</Paper>
 					))}
 				</div>
@@ -143,10 +175,14 @@ class OrderDetail extends React.Component {
 							"Sauvegarder les changements"
 						)}
 					</Button>
-					<Button className={classes.button} variant="contained"
-									disabled={changing || saving} onClick={this.downloadTickets}>
-						Télécharger les billets
-					</Button>
+					{/* TODO Add download or not option */}
+					{ true && (
+						<Button className={classes.button} variant="contained"
+						        disabled={changing || saving} onClick={this.downloadTickets}>
+							Télécharger les billets
+						</Button>
+						)
+					}
 				</div>
 			</div>
 		);
@@ -176,6 +212,10 @@ const styles = theme => ({
 		width: '100%',
 		margin: '0 0 10px',
 		fontWeigth: 100,
+	},
+	empty: {
+		fontStyle: 'italic',
+		marginBottom: 0,
 	},
 	input: {
 		flex: 1,

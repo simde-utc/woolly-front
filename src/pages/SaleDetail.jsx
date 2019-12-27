@@ -15,7 +15,6 @@ import { ShoppingCart, Save, Delete } from '@material-ui/icons';
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
-	window.s = store
 	return {
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
 		sale: store.getData(['sales', saleId], null),
@@ -68,7 +67,7 @@ class SaleDetail extends React.Component{
 		);
 	}
 
-	saveOrder = (event, notif = true, update = true) => {
+	saveOrder = (event, notif = true, update = false) => {
 		if (!this.props.order) {
 			console.warn("No order")
 			return;
@@ -119,14 +118,15 @@ class SaleDetail extends React.Component{
 		}
 	}
 
+	/** Redirect to payment */
 	handlePay = async event => {
-		// Redirect to payment
 		const order = this.props.order.id;
 		const returnUrl = window.location.href.replace(this.props.location.pathname, `/orders/${order}`);
 		const resp = await axios.get(`/orders/${order}/pay?return_url=${returnUrl}`, { withCredentials: true });
-		window.location.href = resp.data.url;
+		window.location.href = resp.data['redirect_url'];
 	}
 
+	/** Cancel an order */
 	handleCancel = event => {
 		axios.delete(`/orders/${this.props.order.id}`, { withCredentials: true })
 		     .finally(this.fetchOrder);
@@ -157,7 +157,7 @@ class SaleDetail extends React.Component{
 			<div className="container">
 				<div className={classes.titleContainer}>
 					<h1 className={classes.title}>{sale.name}</h1>
-					<h2 className={classes.subtitle}>Organisé par {sale.association.name}</h2>
+					<h2 className={classes.subtitle}>Organisé par {sale.association.shortname}</h2>
 				</div>
 
 				<div className={classes.details}>

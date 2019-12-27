@@ -14,7 +14,7 @@ class SaleCard extends React.Component {
 		<Card className={classes.card}>
 			<CardContent className={classes.content}>
 				<h4 className={classes.title}>{sale.name}</h4>
-				<span className={classes.subtitle}>Par {sale.association.name}</span>
+				<span className={classes.subtitle}>Par {sale.association.shortname}</span>
 				<p className={classes.description}>{shorten(sale.description, 150)}</p>
 			</CardContent>
 
