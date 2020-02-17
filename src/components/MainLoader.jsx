@@ -10,17 +10,12 @@ window.actions = actions // DEBUG
 window.RestAction = RestAction // DEBUG
 
 
-const decorator = connect(store => {
-	window.store = store // DEBUG
-	return ({
+const decorator = connect(store => ({
 	auth: store.get('auth', {}),
-})
-});
+}));
 
 class MainLoader extends React.Component {
 	render() {
-		window.dispatch = this.props.dispatch // DEBUG
-
 		const { classes, auth } = this.props
 		if (auth.fetched && auth.data && Object.entries(auth.data).length)
 			return this.props.children;
