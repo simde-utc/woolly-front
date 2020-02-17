@@ -241,17 +241,16 @@ export const store = {
 		const data = this.get(this.pathToArray(path), {}, true);
 		return Boolean(data.fetched && data.failed);
 	},
-
-	// TODO Storages
 	resources: {},
 	config: {},
+	// TODO Add error listeners ?
 
 	// TODO Custom methods
-	getAuthUser(...steps) {
-		return this.get(['auth', 'data', 'user', ...steps], null, true);
+	getAuthUser(path, replacement = null, forceReplacement = true) {
+		return this.get(['auth', 'data', 'user', ...this.pathToArray(path)], replacement, forceReplacement);
 	},
-	getAuthRelated(...steps) {
-		return this.get(['auth', 'resources', ...steps], {}, true);
+	getAuthRelatedData(path, replacement = {}, forceReplacement = true) {
+		return this.getData(['auth', 'resources', ...this.pathToArray(path)], replacement, forceReplacement);
 	},
 };
 

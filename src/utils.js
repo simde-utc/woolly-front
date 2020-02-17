@@ -1,7 +1,25 @@
 import React from 'react';
 import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
 
-export const isList = object => object && object.length;
+/*
+|---------------------------------------------------------
+|		Object utils
+|---------------------------------------------------------
+*/
+
+export function isList(object) {
+	return object && object.length !== undefined;
+}
+
+export function isEmpty(object) {
+	return object && Object.values(object).length === 0;
+}
+
+/*
+|---------------------------------------------------------
+|		Text utils
+|---------------------------------------------------------
+*/
 
 export function shorten(text, limit) {
 	if (text.length > limit)
@@ -17,6 +35,20 @@ export function textOrIcon(text, Icon, displayText) {
 	return displayText ? text : <Icon title={text} />
 }
 
+/*
+|---------------------------------------------------------
+|		Right utils
+|---------------------------------------------------------
+*/
+
+export function hasManagerRights(auth, userAssos) {
+	return auth.authenticated && (
+		auth.user.is_admin || !isEmpty(userAssos)
+	);
+}
+
+
+// TODO Move to constants
 export const ORDER_STATUS = {
 	0: { color: '#565656', actions: [ 'cancel', ],            label: 'En cours' },
 	1: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Validation' },
