@@ -7,7 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Table, TableBody, TableCell, TableHead, TableRow,
 				 List, ListItem, ListItemText, Button } from '@material-ui/core';
 import OrderlinesList from './OrderlinesList';
-import { ORDER_STATUS, ORDER_ACTIONS } from '../../utils';
+import { ORDER_STATUS, ORDER_ACTIONS } from '../../constants';
 
 const OLL_PROPS = { dense: true, disablePadding: true };
 

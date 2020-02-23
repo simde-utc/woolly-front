@@ -5,7 +5,8 @@ import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, TextField, Chip } from '@material-ui/core';
-import { ORDER_STATUS, isList } from '../../utils';
+import { ORDER_STATUS } from '../../constants';
+import { isList } from '../../utils';
 import Loader from '../../components/common/Loader';
 
 const connector = connect((store, props) => ({

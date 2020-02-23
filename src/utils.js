@@ -1,5 +1,4 @@
 import React from 'react';
-import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
 
 /*
 |---------------------------------------------------------
