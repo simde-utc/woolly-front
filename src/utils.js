@@ -12,7 +12,7 @@ export function isList(object) {
 }
 
 export function isEmpty(object) {
-	return object && Object.values(object).length === 0;
+	return !object || Object.values(object).length === 0;
 }
 
 /*
@@ -45,23 +45,4 @@ export function hasManagerRights(auth, userAssos) {
 	return auth.authenticated && (
 		auth.user.is_admin || !isEmpty(userAssos)
 	);
-}
-
-
-// TODO Move to constants
-export const ORDER_STATUS = {
-	0: { color: '#565656', actions: [ 'cancel', ],            label: 'En cours' },
-	1: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Validation' },
-	2: { color: '#008805', actions: [ 'download', 'modify' ], label: 'Validée' },
-	3: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Paiement' },
-	4: { color: '#008805', actions: [ 'download', 'modify' ], label: 'Payé' },
-	5: { color: '#000000', actions: [],                       label: 'Expirée' },
-	6: { color: '#e00000', actions: [],                       label: 'Annulée' },
-}
-
-export const ORDER_ACTIONS = {
-	download: { text: "Télécharger les billets", Icon: SaveAlt,           },
-	modify:   { text: "Modifier la commande",    Icon: Edit,              },
-	continue: { text: "Continuer la commande",   Icon: PlayCircleOutline, },
-	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
 }
