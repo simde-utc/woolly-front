@@ -1,27 +1,52 @@
 import React from 'react';
-// import { Switch } from 'react-router-dom';
-// import ProtectedRoute from '../../components/common/ProtectedRoute';
+import { Switch, Route, Redirect } from 'react-router-dom';
+import ProtectedRoute from '../../components/common/ProtectedRoute';
+import { connect } from 'react-redux';
+import actions from '../../redux/actions';
+import { hasManagerRights } from '../../utils';
 
+import Loader from '../../components/common/Loader';
 import Dashboard from './Dashboard';
-// import AssoSales from './AssoSales';
-// import SaleDetail from './SaleDetail';
-// import Error404 from '../Error404';
+import AssoDashboard from './AssoDashboard';
+import AssoSales from './AssoSales';
+import SaleDetail from './SaleDetail';
+import SaleEditor from './SaleEditor/';
+import Error404 from '../Error404';
+
+const decorator = connect(store => ({
+	auth: store.getData('auth', {}),
+	userAssos: store.getAuthRelatedData('associations', null),
+}));
 
 class Admin extends React.Component {
+
 	render() {
-		// const base_url = this.props.match.url;
-		return <Dashboard />
-		// return (
-		// 	<Switch>
-		// 		<ProtectedRoute path={base_url} exact component={Dashboard} />
-		// 		{/* <ProtectedRoute path={`${base_url}/assos/:asso_id`} exact component={AssoDashboard} /> */}
-		// 		<ProtectedRoute path={`${base_url}/sales`} exact component={AssoSales} />
-		// 		<ProtectedRoute path={`${base_url}/sales/:sale_id`} exact component={SaleDetail} />
+		const { auth, userAssos } = this.props;
+
+		// Wait for user's associations to be fetched
+		if (userAssos === null)
+			return <Loader />
+
+		// Redirect if user has no manager rights
+		if (!hasManagerRights(auth, userAssos))
+			return <Redirect to="/" />
+
+		const base_url = this.props.match.url;
+		return (
+			<Switch>
+				<Route path={base_url} exact component={Dashboard} />
+				<ProtectedRoute path={`${base_url}/assos/:asso_id`} only="asso_manager" exact component={AssoDashboard} />
+
+				<Route path={`${base_url}/sales/create`} exact component={SaleEditor} />
+				<Route path={`${base_url}/sales/:sale_id/edit`} exact component={SaleEditor} />
 				
-		// 		<ProtectedRoute component={Error404} />
-		// 	</Switch>
-		// );
+				<Route path={`${base_url}/sales`} exact component={AssoSales} />
+				<Route path={`${base_url}/sales/:sale_id`} exact component={SaleDetail} />
+				
+				<Route component={Error404} />
+			</Switch>
+		);
 	}
 }
 
-export default Admin;
+export default decorator(Admin);

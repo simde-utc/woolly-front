@@ -13,7 +13,7 @@ const decorator = connect(store => ({
 }))
 
 class Sales extends React.Component {
-    componentDidMount(){
+    componentDidMount() {
         this.props.dispatch(actions.sales.all({ include: 'association' }))
     }
 
