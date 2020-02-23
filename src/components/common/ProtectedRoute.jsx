@@ -23,10 +23,8 @@ class ProtectedRoute extends React.Component {
 			case 'manager':
 				return hasManagerRights(auth, userAssos)
 			case 'asso_manager':
-				console.log(this.props)
-				return hasManagerRights(auth, userAssos);
 				const asso_id = this.props.computedMatch.params.asso_id;
-
+				return hasManagerRights(auth, userAssos) && (asso_id in userAssos || auth.is_admin);
 			case 'logged':
 				return auth.authenticated;
 			default:
