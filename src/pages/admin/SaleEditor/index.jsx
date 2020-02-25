@@ -20,6 +20,19 @@ const connector = connect((store, props) => {
 
 class SaleEditor extends React.Component {
 
+	constructor(props) {
+		super(props);
+		this.state = {
+			details: null,
+			groups: [],
+			items: [],
+		}
+	}
+
+	mapPropsToState = () => {
+
+	}
+
 	isCreator = () => this.props.sale_id === null
 
 	handleChange = event => {

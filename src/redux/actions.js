@@ -91,6 +91,13 @@ export const CONFIG_METHODS = {
 		return new Proxy(action, actionHandler);
 	},
 
+	auth_assos: action => (authId = null) => {
+		action.path = ['auth'];
+		action.uri = authId ? `/users/${authId}` : 'auth/me';
+		return new Proxy(action, actionHandler);		
+		// TODO WIP
+	},
+
 };
 
 
