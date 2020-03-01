@@ -14,6 +14,10 @@ export function isEmpty(object) {
 	return !object || Object.values(object).length === 0;
 }
 
+export function deepcopy(object) {
+	return JSON.parse(JSON.stringify(object));
+}
+
 /*
 |---------------------------------------------------------
 |		Text utils
