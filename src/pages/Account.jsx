@@ -14,17 +14,14 @@ const connector = connect(store => {
 	const auth = store.getData('auth', {})
 	return {
 		user: auth.authenticated ? auth.user : null,
-		orders: auth.authenticated ? store.getData(ORDERS_PATH, []) : [],
-		fetching: store.isFetching(ORDERS_PATH),
-		fetched: store.isFetched(ORDERS_PATH),
-		// pagination: store.getPagination('orders'),
+		orders: store.get(ORDERS_PATH),
 	};
 })
 
 class Account extends React.Component {
 
 	componentDidMount() {
-		if (!this.props.fetched)
+		if (!this.props.orders.fetched)
 			this.fetchOrders();
 	}
 
@@ -50,8 +47,8 @@ class Account extends React.Component {
 					</Grid>
 					<Grid item xs={12} md={8}>
 						<h2>Mes commandes</h2>
-						<Loader loading={this.props.fetching && !this.props.fetched}>
-							<OrdersList orders={Object.values(this.props.orders)} updateOrders={this.fetchOrders} />
+						<Loader loading={this.props.orders.fetching && !this.props.orders.fetched}>
+							<OrdersList orders={Object.values(this.props.orders.data)} updateOrders={this.fetchOrders} />
 						</Loader>
 					</Grid>
 				</Grid>

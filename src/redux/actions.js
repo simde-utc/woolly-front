@@ -260,22 +260,14 @@ export class RestAction {
 	}
 }
 
-
-// TODO
-const CUSTOM_ACTIONS = {
-	config: payload => ({ type: 'CONFIG', payload }),
-};
-
 /**
- * Actions are created dynamically (each use is a new RestAction instance)
+ * Actions are created dynamically (each use returns a new RestAction instance)
  * Examples:
  *  - actions.users.all()
- *  - actions('rootUri').users(1).orders.create(null, { status: 'ok' })
+ *  - actions('https://rootUri.com').users(1).orders.create(null, { status: 'ok' })
  */
 export const actions = new Proxy(rootUri => new RestAction(rootUri), {
 	get(target, attr) {
-		if (attr in CUSTOM_ACTIONS)
-			return CUSTOM_ACTIONS[attr];
 		return new RestAction()[attr]
 	},
 });

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableRow,
 import OrderlinesList from './OrderlinesList';
 import { ORDER_STATUS, ORDER_ACTIONS } from '../../constants';
 
-const OLL_PROPS = { dense: true, disablePadding: true };
+const ORDERLINE_PROPS = { dense: true, disablePadding: true };
 
 const ActionButton = ({ order, text, Icon, onClick }) => (
 	<Button size="small" title={text} onClick={onClick}
@@ -61,7 +61,7 @@ class OrdersList extends React.Component{
 				<Cell>{order.sale.name}</Cell>
 				<Cell align="center">{statusCell}</Cell>
 				<Cell align="center">{actionsCell}</Cell>
-				<Cell><OrderlinesList orderlines={order.orderlines} listProps={OLL_PROPS} /></Cell>
+				<Cell><OrderlinesList orderlines={order.orderlines} listProps={ORDERLINE_PROPS} /></Cell>
 			</TableRow>
 		);
 	}

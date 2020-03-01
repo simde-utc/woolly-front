@@ -9,15 +9,12 @@ import OrdersList from '../../components/orders/OrdersList';
 const ORDERS_PATH = ['auth', 'orders'];
 const connector = connect(store => ({
 	user: store.getData('auth', {}).user,
-	orders: store.getData(ORDERS_PATH, []),
-	fetching: store.isFetching(ORDERS_PATH),
-	fetched: store.isFetched(ORDERS_PATH),
-	// pagination: store.getPagination(ORDERS_PATH),
+	orders: store.get(ORDERS_PATH),
 }))
 
 class Orders extends React.Component {
 	componentDidMount() {
-		if (!this.props.fetched)
+		if (!this.props.orders.fetched)
 			this.fetchOrders();
 	}
 
@@ -38,9 +35,12 @@ class Orders extends React.Component {
 			<div className="container">
 				<h1>Mes commandes</h1>
 
-				<Loader fluid loading={this.props.fetching} text="Récupération des commandes en cours...">
+				<Loader fluid loading={this.props.orders.fetching} text="Récupération des commandes en cours...">
 					<div className={classes.container}>
-						<OrdersList orders={this.props.orders} updateOrders={this.fetchOrders} />
+						<OrdersList
+							orders={Object.values(this.props.orders.data)}
+							updateOrders={this.fetchOrders}
+						/>
 					</div>
 				</Loader>
 			</div>

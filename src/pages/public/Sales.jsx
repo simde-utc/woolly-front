@@ -7,15 +7,12 @@ import Loader from '../../components/common/Loader';
 import SaleCard from '../../components/sales/SaleCard';
 
 const connector = connect(store => ({
-	sales: store.getData('sales', {}),
-	fetching: store.isFetching('sales'),
-	fetched: store.isFetched('sales'),
-	// pagination: store.getPagination('sales'),
+	sales: store.get('sales'),
 }))
 
 class Sales extends React.Component {
 	componentDidMount() {
-		if (!this.props.fetched || this.props.sales.length === 1)
+		if (!this.props.fetched || this.props.sales.data.length === 1)
 			this.props.dispatch(actions.sales.all({ include: 'association' }));
 	}
 
@@ -25,9 +22,9 @@ class Sales extends React.Component {
 			<div className="container">
 				<h1>Liste des ventes</h1>
 
-				<Loader fluid loading={this.props.fetching} text="Récupération des ventes en cours...">
+				<Loader fluid loading={this.props.sales.fetching} text="Récupération des ventes en cours...">
 					<div className={classes.container}>
-						{Object.values(this.props.sales).map(sale => <SaleCard key={sale.id} sale={sale} /> )}
+						{Object.values(this.props.sales.data || {}).map(sale => <SaleCard key={sale.id} sale={sale} /> )}
 					</div>
 				</Loader>
 			</div>

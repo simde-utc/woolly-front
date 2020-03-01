@@ -11,7 +11,7 @@ export function isList(object) {
 }
 
 export function isEmpty(object) {
-	return !object || Object.values(object).length === 0;
+	return object == null || (object instanceof Object && Object.keys(object).length === 0);
 }
 
 export function deepcopy(object) {

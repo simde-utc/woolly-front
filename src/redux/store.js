@@ -10,6 +10,7 @@
 
 import produce from 'immer';
 import { createStore, applyMiddleware, compose } from 'redux';
+import { deepcopy, isEmpty } from '../utils';
 
 // Import Middlewares
 import thunk from 'redux-thunk';
@@ -17,9 +18,11 @@ import { createPromise } from 'redux-promise-middleware';
 // import { createLogger } from 'redux-logger';
 
 
-// =============================================================
-// 		Middlewares
-// =============================================================
+/*
+|---------------------------------------------------------
+|		Middlewares
+|---------------------------------------------------------
+*/
 
 // Suffixes des actions asynchrones
 const ASYNC_SUFFIXES = {
@@ -42,24 +45,15 @@ if (process.env.NODE_ENV === 'development') {
 /* eslint-enable no-underscore-dangle */
 
 
-// TODO
-function processPagination(payload) {
-	if ('results' in payload) {
-		const { results, ...rest } = payload;
-		return { data: results, pagination: rest };
-	} else {
-		return { data: payload, pagination: {} };
-	}
-}
-
-
-// =============================================================
-// 		Resource helpers
-// =============================================================
+/*
+|---------------------------------------------------------
+|		Resource helpers
+|---------------------------------------------------------
+*/
 
 // Base storage for each resource
-export const INITIAL_REST_STATE = {
-	data: {},
+export const INITIAL_CRUD_STATE = {
+	data: {},							// A map of the needed data by id
 	error: null,
 	failed: false,
 	status: null,
@@ -70,61 +64,48 @@ export const INITIAL_REST_STATE = {
 	resources: {},
 };
 
-/** Init a state by deep copying the initialState properties into it */
-function initRestState(state, initialState = INITIAL_REST_STATE) {
-	for (const key in initialState) {
-		if (initialState.hasOwnProperty(key)) {
-			if (initialState[key] instanceof Object) {
-				state[key] = Array.isArray(initialState[key]) ? [] : {};
-				initRestState(state[key], initialState[key]);
-			} else {
-				state[key] = initialState[key];
-			}
-		}
-	}
-	return state;
-};
-
-/** Dynamically generate the resource storage in the store from the path */
-function buildStorePath(store, path) {
-	for (const step of path) {
+/**
+ * Dynamically generate the resource storage in the store from the path
+ * @param  {Object}   store The Redux CRUD store
+ * @param  {String[]} path  The path to the place wanted
+ * @return {Object}         The place located at the required steps
+ */
+function buildPathInStore(store, path) {
+	return path.reduce((place, step) => {
 		// Create nested resources if doesn't exist
-		if (store.resources[step] === undefined) {
-			store.resources[step] = {};
-			initRestState(store.resources[step]);
-		}
+		if (place.resources[step] === undefined)
+			place.resources[step] = deepcopy(INITIAL_CRUD_STATE);
 
 		// Go forward in the path
-		store = store.resources[step];
+		return place.resources[step];
+	}, store);
+}
+
+function makeResourceSuccessful(resource, timestamp, status) {
+	resource.fetching = false
+	resource.fetched = true
+	resource.error = null
+	resource.failed = false
+	resource.lastUpdate = timestamp
+	resource.status = status
+	return resource
+}
+
+function processPagination(payload) {
+	if ('results' in payload) {
+		const { results, ...pagination } = payload;
+		return { data: results, pagination: pagination };
+	} else {
+		return { data: payload, pagination: {} };
 	}
-	return store;
-};
-
-function makeResourceSuccessful(store, timestamp, status) {
-	store.fetching = false;
-	store.fetched = true;
-	store.error = null;
-	store.failed = false;
-	store.lastUpdate = timestamp;
-	store.status = status;
-	return store;
 }
 
 
-// TODO
-
-const NAMESPACES_CONFIG = {
-	config: {
-		type: 'CONFIG',
-		reducer: (state = {}, action) => ({
-			...state,
-			config: {
-				...state.config,
-				...action.payload,
-			},
-		}),
-	},
-}
+/*
+|---------------------------------------------------------
+|		Path helpers
+|---------------------------------------------------------
+*/
 
 /** Helper to get path and id from an action meta */
 function getPathFromMeta(meta) {
@@ -139,23 +120,35 @@ function getPathFromMeta(meta) {
 	return { path, id };
 }
 
+/**
+ * Casse une route uri (string) en array
+ * Exemple: 'assos/calendars' => ['assos', 'calendars']
+ */
+function pathToArray(path) {
+	if (typeof path === 'string')
+		path = path.split('/');
+
+	return (path instanceof Array) ? path : [];
+}
+
+function mergePath(path, ...additionalSteps) {
+	return pathToArray(path).concat(additionalSteps);
+}
+
+
+/*
+|---------------------------------------------------------
+|		Store
+|---------------------------------------------------------
+| This CRUD store is auto building itself with each request
+*/
+
 // La racine du store
-export const store = {
-	/**
-	 * Casse une route uri (string) en array
-	 * Exemple: 'assos/calendars' => ['assos', 'calendars']
-	 */
-	pathToArray(path) {
-		if (typeof path === 'string')
-			path = path.split('/');
+export const CRUD_STORE = {
 
-		return (path instanceof Array) ? path : [];
-	},
+	// Actual store
+	resources: {},
 
-	// TODO
-	mergePath(path, ...steps) {
-		return this.pathToArray(path).concat(steps);
-	},
 
 	/**
 	 * Easy access an element in the store
@@ -165,11 +158,12 @@ export const store = {
 	 * @param      {<type>}   [replacement={}]          The returned Objet if the resource if infindable
 	 * @param      {boolean}  [forceReplacement=false]  Return remplacement resource is empty or null
 	 */
-	get(path, replacement = {}, forceReplacement = false) {
+	get(path, replacement = INITIAL_CRUD_STATE, forceReplacement = false) {
 		let data = this;
-		path = this.pathToArray(path);
+		path = pathToArray(path);
 
 		// Find the resource from the path
+		// Search directly and in resources
 		for (const step of path) {
 			if (data[step] !== undefined)
 				data = data[step];
@@ -180,7 +174,7 @@ export const store = {
 		}
 
 		// Return replacement if the data is empty or null
-		if (forceReplacement && (data == null || (data instanceof Object && Object.keys(data).length === 0)))
+		if (forceReplacement && isEmpty(data))
 			return replacement;
 
 		return data;
@@ -188,69 +182,62 @@ export const store = {
 
 	/** Retrieve the data object of a resource */
 	getData(path, replacement = {}, forceReplacement = true) {
-		return this.get(this.mergePath(path, 'data'), replacement, forceReplacement);
+		return this.get(mergePath(path, 'data'), replacement, forceReplacement);
 	},
 
 	/** Retrieve the data with a particuliar value of a resource */
 	findData(path, value, key = 'id', replacement = null, forceReplacement = true) {
-		// TODO
-		// Resources are stored by id
-		if (key === 'id') {
-			return this.getData(this.mergePath(path, value), replacement, forceReplacement);
-		}
+		// Data is stored by id
+		if (key === 'id')
+			return this.getData(mergePath(path, value), replacement, forceReplacement);
 
-		const data = this.getData(path, []);
-		for (const k in data) {
-			if (data[k][key] === value) {
-				if (!forceReplacement || !(data[k] instanceof Object) || Object.keys(data[k]).length > 0) {
-					return data[k];
-				}
-			}
-		}
+		// Otherwise, search the data for the right key
+		const data = this.getData(path);
+		for (const k in data)
+			if (data[k][key] === value)
+				return data[k];
 
 		return replacement;
 	},
 
-	// TODO
-	getRessources(props, replacement = null, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'resources'), replacement, forceReplacement);
-	},
-	getError(props, replacement = null, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'error'), replacement, forceReplacement);
-	},
-	hasFailed(props, replacement = false, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'failed'), replacement, forceReplacement);
-	},
-	getStatus(props, replacement = null, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'status'), replacement, forceReplacement);
-	},
-	getLastUpdate(props, replacement = null, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'lastUpdate'), replacement, forceReplacement);
-	},
-	isFetching(props, replacement = false, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'fetching'), replacement, forceReplacement);
-	},
-	isFetched(props, replacement = false, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'fetched'), replacement, forceReplacement);
-	},
-	getPagination(props, replacement = false, forceReplacement = true) {
-		return this.get(this.mergePath(props, 'pagination'), replacement, forceReplacement);
-	},
+	// // TODO
+	// getRessources(props, replacement = null, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'resources'), replacement, forceReplacement);
+	// },
+	// getError(props, replacement = null, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'error'), replacement, forceReplacement);
+	// },
+	// hasFailed(props, replacement = false, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'failed'), replacement, forceReplacement);
+	// },
+	// getStatus(props, replacement = null, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'status'), replacement, forceReplacement);
+	// },
+	// getLastUpdate(props, replacement = null, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'lastUpdate'), replacement, forceReplacement);
+	// },
+	// isFetching(props, replacement = false, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'fetching'), replacement, forceReplacement);
+	// },
+	// isFetched(props, replacement = false, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'fetched'), replacement, forceReplacement);
+	// },
+	// getPagination(props, replacement = false, forceReplacement = true) {
+	// 	return this.get(mergePath(props, 'pagination'), replacement, forceReplacement);
+	// },
+
 	// Permet de savoir si une requête s'est terminée
 	hasFinished(path, replacement = false, forceReplacement = true) {
-		const data = this.get(this.pathToArray(path), {}, true);
+		const data = this.get(pathToArray(path), {}, true);
 		return Boolean(data.fetched && data.failed);
 	},
-	resources: {},
-	config: {},
-	// TODO Add error listeners ?
 
 	// TODO Custom methods
 	getAuthUser(path, replacement = null, forceReplacement = true) {
-		return this.get(['auth', 'data', 'user', ...this.pathToArray(path)], replacement, forceReplacement);
+		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);
 	},
 	getAuthRelatedData(path, replacement = {}, forceReplacement = true) {
-		return this.getData(['auth', 'resources', ...this.pathToArray(path)], replacement, forceReplacement);
+		return this.getData(['auth', 'resources', ...pathToArray(path)], replacement, forceReplacement);
 	},
 };
 
@@ -258,16 +245,20 @@ export const store = {
 
 // TODO id ??
 
-/**
- * This reducer manages the async CRUD operations and ???
- */
-export const reducer = (state = store, action) => {
+/*
+|---------------------------------------------------------
+|		Reducer
+|---------------------------------------------------------
+*/
+
+/** This reducer manages the async CRUD operations */
+export const crudReducer = (state = CRUD_STORE, action) => {
 
 	if (action.meta && action.meta.path && action.meta.path.length > 0) {
 		return produce(state, draft => {
 			// Get path and id from action.meta
 			let { path, id } = getPathFromMeta(action.meta);
-			let place = buildStorePath(draft, path);
+			let place = buildPathInStore(draft, path);
 
 			// Async call is loading
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.loading}`)) {
@@ -281,7 +272,7 @@ export const reducer = (state = store, action) => {
 			// Async call has failed
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.error}`)) {
 				// if (id) // TODO ????
-				// 	place = buildStorePath(draft, path.concat([id]));
+				// 	place = buildPathInStore(draft, path.concat([id]));
 
 				// place.data = {};
 				place.fetching = false;
@@ -309,14 +300,16 @@ export const reducer = (state = store, action) => {
 				// Set pagination, timestamp, status and others indicators
 				const { timestamp, status } = action.payload;
 				const { data, pagination } = processPagination(action.payload.data);
-				if (pagination) place.pagination = pagination
+				if (pagination)
+					place.pagination = pagination
+
 				place = makeResourceSuccessful(place, timestamp, status);
 				id = id || data.id; // TODO
 
 				// Helper to build a store for the data if it has a key or an id
 				function buildSuccessfulDataStorePath(element, key) {
 					if (key) {
-						let placeForData = buildStorePath(draft, path.concat([key]));
+						let placeForData = buildPathInStore(draft, path.concat([key]));
 						placeForData = makeResourceSuccessful(placeForData, timestamp, status);
 						placeForData.data = element;
 					}
@@ -375,15 +368,30 @@ export const reducer = (state = store, action) => {
 		});
 	}
 
+	// No changes done
 	return state;
 }
 
 /*
+// TODO
+const NAMESPACES_CONFIG = {
+	config: {
+		type: 'CONFIG',
+		reducer: (state = {}, action) => ({
+			...state,
+			config: {
+				...state.config,
+				...action.payload,
+			},
+		}),
+	},
+}
+
 combineReducers({
-	resources: reducer,
+	resources: crudReducer,
 	...NAMESPACES_CONFIG,
 })
 */
 
 // Finally create and export the redux store
-export default createStore(reducer, middlewares);
+export default createStore(crudReducer, middlewares);
