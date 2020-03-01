@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux';
 import actions from '../../redux/actions';
 
-import Loader from '../../components/common/Loader';
+// import Loader from '../../components/common/Loader';
 import AssoCard from '../../components/sales/AssoCard';
 
 const connnector = connect(store => {
