@@ -1,14 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import actions from '../redux/actions'
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import Loader from './common/Loader';
-
-
-import actions, { RestAction } from '../redux/actions'
-window.actions = actions // DEBUG
-window.RestAction = RestAction // DEBUG
-
 
 const decorator = connect(store => ({
 	auth: store.get('auth', {}),

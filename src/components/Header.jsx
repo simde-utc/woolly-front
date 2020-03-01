@@ -12,7 +12,7 @@ import { hasManagerRights, textOrIcon } from '../utils';
 
 const decorator = connect(store => ({
 	auth: store.getData('auth', {}),
-	userAssos: store.getData(['auth', 'associations'], null),
+	userAssos: store.getAuthRelatedData('associations', null),
 }));
 
 class Header extends React.Component {

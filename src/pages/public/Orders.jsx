@@ -24,9 +24,9 @@ class Orders extends React.Component {
 	}
 
 	fetchOrders = () => {
-		this.props.dispatch(actions(`users/${this.props.user.id}/orders`)
-							.definePath(ORDERS_PATH)
-							.all({ include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems' }));
+		this.props.dispatch(actions.defineUri(`users/${this.props.user.id}/orders`)
+		                           .definePath(ORDERS_PATH)
+		                           .all({ include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems' }));
 	}
 
 	render() {

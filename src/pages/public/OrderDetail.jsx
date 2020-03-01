@@ -45,10 +45,12 @@ class OrderDetail extends React.Component {
 
 	fetchOrder = () => {
 		const orderId = this.props.match.params.order_id;
-		this.props.dispatch(actions(`/orders/${orderId}?include=orderlines,`
-															+ 'orderlines__item,orderlines__orderlineitems,'
-															+ 'orderlines__orderlineitems__orderlinefields')
-													.definePath(['auth', 'currentOrder']).get())
+		this.props.dispatch(actions.defineUri([
+		                              `/orders/${orderId}?include=orderlines`,
+		                              'orderlines__item', 'orderlines__orderlineitems',
+		                              'orderlines__orderlineitems__orderlinefields'
+		                            ].join(','))
+		                            .definePath(['auth', 'currentOrder']).get())
 	}
 
 	updateStatus = async () => {

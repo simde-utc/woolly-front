@@ -47,62 +47,6 @@ if (process.env.NODE_ENV === 'development') {
 
 /*
 |---------------------------------------------------------
-|		Resource helpers
-|---------------------------------------------------------
-*/
-
-// Base storage for each resource
-export const INITIAL_CRUD_STATE = {
-	data: {},							// A map of the needed data by id
-	error: null,
-	failed: false,
-	status: null,
-	fetching: false,
-	fetched: false,
-	lastUpdate: null,
-	pagination: {},
-	resources: {},
-};
-
-/**
- * Dynamically generate the resource storage in the store from the path
- * @param  {Object}   store The Redux CRUD store
- * @param  {String[]} path  The path to the place wanted
- * @return {Object}         The place located at the required steps
- */
-function buildPathInStore(store, path) {
-	return path.reduce((place, step) => {
-		// Create nested resources if doesn't exist
-		if (place.resources[step] === undefined)
-			place.resources[step] = deepcopy(INITIAL_CRUD_STATE);
-
-		// Go forward in the path
-		return place.resources[step];
-	}, store);
-}
-
-function makeResourceSuccessful(resource, timestamp, status) {
-	resource.fetching = false
-	resource.fetched = true
-	resource.error = null
-	resource.failed = false
-	resource.lastUpdate = timestamp
-	resource.status = status
-	return resource
-}
-
-function processPagination(payload) {
-	if ('results' in payload) {
-		const { results, ...pagination } = payload;
-		return { data: results, pagination: pagination };
-	} else {
-		return { data: payload, pagination: {} };
-	}
-}
-
-
-/*
-|---------------------------------------------------------
 |		Path helpers
 |---------------------------------------------------------
 */
@@ -140,15 +84,27 @@ function mergePath(path, ...additionalSteps) {
 |---------------------------------------------------------
 |		Store
 |---------------------------------------------------------
-| This CRUD store is auto building itself with each request
+| This API store is auto building itself with each request
 */
 
+// Base storage for each resource
+export const INITIAL_RESOURCE_STATE = {
+	data: {},							// A map of the needed data by id
+	error: null,
+	failed: false,
+	status: null,
+	fetching: false,
+	fetched: false,
+	lastUpdate: null,
+	pagination: {},
+	resources: {},
+};
+
 // La racine du store
-export const CRUD_STORE = {
+export const apiStore = {
 
 	// Actual store
 	resources: {},
-
 
 	/**
 	 * Easy access an element in the store
@@ -158,7 +114,7 @@ export const CRUD_STORE = {
 	 * @param      {<type>}   [replacement={}]          The returned Objet if the resource if infindable
 	 * @param      {boolean}  [forceReplacement=false]  Return remplacement resource is empty or null
 	 */
-	get(path, replacement = INITIAL_CRUD_STATE, forceReplacement = false) {
+	get(path, replacement = INITIAL_RESOURCE_STATE, forceReplacement = true) {
 		let data = this;
 		path = pathToArray(path);
 
@@ -200,38 +156,6 @@ export const CRUD_STORE = {
 		return replacement;
 	},
 
-	// // TODO
-	// getRessources(props, replacement = null, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'resources'), replacement, forceReplacement);
-	// },
-	// getError(props, replacement = null, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'error'), replacement, forceReplacement);
-	// },
-	// hasFailed(props, replacement = false, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'failed'), replacement, forceReplacement);
-	// },
-	// getStatus(props, replacement = null, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'status'), replacement, forceReplacement);
-	// },
-	// getLastUpdate(props, replacement = null, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'lastUpdate'), replacement, forceReplacement);
-	// },
-	// isFetching(props, replacement = false, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'fetching'), replacement, forceReplacement);
-	// },
-	// isFetched(props, replacement = false, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'fetched'), replacement, forceReplacement);
-	// },
-	// getPagination(props, replacement = false, forceReplacement = true) {
-	// 	return this.get(mergePath(props, 'pagination'), replacement, forceReplacement);
-	// },
-
-	// Permet de savoir si une requête s'est terminée
-	hasFinished(path, replacement = false, forceReplacement = true) {
-		const data = this.get(pathToArray(path), {}, true);
-		return Boolean(data.fetched && data.failed);
-	},
-
 	// TODO Custom methods
 	getAuthUser(path, replacement = null, forceReplacement = true) {
 		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);
@@ -243,7 +167,49 @@ export const CRUD_STORE = {
 
 // TODO Define accessors
 
-// TODO id ??
+
+/*
+|---------------------------------------------------------
+|		Resource helpers
+|---------------------------------------------------------
+*/
+
+/**
+ * Dynamically generate the resource storage in the store from the path
+ * @param  {Object}   store The Redux API store
+ * @param  {String[]} path  The path to the place wanted
+ * @return {Object}         The place located at the required steps
+ */
+function buildPathInStore(store, path) {
+	return path.reduce((place, step) => {
+		// Create nested resources if doesn't exist
+		if (place.resources[step] === undefined)
+			place.resources[step] = deepcopy(INITIAL_RESOURCE_STATE);
+
+		// Go forward in the path
+		return place.resources[step];
+	}, store);
+}
+
+function makeResourceSuccessful(resource, timestamp, status) {
+	resource.fetching = false
+	resource.fetched = true
+	resource.error = null
+	resource.failed = false
+	resource.lastUpdate = timestamp
+	resource.status = status
+	return resource
+}
+
+function processPagination(payload) {
+	if ('results' in payload) {
+		const { results, ...pagination } = payload;
+		return { data: results, pagination: pagination };
+	} else {
+		return { data: payload, pagination: {} };
+	}
+}
+
 
 /*
 |---------------------------------------------------------
@@ -251,8 +217,8 @@ export const CRUD_STORE = {
 |---------------------------------------------------------
 */
 
-/** This reducer manages the async CRUD operations */
-export const crudReducer = (state = CRUD_STORE, action) => {
+/** This reducer manages the async API operations */
+export const apiReducer = (state = apiStore, action) => {
 
 	if (action.meta && action.meta.path && action.meta.path.length > 0) {
 		return produce(state, draft => {
@@ -388,10 +354,10 @@ const NAMESPACES_CONFIG = {
 }
 
 combineReducers({
-	resources: crudReducer,
+	resources: apiReducer,
 	...NAMESPACES_CONFIG,
 })
 */
 
 // Finally create and export the redux store
-export default createStore(crudReducer, middlewares);
+export default createStore(apiReducer, middlewares);

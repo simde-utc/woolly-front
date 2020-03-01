@@ -9,15 +9,18 @@
  */
 import axios from 'axios';
 
-// Set up Axios defaults
-axios.defaults.baseURL = 'http://localhost:8000';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.xsrfCookieName = 'csrftoken';
+// Default axios for the api
+export const apiAxios = axios.create({
+  baseURL: 'http://localhost:8000',
+	xsrfHeaderName: 'X-CSRFToken',
+	xsrfCookieName: 'csrftoken',
+});
 
-
-// =============================================================
-// 		Action Methods
-// =============================================================
+/*
+|---------------------------------------------------------
+|		Action Methods
+|---------------------------------------------------------
+*/
 
 // Methods calling the API with alliases
 export const API_METHODS = {
@@ -58,10 +61,17 @@ API_METHODS.remove = API_METHODS.delete;
 
 // Methods modifying the action
 export const CONFIG_METHODS = {
+
 	/** Define the path for the resource in the store */
 	definePath: action => path => {
 		action.path = path.slice();
 		action.pathLocked = true;
+		return new Proxy(action, actionHandler);
+	},
+
+	/** Define the path for the resource in the store */
+	defineUri: action => uri => {
+		action.uri = uri;
 		return new Proxy(action, actionHandler);
 	},
 
@@ -90,20 +100,14 @@ export const CONFIG_METHODS = {
 		action.uri = authId ? `/users/${authId}` : 'auth/me';
 		return new Proxy(action, actionHandler);
 	},
-
-	auth_assos: action => (authId = null) => {
-		action.path = ['auth'];
-		action.uri = authId ? `/users/${authId}` : 'auth/me';
-		return new Proxy(action, actionHandler);		
-		// TODO WIP
-	},
-
 };
 
 
-// =============================================================
-// 		Handler and RestAction class
-// =============================================================
+/*
+|---------------------------------------------------------
+|		Handler and APIAction class
+|---------------------------------------------------------
+*/
 
 // Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
 export const actionHandler = {
@@ -173,9 +177,9 @@ export const actionHandler = {
 };
 
 // REST Action management class
-export class RestAction {
-	constructor(rootUri) {
-		this.rootUri = rootUri || '';
+export class APIAction {
+	constructor(axios_instance = apiAxios) {
+		this.axios = axios_instance;
 		this.uri = '';
 		this.idIsGiven = false;
 		this.path = [];
@@ -248,8 +252,8 @@ export class RestAction {
 				timestamp: Date.now(),
 				...this.options.meta,
 			},
-			payload: axios.request({
-				url: this.generateUri(this.rootUri + this.uri, queryParams),
+			payload: this.axios.request({
+				url: this.generateUri(this.uri, queryParams),
 				method: actionData.method,
 				data: jsonData,
 				withCredentials: true,
@@ -261,14 +265,14 @@ export class RestAction {
 }
 
 /**
- * Actions are created dynamically (each use returns a new RestAction instance)
+ * Actions are created dynamically (each use returns a new APIAction instance)
  * Examples:
  *  - actions.users.all()
- *  - actions('https://rootUri.com').users(1).orders.create(null, { status: 'ok' })
+ *  - actions.users(1).orders.create(null, { status: 'ok' })
  */
-export const actions = new Proxy(rootUri => new RestAction(rootUri), {
+export const actions = new Proxy(axios_instance => new APIAction(axios_instance), {
 	get(target, attr) {
-		return new RestAction()[attr]
+		return new APIAction()[attr]
 	},
 });
 
