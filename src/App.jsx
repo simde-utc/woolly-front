@@ -13,10 +13,10 @@ import Loader from './components/common/Loader';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Main pages
-import Home from './pages/Home';
-import Error404 from './pages/Error404';
-import Account from './pages/Account';
+import PublicSite from './pages/public/';
 import LoginLogout from './pages/LoginLogout';
+import Account from './pages/Account';
+import Error404 from './pages/Error404';
 
 // Public pages
 import Sales from './pages/public/Sales';
@@ -25,7 +25,7 @@ import Orders from './pages/public/Orders';
 import OrderDetail from './pages/public/OrderDetail';
 
 // Lazy loaded pages
-const Admin = React.lazy(() => import('./pages/admin/'));
+const AdminSite = React.lazy(() => import('./pages/admin/'));
 
 // TODO Set in theme
 const HEADER_HEIGHT = 64;
@@ -50,8 +50,8 @@ class App extends React.Component {
 							<Header height={HEADER_HEIGHT} />
 							<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
 								<Switch>
-									<Route path="/" exact component={Home} />
-									<ProtectedRoute path="/admin" component={Admin} />
+									<ProtectedRoute path="/admin" component={AdminSite} />
+									<Route path="/" exact component={PublicSite} />
 
 									<Route path="/sales" exact component={Sales} />
 									<Route path="/sales/:sale_id" exact component={SaleDetail} />
