@@ -1,6 +1,7 @@
 import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
 
-// TODO Move to constants
+export const API_URL = process.env.API_URL || 'http://localhost:8000';
+
 export const ORDER_STATUS = {
 	0: { color: '#565656', actions: [ 'cancel', ],            label: 'En cours' },
 	1: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Validation' },

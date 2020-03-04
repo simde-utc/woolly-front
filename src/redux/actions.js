@@ -8,10 +8,12 @@
  * @license GNU GPL-3.0
  */
 import axios from 'axios';
+import { API_URL } from '../constants';
+
 
 // Default axios for the api
 export const apiAxios = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: API_URL,
 	xsrfHeaderName: 'X-CSRFToken',
 	xsrfCookieName: 'csrftoken',
 });
@@ -272,7 +274,7 @@ export class APIAction {
  */
 export const actions = new Proxy(axios_instance => new APIAction(axios_instance), {
 	get(target, attr) {
-		return new APIAction()[attr]
+		return new APIAction()[attr];
 	},
 });
 
