@@ -1,6 +1,7 @@
 import React from 'react'
 // import PropTypes from 'prop-types';
-import actions from '../../../redux/actions';
+import axios from 'axios';
+// import actions from '../../../redux/actions';
 import { connect } from 'react-redux';
 import { deepcopy } from '../../../utils';
 import { BLANK_ORDER_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
@@ -30,7 +31,7 @@ class SaleEditor extends React.Component {
 	mapPropsToState = (props) => (
 		this.isCreator(props) ? ({
 			'details': {
-				...BLANK_ORDER_DETAILS,
+				...deepcopy(BLANK_ORDER_DETAILS),
 				begin_at: Date.now(),
 				end_at: Date.now()
 			},
@@ -62,43 +63,52 @@ class SaleEditor extends React.Component {
 			}, draft);
 			return draft;
 		});
-		console.log(this.state.details.name, newState.details.name)
-		this.setState(newState, () => console.log(this.state.details.name));
+		this.setState(newState);
 	}
 
-	saveDetails = details => {
+	saveDetails = () => {
 
 	}
 
 	addItem = () => this.setState(prevState => ({
-		items: [ ... prevState.items, deepcopy(BLANK_ITEM) ]		
+		items: [ ...prevState.items, deepcopy(BLANK_ITEM) ]		
 	}))
 
-	upsertItem = () => {
+	addGroup = () => this.setState(prevState => ({
+		groups: [ ...prevState.groups, deepcopy(BLANK_ITEMGROUP) ]		
+	}))
+
+	upsertItem = (id) => {
 
 	}
 
 	render() {
+		const isCreator = this.isCreator();
 		return (
 			<div className="container">
-				{this.isCreator() ? (
+				{isCreator ? (
 					<h1>Création d'une vente</h1>
 				) : (
 					<h1>Édition de la vente {this.props.sale.name}</h1>
 				)}
 				
 				<h2>Détails</h2>
-				<SaleDetailsEditor isCreator={this.isCreator()}
-				                   details={this.state.details || {}}
+				<SaleDetailsEditor details={this.state.details}
 				                   handleChange={this.handleChange}
-				                   save={this.saveDetails}
+				                   handleSave={this.saveDetails}
+				                   isCreator={isCreator}
 				/>
 
 				<h2>Articles</h2>
 				<Button onClick={this.addItem}>Créer un article</Button>
-				{this.props.items ? (
-					Object.values(this.state.items).forEach(item => (
-						<ItemEditor item={item} />
+				{this.state.items.length ? (
+					this.state.items.map((item, index) => (
+						<ItemEditor key={item.id || `new-${index}`}
+				                item={item}
+				                handleChange={this.handleChange}
+				                handleSave={this.upsertItem}
+				                isCreator={isCreator}
+						/>
 					))
 				) : (
 					<div>Aucun article</div>

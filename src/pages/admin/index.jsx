@@ -2,7 +2,6 @@ import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import ProtectedRoute from '../../components/common/ProtectedRoute';
 import { connect } from 'react-redux';
-import actions from '../../redux/actions';
 import { hasManagerRights } from '../../utils';
 
 import Loader from '../../components/common/Loader';
@@ -12,13 +11,14 @@ import AssoSales from './AssoSales';
 import SaleDetail from './SaleDetail';
 import SaleEditor from './SaleEditor/';
 import Error404 from '../Error404';
+import AdminNewSale from './AdminNewSale';
 
 const decorator = connect(store => ({
 	auth: store.getData('auth', {}),
 	userAssos: store.getAuthRelatedData('associations', null),
 }));
 
-class Admin extends React.Component {
+class AdminSite extends React.Component {
 
 	render() {
 		const { auth, userAssos } = this.props;
@@ -42,6 +42,7 @@ class Admin extends React.Component {
 				
 				<Route path={`${base_url}/sales`} exact component={AssoSales} />
 				<Route path={`${base_url}/sales/:sale_id`} exact component={SaleDetail} />
+				<Route path="/admin/new" exact component={AdminNewSale} />
 				
 				<Route component={Error404} />
 			</Switch>
@@ -49,4 +50,4 @@ class Admin extends React.Component {
 	}
 }
 
-export default decorator(Admin);
+export default decorator(AdminSite);

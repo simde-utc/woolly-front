@@ -6,10 +6,7 @@ import Loader from '../../components/common/Loader';
 import SaleCard from '../../components/sales/SaleCard';
 
 const decorator = connect(store => ({
-	sales: store.getData('sales'),
-	pagination: store.getPagination('sales'),
-	fetching: store.isFetching('sales'),
-	fetched: store.isFetched('sales'),
+	sales: store.get('sales'),
 }))
 
 class Sales extends React.Component {
@@ -18,13 +15,13 @@ class Sales extends React.Component {
     }
 
     render(){
-        const { sales, fetched, fetching } = this.props;
+        const { sales } = this.props;
         return(
 			<div className="container" style={{marginTop: "60px"}}>
                 <h2 style={titleStyle}>Liste des ventes de {"Baignoires dans l'Oise"}</h2>
-                <Loader loading={!fetched || fetching} text=" Récupération des ventes en cours...">
+                <Loader loading={!sales.fetched || sales.fetching} text=" Récupération des ventes en cours...">
                     <div style={{ display: 'flex' }}>
-                        {sales.map(sale => (
+                        {Object.values(sales.data).map(sale => (
                             <SaleCard key={sale.id} sale={sale} />
                         ))}
                     </div>

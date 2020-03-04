@@ -10,10 +10,7 @@ const connnector = connect(store => {
 	return {
 		authId,
 		assos: authId ? store.getAuthRelatedData('associations', {}) : {},
-		sales: store.getData('sales'),
-		fetching: store.isFetching('sales'),
-		fetched: store.isFetched('sales'),
-		// pagination: store.getPagination('sales'),
+		sales: store.get('sales'),
 	};
 })
 
@@ -30,9 +27,6 @@ class AdminDashboard extends React.Component {
 
 	render() {
 		const { assos } = this.props;
-		window.p = this.props;
-
-		// const { sales, fetched, fetching } = this.props;
 		return (
 			<div className="container">
 				<h1>Admin Dashboard</h1>
