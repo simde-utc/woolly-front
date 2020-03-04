@@ -51,19 +51,6 @@ if (process.env.NODE_ENV === 'development') {
 |---------------------------------------------------------
 */
 
-/** Helper to get path and id from an action meta */
-function getPathFromMeta(meta) {
-	let path = meta.path;
-	let id = undefined;
-
-	// Pop id from path if needed
-	if (!['updateAll', 'create', 'insert'].includes(meta.action)) {
-		path = path.slice();
-		id = path.pop();
-	}
-	return { path, id };
-}
-
 /**
  * Casse une route uri (string) en array
  * Exemple: 'assos/calendars' => ['assos', 'calendars']
@@ -77,6 +64,19 @@ function pathToArray(path) {
 
 function mergePath(path, ...additionalSteps) {
 	return pathToArray(path).concat(additionalSteps);
+}
+
+/** Helper to get path and id from an action meta */
+function getPathFromMeta(meta) {
+	let path = meta.path;
+	let id = undefined;
+
+	// Pop id from path if needed
+	if (!['updateAll', 'create', 'insert'].includes(meta.action)) {
+		path = path.slice();
+		id = path.pop();
+	}
+	return { path, id };
 }
 
 
@@ -206,7 +206,7 @@ function processPagination(payload) {
 		const { results, ...pagination } = payload;
 		return { data: results, pagination: pagination };
 	} else {
-		return { data: payload, pagination: {} };
+		return { data: payload, pagination: null };
 	}
 }
 
@@ -226,7 +226,7 @@ export const apiReducer = (state = apiStore, action) => {
 			let { path, id } = getPathFromMeta(action.meta);
 			let place = buildPathInStore(draft, path);
 
-			// Async call is loading
+			// CASE LOADING: Async call is loading
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.loading}`)) {
 				place.fetching = true;
 				place.status = null;
@@ -235,7 +235,7 @@ export const apiReducer = (state = apiStore, action) => {
 
 			const statusIsValid = action.meta.validStatus.includes(action.payload.status || action.payload.response.status);
 
-			// Async call has failed
+			// ====== CASE ERROR: Async call has failed
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.error}`)) {
 				// if (id) // TODO ????
 				// 	place = buildPathInStore(draft, path.concat([id]));
@@ -252,7 +252,7 @@ export const apiReducer = (state = apiStore, action) => {
 			// Async call has succeeded
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.success}`)) {
 
-				// HTTP status is not acceptable
+				// ====== CASE HTTP ERROR: HTTP status is not acceptable
 				if (!statusIsValid) {
 					// place.data = {};
 					place.fetching = false;
@@ -263,12 +263,15 @@ export const apiReducer = (state = apiStore, action) => {
 					return draft;
 				}
 
+				// ====== CASE SUCCESS: Update store
+
 				// Set pagination, timestamp, status and others indicators
 				const { timestamp, status } = action.payload;
 				const { data, pagination } = processPagination(action.payload.data);
 				if (pagination)
 					place.pagination = pagination
 
+				// The resource place where to store the data
 				place = makeResourceSuccessful(place, timestamp, status);
 				id = id || data.id; // TODO
 
@@ -287,11 +290,11 @@ export const apiReducer = (state = apiStore, action) => {
 
 					// Modify data and Create places in resources for each element according to id
 					if (Array.isArray(data)) {      // Array: Multiple elements with id
-						for (const element of data) {
+						data.forEach(element => {
 							const e_id = element.id; // TODO
 							place.data[e_id] = element;
 							buildSuccessfulDataStorePath(element, e_id);
-						}
+						});
 					} else if (id) {                // Resource with id: Single id
 						place.data = data;
 						buildSuccessfulDataStorePath(data, id);
@@ -302,8 +305,7 @@ export const apiReducer = (state = apiStore, action) => {
 						// 	buildSuccessfulDataStorePath(data[key], key);
 					}
 
-				} else {
-					// Single element 
+				} else {			// Single element 
 
 					// Modify place.data and place.resources
 					if (['create', 'insert', 'update'].includes(action.meta.action)) {
