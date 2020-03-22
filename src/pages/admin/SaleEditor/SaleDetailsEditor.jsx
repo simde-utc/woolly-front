@@ -21,7 +21,7 @@ class SaleDetailsEditor extends React.Component {
 					<Grid item md={6}>
 						{this.field.text('name', 'Nom')}
 						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
-						{this.field.text('association', 'Association')}
+						{this.field.select('association', 'Association', this.props.assos)}
 					</Grid>
 
 					<Grid item md={6}>
@@ -32,7 +32,7 @@ class SaleDetailsEditor extends React.Component {
 						{this.field.integer('max_item_quantity', 'Quantité max')}
 					</Grid>
 				</Grid>
-				<Button onClick={this.handleSave}>
+				<Button onClick={this.props.handleSave}>
 					{ this.props.isCreator ? "Créer" : "Sauvegarder"}
 				</Button>
 			</React.Fragment>

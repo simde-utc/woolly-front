@@ -1,11 +1,12 @@
 import React from 'react'
 // import PropTypes from 'prop-types';
-import axios from 'axios';
 // import actions from '../../../redux/actions';
 import { connect } from 'react-redux';
+import produce from 'immer';
+
+import { apiAxios } from '../../../redux/actions';
 import { deepcopy } from '../../../utils';
 import { BLANK_ORDER_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import produce from 'immer';
 
 import { Button } from '@material-ui/core';
 import SaleDetailsEditor from './SaleDetailsEditor';
@@ -47,16 +48,16 @@ class SaleEditor extends React.Component {
 	isCreator = (props = this.props) => props.sale_id === null
 
 	handleChange = event => {
-		const value = event.currentTarget.value;
-		const { key, maxsize } = event.currentTarget.dataset;
+		const { name, value } = event.target;
+		// const { maxsize } = event.currentTarget.dataset;
 
 		// Value verification
-		if (maxsize)
-			value = value.slice(maxsize)
+		// if (maxsize)
+		// 	value = value.slice(maxsize)
 
 		// Update value in state
 		const newState = produce(this.state, draft => {
-			key.split('.').reduce((place, step, index, stepsArr) => {
+			name.split('.').reduce((place, step, index, stepsArr) => {
 				if (index === stepsArr.length - 1)
 					place[step] = value;
 				return place[step];
@@ -66,8 +67,17 @@ class SaleEditor extends React.Component {
 		this.setState(newState);
 	}
 
-	saveDetails = () => {
+	saveDetails = async () => {
+		const { details } = this.state;
+		const isCreator = this.isCreator();
+		const resp = await apiAxios.request({
+			method: isCreator ? 'post' : 'update',
+			url: isCreator ? 'sales' : `sales/${this.props.sale_id}`,
+			data: details,
+			withCredentials: true,
+		})
 
+		console.log(resp)
 	}
 
 	addItem = () => this.setState(prevState => ({
@@ -84,6 +94,10 @@ class SaleEditor extends React.Component {
 
 	render() {
 		const isCreator = this.isCreator();
+		const assosChoices = Object.values(this.props.userAssos).map(asso => ({
+			value: asso.id,
+			label: asso.shortname,
+		}))
 		return (
 			<div className="container">
 				{isCreator ? (
@@ -94,6 +108,7 @@ class SaleEditor extends React.Component {
 				
 				<h2>Détails</h2>
 				<SaleDetailsEditor details={this.state.details}
+								   assos={assosChoices}
 				                   handleChange={this.handleChange}
 				                   handleSave={this.saveDetails}
 				                   isCreator={isCreator}
