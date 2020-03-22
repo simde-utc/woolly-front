@@ -48,7 +48,8 @@ class SaleEditor extends React.Component {
 	isCreator = (props = this.props) => props.sale_id === null
 
 	handleChange = event => {
-		const { name, value } = event.target;
+		const valueKey = event.target.hasOwnProperty('checked') ? 'checked' : 'value';
+		const { name, [valueKey]: value } = event.target;
 		// const { maxsize } = event.currentTarget.dataset;
 
 		// Value verification

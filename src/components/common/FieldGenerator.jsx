@@ -44,7 +44,7 @@ class FieldGenerator {
 			control={
 				<Checkbox
 					name={this.getKey(key)}
-					checked={this.getValue(key, props)}
+					checked={this.getValue(key, props) || false}
 					onChange={this.handleChange}
 				/>
 			}
