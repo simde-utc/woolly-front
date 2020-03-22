@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import actions from './redux/actions';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 // Layout components
 import Header from './components/Header';
@@ -31,6 +33,7 @@ const AdminSite = React.lazy(() => import('./pages/admin/'));
 const HEADER_HEIGHT = 64;
 const FOOTER_HEIGHT = 40;
 
+
 class App extends React.Component {
 	componentDidMount() {
 		// Get connected user
@@ -40,36 +43,38 @@ class App extends React.Component {
 	render() {
 		return (
 			<Provider store={store}>
-				<CssBaseline />
-				<MainLoader>
-					<BrowserRouter>
-						<div style={{
-							paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT,
-							height: '100%', boxSizing: 'border-box', overflowY: 'auto',
-						}}>
-							<Header height={HEADER_HEIGHT} />
-							<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
-								<Switch>
-									<ProtectedRoute path="/admin" component={AdminSite} />
-									<Route path="/" exact component={PublicSite} />
+				<MuiPickersUtilsProvider utils={DateFnsUtils}>
+					<CssBaseline />
+					<MainLoader>
+						<BrowserRouter>
+							<div style={{
+								paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT,
+								height: '100%', boxSizing: 'border-box', overflowY: 'auto',
+							}}>
+								<Header height={HEADER_HEIGHT} />
+								<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
+									<Switch>
+										<ProtectedRoute path="/admin" component={AdminSite} />
+										<Route path="/" exact component={PublicSite} />
 
-									<Route path="/sales" exact component={Sales} />
-									<Route path="/sales/:sale_id" exact component={SaleDetail} />
+										<Route path="/sales" exact component={Sales} />
+										<Route path="/sales/:sale_id" exact component={SaleDetail} />
 
-									<ProtectedRoute path="/account" exact component={Account} />
-									<ProtectedRoute path="/orders" exact component={Orders} />
-									<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
+										<ProtectedRoute path="/account" exact component={Account} />
+										<ProtectedRoute path="/orders" exact component={Orders} />
+										<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
 
-									<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
-									<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
+										<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
+										<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
 
-									<Route component={Error404} />
-								</Switch>
-							</React.Suspense>
-							<Footer height={FOOTER_HEIGHT} />
-						</div>
-					</BrowserRouter>
-				</MainLoader>
+										<Route component={Error404} />
+									</Switch>
+								</React.Suspense>
+								<Footer height={FOOTER_HEIGHT} />
+							</div>
+						</BrowserRouter>
+					</MainLoader>
+				</MuiPickersUtilsProvider>
 			</Provider>
 		);
 	}

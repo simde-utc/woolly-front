@@ -11,7 +11,7 @@ import AssoSales from './AssoSales';
 import SaleDetail from './SaleDetail';
 import SaleEditor from './SaleEditor/';
 import Error404 from '../Error404';
-import AdminNewSale from './AdminNewSale';
+
 
 const decorator = connect(store => ({
 	auth: store.getData('auth', {}),
@@ -42,7 +42,6 @@ class AdminSite extends React.Component {
 				
 				<Route path={`${base_url}/sales`} exact component={AssoSales} />
 				<Route path={`${base_url}/sales/:sale_id`} exact component={SaleDetail} />
-				<Route path="/admin/new" exact component={AdminNewSale} />
 				
 				<Route component={Error404} />
 			</Switch>

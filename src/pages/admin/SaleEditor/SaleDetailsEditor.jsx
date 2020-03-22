@@ -1,5 +1,8 @@
 import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
 import { Grid, Button } from '@material-ui/core';
+import { mergeClasses } from '../../../utils';
+
 import FieldGenerator from '../../../components/common/FieldGenerator';
 
 
@@ -15,18 +18,21 @@ class SaleDetailsEditor extends React.Component {
 	}
 
 	render() {
+		const { classes } = this.props;
 		return (
 			<React.Fragment>
 				<Grid container spacing={3}>
-					<Grid item md={6}>
+					<Grid item xs={12} sm={8} className={classes.column}>
 						{this.field.text('name', 'Nom')}
-						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
 						{this.field.select('association', 'Association', this.props.assos)}
+						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
 					</Grid>
 
-					<Grid item md={6}>
-						{this.field.datetime('begin_at', 'Ouverture')}
-						{this.field.datetime('end_at', 'Fermeture')}
+					<Grid container item xs={12} sm={4} className={mergeClasses(classes, 'column', 'controls')}>
+						<Grid item xs={12}>
+							{this.field.datetime('begin_at', 'Ouverture')}
+							{this.field.datetime('end_at', 'Fermeture')}
+						</Grid>
 						{this.field.boolean('is_active', 'Active')}
 						{this.field.boolean('is_public', 'Publique')}
 						{this.field.integer('max_item_quantity', 'Quantité max')}
@@ -41,4 +47,16 @@ class SaleDetailsEditor extends React.Component {
 
 }
 
-export default SaleDetailsEditor;
+const styles = {
+	column: {
+		display: 'flex',
+		flexDirection: 'column',
+		paddingTop: '0 !important',
+		paddingBottom: '0 !important',
+	},
+	controls: {
+		maxWidth: 300,
+	},
+};
+
+export default withStyles(styles)(SaleDetailsEditor);

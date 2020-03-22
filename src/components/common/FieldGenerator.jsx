@@ -3,6 +3,8 @@ import {
 	TextField, Checkbox, FormControlLabel,
 	FormControl, InputLabel, Select, MenuItem
 } from '@material-ui/core';
+import { KeyboardDateTimePicker } from '@material-ui/pickers';
+
 
 class FieldGenerator {
 
@@ -10,6 +12,11 @@ class FieldGenerator {
 		this.store = store;
 		this.handleChange = handleChange;
 		this.keyPrefix = keyPrefix;
+	}
+
+	handleChangeDatetime = name => value => {
+		const fakeEvent = { target: { name, value } };
+		return this.handleChange(fakeEvent);
 	}
 
 	needUpdate = (store, handleChange) => {
@@ -63,12 +70,12 @@ class FieldGenerator {
 	)
 
 	datetime = (key, label, props = {}) => (
-		<TextField
+		<KeyboardDateTimePicker
 			label={label}
-			name={this.getKey(key)}
-			value={this.getValue(key, props) || Date.now()}
-			onChange={this.handleChange}
-			type="datetime"
+			value={this.getValue(key, props) || new Date()}
+			onChange={this.handleChangeDatetime(this.getKey(key))}
+			format="yyyy/MM/dd hh:mm"
+			showTodayButton
 			{...props}
 		/>
 	)

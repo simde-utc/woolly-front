@@ -12,6 +12,7 @@ import { Button } from '@material-ui/core';
 import SaleDetailsEditor from './SaleDetailsEditor';
 import ItemEditor from './ItemEditor';
 
+
 const connector = connect((store, props) => {
 	const sale_id = props.match.params.sale_id || null;
 	return {
@@ -33,8 +34,8 @@ class SaleEditor extends React.Component {
 		this.isCreator(props) ? ({
 			'details': {
 				...deepcopy(BLANK_ORDER_DETAILS),
-				begin_at: Date.now(),
-				end_at: Date.now()
+				begin_at: new Date(),
+				end_at: new Date(),
 			},
 			'groups': [],
 			'items': []
