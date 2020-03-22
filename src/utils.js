@@ -1,5 +1,16 @@
 import React from 'react';
 
+
+/*
+|---------------------------------------------------------
+|		Style utils
+|---------------------------------------------------------
+*/
+
+export function mergeClasses(classes, ...names) {
+	return names.reduce((name, merged) => `${merged} ${classes[name]}`, '').slice(1);
+}
+
 /*
 |---------------------------------------------------------
 |		Object utils
