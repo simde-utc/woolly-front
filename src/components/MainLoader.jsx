@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import actions from '../redux/actions'
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import Loader from './common/Loader';

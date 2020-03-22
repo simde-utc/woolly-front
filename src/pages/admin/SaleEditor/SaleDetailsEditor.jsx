@@ -10,17 +10,18 @@ class SaleDetailsEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.field = new FieldGenerator(this.props.details, this.props.handleChange, 'details');
+		this.field = new FieldGenerator(this.props.details, this.props.errors, this.props.handleChange, 'details');
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		return this.field.needUpdate(nextProps.details, nextProps.handleChange);
+		return this.field.needUpdate(nextProps.details, nextProps.errors, nextProps.handleChange);
 	}
 
 	render() {
 		const { classes } = this.props;
 		return (
 			<React.Fragment>
+				<span>{JSON.stringify(this.props.errors)}</span>
 				<Grid container spacing={3}>
 					<Grid item xs={12} sm={8} className={classes.column}>
 						{this.field.text('name', 'Nom')}

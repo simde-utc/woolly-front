@@ -30,23 +30,25 @@ class SaleEditor extends React.Component {
 		this.state = this.mapPropsToState(props);
 	}
 
-	mapPropsToState = (props) => (
-		this.isCreator(props) ? ({
+	mapPropsToState(props) {
+		return this.isCreator(props) ? {
 			'details': {
 				...deepcopy(BLANK_ORDER_DETAILS),
 				begin_at: new Date(),
 				end_at: new Date(),
 			},
 			'groups': [],
-			'items': []
-		}) : ({
-				'details': deepcopy(BLANK_ORDER_DETAILS),
-				'groups': [],
-				'items': []
-		})
-	)
+			'items': [],
+			'errors': {},
+		} : {
+			'details': deepcopy(BLANK_ORDER_DETAILS),
+			'groups': [],
+			'items': [],
+			'errors': {},
+		};
+	}
 
-	isCreator = (props = this.props) => props.sale_id === null
+	isCreator = (props = this.props) => (props.sale_id === null)
 
 	handleChange = event => {
 		const valueKey = event.target.hasOwnProperty('checked') ? 'checked' : 'value';
@@ -72,14 +74,32 @@ class SaleEditor extends React.Component {
 	saveDetails = async () => {
 		const { details } = this.state;
 		const isCreator = this.isCreator();
-		const resp = await apiAxios.request({
-			method: isCreator ? 'post' : 'update',
-			url: isCreator ? 'sales' : `sales/${this.props.sale_id}`,
-			data: details,
-			withCredentials: true,
-		})
 
-		console.log(resp)
+		try {
+			const response = await apiAxios.request({
+				method: isCreator ? 'post' : 'update',
+				url: isCreator ? 'sales' : `sales/${this.props.sale_id}`,
+				data: details,
+				withCredentials: true,
+			})
+			console.log(response) // DEBUG
+			this.setState(prevState => ({
+				details: response.data,
+				errors: {
+					...prevState.errors,
+					details: {},
+				},
+			}));
+			// TODO Update url with id
+		} catch(error) {
+			console.log(error) // DEBUG
+			this.setState(prevState => ({
+				errors: {
+					...prevState.errors,
+					details: error.response.data,
+				},
+			}));
+		}
 	}
 
 	addItem = () => this.setState(prevState => ({
@@ -110,7 +130,8 @@ class SaleEditor extends React.Component {
 				
 				<h2>Détails</h2>
 				<SaleDetailsEditor details={this.state.details}
-								   assos={assosChoices}
+				                   errors={this.state.errors.details || {}}
+				                   assos={assosChoices}
 				                   handleChange={this.handleChange}
 				                   handleSave={this.saveDetails}
 				                   isCreator={isCreator}
@@ -121,10 +142,10 @@ class SaleEditor extends React.Component {
 				{this.state.items.length ? (
 					this.state.items.map((item, index) => (
 						<ItemEditor key={item.id || `new-${index}`}
-				                item={item}
-				                handleChange={this.handleChange}
-				                handleSave={this.upsertItem}
-				                isCreator={isCreator}
+						            item={item}
+						            handleChange={this.handleChange}
+						            handleSave={this.upsertItem}
+						            isCreator={isCreator}
 						/>
 					))
 				) : (

@@ -8,8 +8,11 @@ import { KeyboardDateTimePicker } from '@material-ui/pickers';
 
 class FieldGenerator {
 
-	constructor(store, handleChange, keyPrefix = null) {
+	// TODO Finish error texts
+
+	constructor(store, errors, handleChange, keyPrefix = null) {
 		this.store = store;
+		this.errors = errors;
 		this.handleChange = handleChange;
 		this.keyPrefix = keyPrefix;
 	}
@@ -19,14 +22,19 @@ class FieldGenerator {
 		return this.handleChange(fakeEvent);
 	}
 
-	needUpdate = (store, handleChange) => {
+	needUpdate = (store, errors, handleChange) => {
+		let needUpdate = false;
 		if (this.store !== store) {
 			this.store = store;
-			return true;
+			needUpdate = true;
+		}
+		if (this.errors !== errors) {
+			this.errors = errors;
+			needUpdate = true;
 		}
 		if (this.handleChange !== handleChange)
 			this.handleChange = handleChange;
-		return false;
+		return needUpdate;
 	}
 
 	getKey = (key) => (this.keyPrefix ? `${this.keyPrefix}.${key}` : key)
@@ -35,26 +43,19 @@ class FieldGenerator {
 		key.split('.').reduce((props, step) => props[step], this.store)
 	)
 
+	displayErrors = (key) => (
+		this.errors[key] ? this.errors[key].join('<br>') : ''
+	)
+
 	text = (key, label, props = {}) => (
 		<TextField
 			label={label}
 			name={this.getKey(key)}
 			value={this.getValue(key, props) || ''}
 			onChange={this.handleChange}
+			error={Boolean(this.errors[key])}
+			helperText={this.displayErrors(key)}
 			{...props}
-		/>
-	)
-
-	boolean = (key, label, props = {}) => (
-		<FormControlLabel
-			label={label}
-			control={
-				<Checkbox
-					name={this.getKey(key)}
-					checked={this.getValue(key, props) || false}
-					onChange={this.handleChange}
-				/>
-			}
 		/>
 	)
 
@@ -65,7 +66,24 @@ class FieldGenerator {
 			value={this.getValue(key, props) || 0}
 			onChange={this.handleChange}
 			type="number"
+			error={Boolean(this.errors[key])}
+			helperText={this.displayErrors(key)}
 			{...props}
+		/>
+	)
+
+	boolean = (key, label, props = {}) => (
+		<FormControlLabel
+			label={label}
+			// error={Boolean(this.errors[key])}
+			// helperText={this.displayErrors(key)}
+			control={
+				<Checkbox
+					name={this.getKey(key)}
+					checked={this.getValue(key, props) || false}
+					onChange={this.handleChange}
+				/>
+			}
 		/>
 	)
 
@@ -74,20 +92,21 @@ class FieldGenerator {
 			label={label}
 			value={this.getValue(key, props) || new Date()}
 			onChange={this.handleChangeDatetime(this.getKey(key))}
-			format="yyyy/MM/dd hh:mm"
+			format="yyyy/MM/dd hh:mm:ss"
 			showTodayButton
 			{...props}
 		/>
 	)
 
 	select = (key, label, choices, props = {}) => (
-		<FormControl>
+		<FormControl error={Boolean(this.errors[key])}>
 			<InputLabel htmlFor={this.getKey(key)}>{label}</InputLabel>
 			<Select
 				name={this.getKey(key)}
 				value={this.getValue(key, props) || ''}
 				onChange={this.handleChange}
 				labelId={this.getKey(key)}
+				// helperText={this.displayErrors(key)}
 			>
 				{choices.map(choice => (
 					<MenuItem
