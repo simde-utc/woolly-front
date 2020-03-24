@@ -5,7 +5,7 @@ import actions from '../../redux/actions';
 import { isEmpty } from '../../utils';
 
 import Loader from '../../components/common/Loader';
-import { NavButton } from '../../components/common/Nav';
+import { Link, NavButton } from '../../components/common/Nav';
 
 // import { withStyles } from '@material-ui/core/styles';
 // import { Button, Paper, FormControlLabel, Checkbox } from '@material-ui/core';
@@ -20,7 +20,7 @@ const connector = connect((store, props) => {
 	};
 })
 
-class AdminDashboard extends React.Component {
+class AssoDashboard extends React.Component {
 
 	componentDidMount() {
 		const { asso_id } = this.props;
@@ -41,24 +41,29 @@ class AdminDashboard extends React.Component {
 			<div className="container">
 				<h1>Dashboard de l'asso {asso.shortname}</h1>
 				<h2>Informations</h2>
+				<p>TODO</p>
 
 				<h2>Ventes</h2>
-				<NavButton to="/admin/sales/create">Créer une vente</NavButton>
 				{sales === null ? (
 					<Loader text="Chargement des ventes..." />
 				) : (
 					Object.values(sales).length === 0 ? (
 						<div>Aucune vente n'a été créée</div>
 					) : (
-						Object.values(sales).forEach(sale => (
-							<li>{sale.name}</li>
-						))
+						<ul>
+							{Object.values(sales).map(sale => (
+								<li key={sale.id}>
+									<Link to={`/admin/sales/${sale.id}/edit`}>{sale.name}</Link>
+								</li>
+							))}
+						</ul>
 					)
 				)}
+				<NavButton to="/admin/sales/create">Créer une vente</NavButton>
 			</div>
 		);
 	}
 }
 
 
-export default connector(AdminDashboard);
+export default connector(AssoDashboard);

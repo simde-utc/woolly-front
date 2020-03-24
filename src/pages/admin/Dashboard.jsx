@@ -14,7 +14,7 @@ const connnector = connect(store => {
 	};
 })
 
-class AdminDashboard extends React.Component {
+class Dashboard extends React.Component {
 	componentDidMount() {
 		if (this.props.authId)
 			this.props.dispatch(actions.auth(this.props.authId).associations.all());
@@ -45,4 +45,4 @@ class AdminDashboard extends React.Component {
 	}
 }
 
-export default connnector(AdminDashboard);
+export default connnector(Dashboard);

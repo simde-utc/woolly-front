@@ -9,7 +9,7 @@ const decorator = connect(store => ({
 	sales: store.get('sales'),
 }))
 
-class Sales extends React.Component {
+class AssoSales extends React.Component {
     componentDidMount() {
         this.props.dispatch(actions.sales.all({ include: 'association' }))
     }
@@ -37,4 +37,4 @@ const titleStyle = {
     fontSize: "2em",
 }
 
-export default decorator(Sales)
+export default decorator(AssoSales)
