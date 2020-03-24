@@ -2,8 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles';
 
-import { Paper, Table, TableHead, TableRow, TableBody, TableCell, Tooltip, TableSortLabel, IconButton, Checkbox, FormControlLabel } from '@material-ui/core'
-import FilterListIcon from '@material-ui/icons/FilterList'
+import {
+    Paper, Table, TableHead, TableRow, TableBody, TableCell, Tooltip, TableSortLabel
+} from '@material-ui/core'
+// import { Paper, Table, TableHead, TableRow, TableBody, TableCell, Tooltip, TableSortLabel, IconButton, Checkbox, FormControlLabel } from '@material-ui/core'
+// import FilterListIcon from '@material-ui/icons/FilterList'
 
 const rows = [
     { id: 'name', label: 'Nom' },

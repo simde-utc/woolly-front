@@ -1,8 +1,7 @@
 import React from 'react'
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions from '../../redux/actions';
-import { isEmpty } from '../../utils';
 
 import Loader from '../../components/common/Loader';
 import { Link, NavButton } from '../../components/common/Nav';
@@ -32,11 +31,9 @@ class AssoDashboard extends React.Component {
 
 	render() {
 		const { asso, sales } = this.props;
-		window.p = this.props;
 		if (asso === null)
 			return <Loader />
 
-		const asso_id = this.props.match.params.asso_id;
 		return (
 			<div className="container">
 				<h1>Dashboard de l'asso {asso.shortname}</h1>

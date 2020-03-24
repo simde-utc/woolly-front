@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { shorten } from '../../utils';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Card, CardContent, CardActions, CardMedia, CardHeader } from '@material-ui/core';
