@@ -6,7 +6,7 @@ import { mergeClasses } from '../../../utils';
 import FieldGenerator from '../../../components/common/FieldGenerator';
 
 
-class SaleDetailsEditor extends React.Component {
+class DetailsEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
@@ -21,7 +21,6 @@ class SaleDetailsEditor extends React.Component {
 		const { classes } = this.props;
 		return (
 			<React.Fragment>
-				<span>{JSON.stringify(this.props.errors)}</span>
 				<Grid container spacing={3}>
 					<Grid item xs={12} sm={8} className={classes.column}>
 						{this.field.text('name', 'Nom')}
@@ -60,4 +59,4 @@ const styles = {
 	},
 };
 
-export default withStyles(styles)(SaleDetailsEditor);
+export default withStyles(styles)(DetailsEditor);
