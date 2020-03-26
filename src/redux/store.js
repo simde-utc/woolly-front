@@ -233,7 +233,10 @@ export const apiReducer = (state = apiStore, action) => {
 				return draft;
 			}
 
-			const statusIsValid = action.meta.validStatus.includes(action.payload.status || action.payload.response.status);
+			const status = (action.payload.status || (
+				action.payload.response && action.payload.response.status
+			));
+			const statusIsValid = action.meta.validStatus.includes(status);
 
 			// ====== CASE ERROR: Async call has failed
 			if (action.type.endsWith(`_${ASYNC_SUFFIXES.error}`)) {
@@ -245,7 +248,7 @@ export const apiReducer = (state = apiStore, action) => {
 				place.fetched = statusIsValid;
 				place.error = action.payload;
 				place.failed = statusIsValid;
-				place.status = action.payload.response.status;
+				place.status = status;
 				return draft;
 			}
 
