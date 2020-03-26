@@ -2,6 +2,13 @@ import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
 
 export const API_URL = process.env.API_URL || 'http://localhost:8000';
 
+// Regex
+
+export const REGEX_SLUG = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
+
+
+// Orders
+
 export const ORDER_STATUS = {
 	0: { color: '#565656', actions: [ 'cancel', ],            label: 'En cours' },
 	1: { color: '#ff5722', actions: [ 'cancel', ],            label: 'En attente de Validation' },
@@ -19,7 +26,10 @@ export const ORDER_ACTIONS = {
 	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
 }
 
-export const BLANK_ORDER_DETAILS = {
+// Blank data
+
+export const BLANK_SALE_DETAILS = {
+	id: "",
 	name: "",
 	description: "",
 	association: null,

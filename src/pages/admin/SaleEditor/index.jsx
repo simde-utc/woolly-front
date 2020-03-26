@@ -4,9 +4,8 @@ import { connect } from 'react-redux';
 import actions from '../../../redux/actions';
 import produce from 'immer';
 
-import { apiAxios } from '../../../redux/actions';
+import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
 import { deepcopy } from '../../../utils';
-import { BLANK_ORDER_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
 
 import { Button } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
@@ -50,7 +49,7 @@ class SaleEditor extends React.Component {
 			return {
 				loading_details: false,
 				details: {
-					...deepcopy(BLANK_ORDER_DETAILS),
+					...deepcopy(BLANK_SALE_DETAILS),
 					begin_at: new Date(),
 					end_at: new Date(),
 				},
@@ -63,29 +62,26 @@ class SaleEditor extends React.Component {
 				loading_details: false,
 				name: data.name,
 				details: deepcopy(data),
-				groups: [],
+				itemgroups: [],
 				items: [],
 				errors: {},
 			};
 		} else if (props.sale) {
 			// Got sale data from store
-			const { items, ...sale } = props.sale;
+			const { items = [], ...sale } = props.sale;
 			return {
 				name: sale.name,
 				details: deepcopy(sale),
-				groups: [],
+				itemgroups: [],
 				items,
 				errors: {},
+				saving_details: false,
 				loading_details: false,
 				loading_items: false,
 			};
 		} else {
-			// Fetch sale data with redux action
-			const saleId = props.match.params.sale_id;
-			this.props.dispatch(actions.sales.find(saleId, {
-				include: 'items' // TODO itemgroups
-			}));
-
+			const saleId = this.props.match.params.sale_id;
+			this.props.dispatch(actions.sales.find(saleId, { include: 'items,itemgroups' }));
 			return { loading_details: true, loading_items: true };
 		}
 	}
@@ -98,35 +94,46 @@ class SaleEditor extends React.Component {
 		// const { maxsize } = event.currentTarget.dataset;
 
 		// Value verification
+		// if (name === 'details.id' && value.length && !REGEX_SLUG.test(value))
+		// 	return;
 		// if (maxsize)
 		// 	value = value.slice(maxsize)
 
 		// Update value in state
-		const newState = produce(this.state, draft => {
+		this.setState(prevState => produce(prevState, draft => {
 			name.split('.').reduce((place, step, index, stepsArr) => {
 				if (index === stepsArr.length - 1)
 					place[step] = value;
 				return place[step];
 			}, draft);
 			return draft;
-		});
-		this.setState(newState);
+		}));
 	}
 
 	handleSaveDetails = async event => {
 		const { details } = this.state;
 		const isCreator = this.isCreator();
 
+		// Check id value
+		if (!REGEX_SLUG.test(details.id))
+			return this.setState(prevState => produce(prevState, draft => {
+				draft.errors.details = draft.errors.details || {};
+				draft.errors.details.id = ["Invalide"];
+				return draft;
+			}));
+
+		// Create or update details
 		try {
-			const response = await apiAxios.request({
-				method: isCreator ? 'post' : 'update',
-				url: isCreator ? 'sales' : `sales/${this.props.sale_id}`,
-				data: details,
-				withCredentials: true,
-			})
-			const data = response.data;
-			const saleId = data.id;
-			return this.props.history.push(`/admin/sales/${saleId}/edit`, { data });
+			if (isCreator) {
+				// TODO Create and store with id after await
+				const response = await actions.sales.create(null, details).payload;
+				const data = response.data;
+				const saleId = data.id;
+				return this.props.history.push(`/admin/sales/${saleId}/edit`, { data });				
+			} else {
+				this.props.dispatch(actions.sales.update(this.props.sale_id, null, details));
+				return this.setState({ saving_details: true });
+			}
 		} catch(error) {
 			console.log(error) // DEBUG
 			this.setState(prevState => ({
@@ -142,8 +149,8 @@ class SaleEditor extends React.Component {
 		items: [ ...prevState.items, deepcopy(BLANK_ITEM) ]		
 	}))
 
-	handleAddGroup = event => this.setState(prevState => ({
-		groups: [ ...prevState.groups, deepcopy(BLANK_ITEMGROUP) ]		
+	handleAddItemGroup = event => this.setState(prevState => ({
+		itemgroups: [ ...prevState.itemgroups, deepcopy(BLANK_ITEMGROUP) ]		
 	}))
 
 	handleSaveItem = event => {
@@ -176,6 +183,7 @@ class SaleEditor extends React.Component {
 					               assos={assosChoices}
 					               handleChange={this.handleChange}
 					               handleSave={this.handleSaveDetails}
+					               saving={this.state.saving_details}
 					               isCreator={isCreator}
 					/>
 				)}

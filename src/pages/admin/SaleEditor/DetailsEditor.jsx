@@ -18,13 +18,15 @@ class DetailsEditor extends React.Component {
 	}
 
 	render() {
-		const { classes } = this.props;
+		const { classes, isCreator } = this.props;
+		const cantUpdate = { disabled: !isCreator };
 		return (
 			<React.Fragment>
 				<Grid container spacing={3}>
 					<Grid item xs={12} sm={8} className={classes.column}>
+						{this.field.text('id', 'ID', cantUpdate)}
 						{this.field.text('name', 'Nom')}
-						{this.field.select('association', 'Association', this.props.assos)}
+						{this.field.select('association', 'Association', this.props.assos, cantUpdate)}
 						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
 					</Grid>
 
@@ -38,8 +40,8 @@ class DetailsEditor extends React.Component {
 						{this.field.integer('max_item_quantity', 'Quantité max')}
 					</Grid>
 				</Grid>
-				<Button onClick={this.props.handleSave}>
-					{ this.props.isCreator ? "Créer" : "Sauvegarder"}
+				<Button onClick={this.props.handleSave} disabled={this.props.saving}>
+					{ isCreator ? "Créer" : "Sauvegarder"}
 				</Button>
 			</React.Fragment>
 		);

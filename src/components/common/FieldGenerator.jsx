@@ -10,11 +10,12 @@ class FieldGenerator {
 
 	// TODO Finish error texts
 
-	constructor(store, errors, handleChange, keyPrefix = null) {
+	constructor(store, errors, handleChange, keyPrefix = null, defaultProps = null) {
 		this.store = store;
 		this.errors = errors;
 		this.handleChange = handleChange;
 		this.keyPrefix = keyPrefix;
+		this.defaultProps = defaultProps;
 	}
 
 	handleChangeDatetime = name => value => {
@@ -43,6 +44,10 @@ class FieldGenerator {
 		key.split('.').reduce((props, step) => props[step], this.store)
 	)
 
+	getProps = (props) => (
+		this.defaultProps ? { ...this.defaultProps, ...props } : props
+	)
+
 	displayErrors = (key) => (
 		this.errors[key] ? this.errors[key].join('<br>') : ''
 	)
@@ -55,7 +60,7 @@ class FieldGenerator {
 			onChange={this.handleChange}
 			error={Boolean(this.errors[key])}
 			helperText={this.displayErrors(key)}
-			{...props}
+			{...this.getProps(props)}
 		/>
 	)
 
@@ -68,7 +73,7 @@ class FieldGenerator {
 			type="number"
 			error={Boolean(this.errors[key])}
 			helperText={this.displayErrors(key)}
-			{...props}
+			{...this.getProps(props)}
 		/>
 	)
 
@@ -94,7 +99,7 @@ class FieldGenerator {
 			onChange={this.handleChangeDatetime(this.getKey(key))}
 			format="yyyy/MM/dd hh:mm:ss"
 			showTodayButton
-			{...props}
+			{...this.getProps(props)}
 		/>
 	)
 
@@ -107,6 +112,7 @@ class FieldGenerator {
 				onChange={this.handleChange}
 				labelId={this.getKey(key)}
 				// helperText={this.displayErrors(key)}
+				{...this.getProps(props)}
 			>
 				{choices.map(choice => (
 					<MenuItem
