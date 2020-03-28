@@ -5,7 +5,7 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { deepcopy } from '../../../utils';
+import { deepcopy, isEmpty } from '../../../utils';
 
 import { Button } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
@@ -15,11 +15,27 @@ import Loader from '../../../components/common/Loader';
 
 const connector = connect((store, props) => {
 	const sale_id = props.match.params.sale_id || null;
+
+	const assos = store.getAuthRelatedData('associations', {});
+	const assosChoices = Object.values(assos).map(asso => ({
+		value: asso.id,
+		label: asso.shortname,
+	}));
+
+	const usertypes = store.get('usertypes');
+	console.log(usertypes)
+	const usertypesChoices = Object.values(usertypes.data).map(usertype => ({
+		value: usertype.id,
+		label: usertype.name,
+	}));
+
 	return {
 		sale_id,
-		userAssos: store.getAuthRelatedData('associations', {}),
+		assosChoices,
+		usertypes,
+		usertypesChoices,
 		sale: sale_id ? store.getData(['sales', sale_id], null) : null,
-		items: sale_id ? store.getData(['sales', sale_id, 'items'], null) : null,
+		items: sale_id ? store.getData(['sales', sale_id, 'items'], {}) : {},
 	};
 })
 
@@ -28,6 +44,7 @@ class SaleEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = this.mapPropsToState(props);
+		this.props.dispatch(actions.usertypes.all());
 		window.props = this.props; // DEBUG
 	}
 
@@ -44,6 +61,7 @@ class SaleEditor extends React.Component {
 	isCreator = (props = this.props) => (!props.match.params.sale_id)
 
 	mapPropsToState(props) {
+		const default_errors = { details: {}, items: {} };
 		if (this.isCreator(props)) {
 			// Create sale
 			return {
@@ -53,7 +71,7 @@ class SaleEditor extends React.Component {
 					begin_at: new Date(),
 					end_at: new Date(),
 				},
-				errors: {},
+				errors: default_errors,
 			};
 		} else if (props.location.state && props.location.state.data) {
 			// Get data from freshly created sale
@@ -63,25 +81,26 @@ class SaleEditor extends React.Component {
 				name: data.name,
 				details: deepcopy(data),
 				itemgroups: [],
-				items: [],
-				errors: {},
+				items: {},
+				errors: default_errors,
 			};
 		} else if (props.sale) {
 			// Got sale data from store
-			const { items = [], ...sale } = props.sale;
 			return {
-				name: sale.name,
-				details: deepcopy(sale),
+				name: props.sale.name,
+				details: deepcopy(props.sale),
 				itemgroups: [],
-				items,
-				errors: {},
+				items: props.items,
+				errors: default_errors,
 				saving_details: false,
 				loading_details: false,
 				loading_items: false,
 			};
 		} else {
 			const saleId = this.props.match.params.sale_id;
-			this.props.dispatch(actions.sales.find(saleId, { include: 'items,itemgroups' }));
+			this.props.dispatch(actions.sales.find(saleId));
+			this.props.dispatch(actions.sales(saleId).items.all());
+			// this.props.dispatch(actions.sales(saleId).itemgroups.all());
 			return { loading_details: true, loading_items: true };
 		}
 	}
@@ -117,7 +136,6 @@ class SaleEditor extends React.Component {
 		// Check id value
 		if (!REGEX_SLUG.test(details.id))
 			return this.setState(prevState => produce(prevState, draft => {
-				draft.errors.details = draft.errors.details || {};
 				draft.errors.details.id = ["Invalide"];
 				return draft;
 			}));
@@ -145,9 +163,16 @@ class SaleEditor extends React.Component {
 		}
 	}
 
-	handleAddItem = event => this.setState(prevState => ({
-		items: [ ...prevState.items, deepcopy(BLANK_ITEM) ]		
-	}))
+	handleAddItem = event => {
+		// Create a random id only for state purposes
+		const id = "fake_" +Math.random().toString(36).slice(2);
+		this.setState(prevState => ({
+			items: {
+				...prevState.items,
+				[id]: { id, ...deepcopy(BLANK_ITEM) },
+			}
+		}))
+	}
 
 	handleAddItemGroup = event => this.setState(prevState => ({
 		itemgroups: [ ...prevState.itemgroups, deepcopy(BLANK_ITEMGROUP) ]		
@@ -161,30 +186,28 @@ class SaleEditor extends React.Component {
 
 	render() {
 		const isCreator = this.isCreator();
-		const assosChoices = Object.values(this.props.userAssos).map(asso => ({
-			value: asso.id,
-			label: asso.shortname,
-		}))
+		const title = isCreator ? (
+			"Création d'une vente"
+		) : (
+			"Édition de la vente " + this.state.name || '...'
+		);
 
 		return (
 			<div className="container">
-				{isCreator ? (
-					<h1>Création d'une vente</h1>
-				) : (
-					<h1>Édition de la vente {this.state.name || '...'}</h1>
-				)}
+				<h1>{title}</h1>
 				
 				<h2>Détails</h2>
 				{this.state.loading_details ? (
 					<Loader text="Chargement des détails de la vente..." />
 				) : (
-					<DetailsEditor details={this.state.details}
-					               errors={this.state.errors.details || {}}
-					               assos={assosChoices}
-					               handleChange={this.handleChange}
-					               handleSave={this.handleSaveDetails}
-					               saving={this.state.saving_details}
-					               isCreator={isCreator}
+					<DetailsEditor
+						details={this.state.details}
+						errors={this.state.errors.details}
+						assos={this.props.assosChoices}
+						handleChange={this.handleChange}
+						handleSave={this.handleSaveDetails}
+						saving={this.state.saving_details}
+						isCreator={isCreator}
 					/>
 				)}
 
@@ -194,13 +217,16 @@ class SaleEditor extends React.Component {
 						{this.state.loading_items ? (
 							<Loader text="Chargement des articles..." />
 						) : (
-							this.state.items.length ? (
-								this.state.items.map((item, index) => (
-									<ItemEditor key={item.id || `new-${index}`}
-									            item={item}
-									            handleChange={this.handleChange}
-									            handleSave={this.handleSaveItem}
-									            isCreator={isCreator}
+							!isEmpty(this.state.items) ? (
+								Object.values(this.state.items).map((item, index) => (
+									<ItemEditor
+										key={item.id}
+										item={item}
+										errors={this.state.errors.items[item.id] || {}}
+										handleChange={this.handleChange}
+										handleSave={this.handleSaveItem}
+										usertypes={this.props.usertypesChoices}
+										isCreator={isCreator}
 									/>
 								))
 							) : (

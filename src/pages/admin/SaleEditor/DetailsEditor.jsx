@@ -10,7 +10,7 @@ class DetailsEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.field = new FieldGenerator(this.props.details, this.props.errors, this.props.handleChange, 'details');
+		this.field = new FieldGenerator(props.details, props.errors, props.handleChange, 'details');
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -19,14 +19,14 @@ class DetailsEditor extends React.Component {
 
 	render() {
 		const { classes, isCreator } = this.props;
-		const cantUpdate = { disabled: !isCreator };
+		const onlyCreate = { disabled: !isCreator };
 		return (
 			<React.Fragment>
 				<Grid container spacing={3}>
 					<Grid item xs={12} sm={8} className={classes.column}>
-						{this.field.text('id', 'ID', cantUpdate)}
+						{this.field.text('id', 'ID', onlyCreate)}
 						{this.field.text('name', 'Nom')}
-						{this.field.select('association', 'Association', this.props.assos, cantUpdate)}
+						{this.field.select('association', 'Association', this.props.assos, onlyCreate)}
 						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
 					</Grid>
 
@@ -37,7 +37,7 @@ class DetailsEditor extends React.Component {
 						</Grid>
 						{this.field.boolean('is_active', 'Active')}
 						{this.field.boolean('is_public', 'Publique')}
-						{this.field.integer('max_item_quantity', 'Quantité max')}
+						{this.field.number('max_item_quantity', 'Quantité max')}
 					</Grid>
 				</Grid>
 				<Button onClick={this.props.handleSave} disabled={this.props.saving}>

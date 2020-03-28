@@ -23,7 +23,7 @@ class FieldGenerator {
 		return this.handleChange(fakeEvent);
 	}
 
-	needUpdate = (store, errors, handleChange) => {
+	needUpdate = (store, errors, handleChange, key = null) => {
 		let needUpdate = false;
 		if (this.store !== store) {
 			this.store = store;
@@ -31,6 +31,10 @@ class FieldGenerator {
 		}
 		if (this.errors !== errors) {
 			this.errors = errors;
+			needUpdate = true;
+		}
+		if (key != null && this.keyPrefix !== key) {
+			this.keyPrefix = key;
 			needUpdate = true;
 		}
 		if (this.handleChange !== handleChange)
@@ -64,7 +68,7 @@ class FieldGenerator {
 		/>
 	)
 
-	integer = (key, label, props = {}) => (
+	number = (key, label, props = {}) => (
 		<TextField
 			label={label}
 			name={this.getKey(key)}
