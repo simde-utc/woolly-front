@@ -5,13 +5,18 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { isEmpty, areDifferent } from '../../../utils';
+import { isEmpty, areDifferent, deepcopy } from '../../../utils';
 
 import { Button } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
 import ItemEditor from './ItemEditor';
 import Loader from '../../../components/common/Loader';
 
+
+const BLANK_RESOURCES = {
+	items: BLANK_ITEM,
+	itemgroups: BLANK_ITEMGROUP,
+};
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id || null;
@@ -35,7 +40,8 @@ const connector = connect((store, props) => {
 		usertypesChoices,
 		sale: saleId ? store.getData(['sales', saleId], null) : null,
 		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
-		// itemgroups: saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {},
+		itemgroups: saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {},
+		// itemfields: saleId ? store.getData(['items', itemId, 'itemfields'], {}) : {},
 		fields: store.getData(['fields'], {}),
 	};
 })
@@ -55,9 +61,9 @@ class SaleEditor extends React.Component {
 			this.fetchData();
 
 		// Fetch side resources
-		if (isEmpty(this.props.usertypes))
+		if (!this.props.usertypes.fetched)
 			this.props.dispatch(actions.usertypes.all());
-		if (isEmpty(this.props.fields))
+		if (!this.props.fields.fetched)
 			this.props.dispatch(actions.fields.all());
 	}
 
@@ -75,7 +81,7 @@ class SaleEditor extends React.Component {
 		else {
 			for (const resource of ['sale', 'items', 'itemgroups'])
 				if (areDifferent(prevProps, this.props, resource))
-					this.setState(prevState => this.getStateFor(resource, differentSale && prevState));
+					this.setState(prevState => this.getStateFor(resource, !differentSale && prevState));
 		}
 	}
 
@@ -112,9 +118,10 @@ class SaleEditor extends React.Component {
 					},
 					loading_details: false,
 					loading_items: false,
-					loading_item: {},
 					loading_itemgroups: false,
-					loading_itemgroup: {},
+					saving_details: false,
+					saving_item: {},
+					saving_itemgroup: {},
 				};
 			case 'sale':
 				if (this.props.sale === null)
@@ -124,6 +131,7 @@ class SaleEditor extends React.Component {
 						name: this.props.sale.name,
 						details: this.props.sale,
 						loading_details: false,
+						saving_details: false,
 					};
 			case 'items':
 			case 'itemgroups':
@@ -199,53 +207,71 @@ class SaleEditor extends React.Component {
 		}
 	}
 
-	handleAddItem = event => {
+	handleAddResource = event => {
+		const resource = event.currentTarget.name;
+
 		// Create a random id only for state purposes
 		const id = "fake_" + Math.random().toString(36).slice(2);
 		this.setState(prevState => ({
-			items: {
-				...prevState.items,
-				[id]: { id, _isNew: true, ...BLANK_ITEM },
+			[resource]: {
+				...prevState[resource],
+				[id]: { id, _isNew: true, ...BLANK_RESOURCES[resource] },
 			}
 		}))
 	}
 
-	handleSaveItem = async event => {
+	handleSaveResource = async event => {
 		const saleId = this.props.saleId;
-		const id = event.currentTarget.name;
-		const { _isNew = false, ...item } = this.state.items[id];
+		const { name: resource, value: id } = event.currentTarget;
+		let data = deepcopy(this.state[resource][id]);
+		console.log(resource, id)
+
+		// TODO Set item as loading
+		// this.setState(prevState => produce(prevState, draft => {
+		// 	draft[`saving_${resource}`][id] = true;
+		// 	return draft;
+		// }));
+
 		try {
-			if (_isNew) {
-				this.setState(prevState => ({
-					loading_item: {
-						...prevState.loading_item,
-						[id]: true,
-					}
-				}));
-				const action = actions.sales(saleId).items.create(null, item);
+			if (data._isNew) {
+				delete data.id; // Remove fake id
+				delete data._isNew;
+				data.sale = saleId;
+
+				const action = actions.sales(saleId)[resource].create(null, data);
 				await action.payload;
 
-				// Creation succeeded, remove fake id and dispatch created
+				// Creation succeeded, dispatch created and remove fake id
+				this.props.dispatch(action);
 				this.setState(prevState => produce(prevState, draft => {
-					delete draft.items[id];
+					delete draft[resource][id];
+					// delete draft[`saving_${resource}`][id];
 					return draft;
 				}));
-				this.props.dispatch(action);
 			} else {
-				this.props.dispatch(actions.items.update(id, null, item));
-
+				this.props.dispatch(actions[resource].update(id, null, data));
 			}
 		} catch(error) {
-
+			this.setState(prevState => ({
+				errors: {
+					...prevState.errors,
+					[resource]: {
+						...prevState.errors[resource],
+						[id]: error.response.data,
+					}
+				},
+			}));
 		}
 	}
 
-	handleAddItemGroup = event => {}
-
-	handleSaveItemGroup = async event => {
-		// const item = this.state.items[]
+	handleDeleteResource = async event => {
+		const { name: resource, value: id } = event.currentTarget;
+		this.props.dispatch(actions[resource].delete(id));
+		this.setState(prevState => produce(prevState, draft => {
+			delete draft[resource][id];
+			return draft;
+		}));
 	}
-
 
 	// Rendering
 
@@ -279,7 +305,7 @@ class SaleEditor extends React.Component {
 				{!isCreator && (
 					<React.Fragment>
 						<h2>Articles</h2>
-						{this.state.loading_items ? (
+						{(this.state.loading_items || !this.props.usertypes.fetched) ? (
 							<Loader text="Chargement des articles..." />
 						) : (
 							!isEmpty(this.state.items) ? (
@@ -287,10 +313,13 @@ class SaleEditor extends React.Component {
 									<ItemEditor
 										key={item.id}
 										item={item}
+										groups={this.props.itemgroups}
 										errors={this.state.errors.items[item.id] || {}}
 										handleChange={this.handleChange}
-										handleSave={this.handleSaveItem}
+										handleSave={this.handleSaveResource}
+										handleDelete={this.handleDeleteResource}
 										usertypes={this.props.usertypesChoices}
+										//saving={this.state.saving_details}
 										isCreator={isCreator}
 									/>
 								))
@@ -298,7 +327,13 @@ class SaleEditor extends React.Component {
 								<div>Aucun article</div>
 							)
 						)}
-						<Button onClick={this.handleAddItem}>Ajouter un article</Button>
+						<br/>
+						<Button onClick={this.handleAddResource} name="itemgroups">
+							Ajouter un groupe
+						</Button>
+						<Button onClick={this.handleAddResource} name="items">
+							Ajouter un article
+						</Button>
 					</React.Fragment>
 				)}
 			</div>
