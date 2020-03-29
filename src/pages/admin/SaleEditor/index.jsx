@@ -5,12 +5,13 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { deepcopy, isEmpty } from '../../../utils';
+import { isEmpty, areDifferent, deepcopy } from '../../../utils';
 
 import { Button } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
 import ItemEditor from './ItemEditor';
 import Loader from '../../../components/common/Loader';
+
 
 
 const connector = connect((store, props) => {
@@ -23,7 +24,6 @@ const connector = connect((store, props) => {
 	}));
 
 	const usertypes = store.get('usertypes');
-	console.log(usertypes)
 	const usertypesChoices = Object.values(usertypes.data).map(usertype => ({
 		value: usertype.id,
 		label: usertype.name,
@@ -36,6 +36,8 @@ const connector = connect((store, props) => {
 		usertypesChoices,
 		sale: sale_id ? store.getData(['sales', sale_id], null) : null,
 		items: sale_id ? store.getData(['sales', sale_id, 'items'], {}) : {},
+		// itemgroups: sale_id ? store.getData(['sales', sale_id, 'itemgroups'], {}) : {},
+		fields: store.getData(['fields'], {}),
 	};
 })
 
@@ -43,65 +45,96 @@ class SaleEditor extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = this.mapPropsToState(props);
-		this.props.dispatch(actions.usertypes.all());
+		this.state = this.getStateFor('create');
 		window.props = this.props; // DEBUG
 	}
 
 	// Props and state management
 
+	componentDidMount() {
+		if (!this.isCreator())
+			this.fetchData();
+
+		// Fetch side resources
+		if (isEmpty(this.props.usertypes))
+			this.props.dispatch(actions.usertypes.all());
+		if (isEmpty(this.props.fields))
+			this.props.dispatch(actions.fields.all());
+	}
+
 	componentDidUpdate(prevProps) {
-		if (prevProps.sale !== this.props.sale ||
-			prevProps.match.params.sale_id !== this.props.match.params.sale_id
-		) {
-			this.setState(this.mapPropsToState(this.props));
+		const differentSale = areDifferent(prevProps, this.props, 'sale_id');
+
+		// Going to create mode
+		if (differentSale) {
+			if (this.isCreator())
+				this.setState(this.getStateFor('create'));
+			else
+				this.fetchData();
+		}
+		// Get or update details/items/itemgroups
+		else {
+			for (const resource of ['sale', 'items', 'itemgroups'])
+				if (areDifferent(prevProps, this.props, resource))
+					this.setState(prevState => this.getStateFor(resource, differentSale && prevState));
 		}
 	}
 
-	isCreator = (props = this.props) => (!props.match.params.sale_id)
+	isCreator = () => (!this.props.match.params.sale_id)
 
-	mapPropsToState(props) {
-		const default_errors = { details: {}, items: {} };
-		if (this.isCreator(props)) {
-			// Create sale
-			return {
-				loading_details: false,
-				details: {
-					...deepcopy(BLANK_SALE_DETAILS),
-					begin_at: new Date(),
-					end_at: new Date(),
-				},
-				errors: default_errors,
-			};
-		} else if (props.location.state && props.location.state.data) {
-			// Get data from freshly created sale
-			const data = props.location.state.data;
-			return {
-				loading_details: false,
-				name: data.name,
-				details: deepcopy(data),
-				itemgroups: [],
-				items: {},
-				errors: default_errors,
-			};
-		} else if (props.sale) {
-			// Got sale data from store
-			return {
-				name: props.sale.name,
-				details: deepcopy(props.sale),
-				itemgroups: [],
-				items: props.items,
-				errors: default_errors,
-				saving_details: false,
-				loading_details: false,
-				loading_items: false,
-			};
-		} else {
-			const saleId = this.props.match.params.sale_id;
-			this.props.dispatch(actions.sales.find(saleId));
-			this.props.dispatch(actions.sales(saleId).items.all());
-			// this.props.dispatch(actions.sales(saleId).itemgroups.all());
-			return { loading_details: true, loading_items: true };
+	fetchData() {
+		this.setState({
+			loading_details: true,
+			loading_items: true,
+			loading_itemgroups: true,
+		});
+		const saleId = this.props.match.params.sale_id;
+		this.props.dispatch(actions.sales.find(saleId));
+		this.props.dispatch(actions.sales(saleId).items.all());
+		this.props.dispatch(actions.sales(saleId).itemgroups.all());
+	}
+
+	getStateFor(resource, prevState = null) {
+		switch (resource) {
+			case 'create':
+				return {
+					details: {
+						...BLANK_SALE_DETAILS,
+						begin_at: new Date(),
+						end_at: new Date(),
+					},
+					items: {},
+					itemgroups: {},
+
+					errors: {
+						details: {},
+						items: {},
+						itemgroups: {},
+					},
+					loading_details: false,
+					loading_items: false,
+					loading_itemgroups: false,
+				};
+			case 'sale':
+				if (this.props.sale === null)
+					return { loading_details: true };
+				else
+					return {
+						name: this.props.sale.name,
+						details: this.props.sale,
+						loading_details: false,
+					};
+			case 'items':
+			case 'itemgroups':
+				return {
+					[`loading_${resource}`]: false,
+					[resource]: {
+						...(prevState ? prevState[resource] : {}),
+						...this.props[resource],
+					},
+				};
+			default:
+				throw Error(`Cannot get state for unknown resource '${resource}'`)			
 		}
 	}
 
@@ -130,30 +163,31 @@ class SaleEditor extends React.Component {
 	}
 
 	handleSaveDetails = async event => {
-		const { details } = this.state;
-		const isCreator = this.isCreator();
+		const details = this.state.details;
 
-		// Check id value
-		if (!REGEX_SLUG.test(details.id))
+		// Check values
+		if (!REGEX_SLUG.test(details.id)) {
 			return this.setState(prevState => produce(prevState, draft => {
 				draft.errors.details.id = ["Invalide"];
 				return draft;
 			}));
+		}
 
-		// Create or update details
 		try {
-			if (isCreator) {
-				// TODO Create and store with id after await
-				const response = await actions.sales.create(null, details).payload;
-				const data = response.data;
-				const saleId = data.id;
-				return this.props.history.push(`/admin/sales/${saleId}/edit`, { data });				
+			if (this.isCreator()) {
+				// Create sale
+				const action = actions.sales.create(null, details);
+				const response = await action.payload;
+				// Dispatch creation and go to edit mode
+				this.props.dispatch(action);
+				this.props.history.push(`/admin/sales/${response.data.id}/edit`);				
 			} else {
+				// Update sale details
+				this.setState({ saving_details: true });
 				this.props.dispatch(actions.sales.update(this.props.sale_id, null, details));
-				return this.setState({ saving_details: true });
 			}
 		} catch(error) {
-			console.log(error) // DEBUG
+			// TODO Test
 			this.setState(prevState => ({
 				errors: {
 					...prevState.errors,
@@ -165,22 +199,41 @@ class SaleEditor extends React.Component {
 
 	handleAddItem = event => {
 		// Create a random id only for state purposes
-		const id = "fake_" +Math.random().toString(36).slice(2);
+		const id = "fake_" + Math.random().toString(36).slice(2);
 		this.setState(prevState => ({
 			items: {
 				...prevState.items,
-				[id]: { id, ...deepcopy(BLANK_ITEM) },
+				[id]: { id, _isNew: true, ...BLANK_ITEM },
 			}
 		}))
 	}
 
+	handleSaveItem = async event => {
+		const saleId = this.props.saleId;
+		const id = event.currentTarget.name;
+		const { _isNew = false, ...item } = this.state.items[id];
+		try {
+			if (_isNew) {
+				const response = await actions.sales(saleId).items.create(null, item).payload;
+
+
+			} else {
+				this.props.dispatch(actions.items.update(id, null, item));
+
+			}
+		} catch(error) {
+
+		}
+	}
+
 	handleAddItemGroup = event => this.setState(prevState => ({
-		itemgroups: [ ...prevState.itemgroups, deepcopy(BLANK_ITEMGROUP) ]		
+		itemgroups: [ ...prevState.itemgroups, BLANK_ITEMGROUP ]		
 	}))
 
-	handleSaveItem = event => {
-
+	handleSaveItemGroup = event => {
+		// const item = this.state.items[]
 	}
+
 
 	// Rendering
 
@@ -189,7 +242,7 @@ class SaleEditor extends React.Component {
 		const title = isCreator ? (
 			"Création d'une vente"
 		) : (
-			"Édition de la vente " + this.state.name || '...'
+			"Édition de la vente " + (this.state.name || '...')
 		);
 
 		return (
@@ -233,7 +286,7 @@ class SaleEditor extends React.Component {
 								<div>Aucun article</div>
 							)
 						)}
-						<Button onClick={this.handleAddItem}>Créer un article</Button>
+						<Button onClick={this.handleAddItem}>Ajouter un article</Button>
 					</React.Fragment>
 				)}
 			</div>
