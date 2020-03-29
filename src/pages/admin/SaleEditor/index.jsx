@@ -5,7 +5,7 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { isEmpty, areDifferent, deepcopy } from '../../../utils';
+import { isEmpty, areDifferent } from '../../../utils';
 
 import { Button } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
@@ -13,9 +13,8 @@ import ItemEditor from './ItemEditor';
 import Loader from '../../../components/common/Loader';
 
 
-
 const connector = connect((store, props) => {
-	const sale_id = props.match.params.sale_id || null;
+	const saleId = props.match.params.sale_id || null;
 
 	const assos = store.getAuthRelatedData('associations', {});
 	const assosChoices = Object.values(assos).map(asso => ({
@@ -30,13 +29,13 @@ const connector = connect((store, props) => {
 	}));
 
 	return {
-		sale_id,
+		saleId,
 		assosChoices,
 		usertypes,
 		usertypesChoices,
-		sale: sale_id ? store.getData(['sales', sale_id], null) : null,
-		items: sale_id ? store.getData(['sales', sale_id, 'items'], {}) : {},
-		// itemgroups: sale_id ? store.getData(['sales', sale_id, 'itemgroups'], {}) : {},
+		sale: saleId ? store.getData(['sales', saleId], null) : null,
+		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
+		// itemgroups: saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {},
 		fields: store.getData(['fields'], {}),
 	};
 })
@@ -46,7 +45,7 @@ class SaleEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = this.getStateFor('create');
-		window.props = this.props; // DEBUG
+		window.props = this.props;  // DEBUG
 	}
 
 	// Props and state management
@@ -63,7 +62,7 @@ class SaleEditor extends React.Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		const differentSale = areDifferent(prevProps, this.props, 'sale_id');
+		const differentSale = areDifferent(prevProps, this.props, 'saleId');
 
 		// Going to create mode
 		if (differentSale) {
@@ -80,7 +79,7 @@ class SaleEditor extends React.Component {
 		}
 	}
 
-	isCreator = () => (!this.props.match.params.sale_id)
+	isCreator = () => (!this.props.saleId)
 
 	fetchData() {
 		this.setState({
@@ -88,7 +87,7 @@ class SaleEditor extends React.Component {
 			loading_items: true,
 			loading_itemgroups: true,
 		});
-		const saleId = this.props.match.params.sale_id;
+		const saleId = this.props.saleId;
 		this.props.dispatch(actions.sales.find(saleId));
 		this.props.dispatch(actions.sales(saleId).items.all());
 		this.props.dispatch(actions.sales(saleId).itemgroups.all());
@@ -113,7 +112,9 @@ class SaleEditor extends React.Component {
 					},
 					loading_details: false,
 					loading_items: false,
+					loading_item: {},
 					loading_itemgroups: false,
+					loading_itemgroup: {},
 				};
 			case 'sale':
 				if (this.props.sale === null)
@@ -126,6 +127,7 @@ class SaleEditor extends React.Component {
 					};
 			case 'items':
 			case 'itemgroups':
+				// TODO Update single resource ??
 				return {
 					[`loading_${resource}`]: false,
 					[resource]: {
@@ -180,11 +182,11 @@ class SaleEditor extends React.Component {
 				const response = await action.payload;
 				// Dispatch creation and go to edit mode
 				this.props.dispatch(action);
-				this.props.history.push(`/admin/sales/${response.data.id}/edit`);				
+				this.props.history.push(`/admin/sales/${response.data.id}/edit`);
 			} else {
 				// Update sale details
 				this.setState({ saving_details: true });
-				this.props.dispatch(actions.sales.update(this.props.sale_id, null, details));
+				this.props.dispatch(actions.sales.update(this.props.saleId, null, details));
 			}
 		} catch(error) {
 			// TODO Test
@@ -214,9 +216,21 @@ class SaleEditor extends React.Component {
 		const { _isNew = false, ...item } = this.state.items[id];
 		try {
 			if (_isNew) {
-				const response = await actions.sales(saleId).items.create(null, item).payload;
+				this.setState(prevState => ({
+					loading_item: {
+						...prevState.loading_item,
+						[id]: true,
+					}
+				}));
+				const action = actions.sales(saleId).items.create(null, item);
+				await action.payload;
 
-
+				// Creation succeeded, remove fake id and dispatch created
+				this.setState(prevState => produce(prevState, draft => {
+					delete draft.items[id];
+					return draft;
+				}));
+				this.props.dispatch(action);
 			} else {
 				this.props.dispatch(actions.items.update(id, null, item));
 
@@ -226,11 +240,9 @@ class SaleEditor extends React.Component {
 		}
 	}
 
-	handleAddItemGroup = event => this.setState(prevState => ({
-		itemgroups: [ ...prevState.itemgroups, BLANK_ITEMGROUP ]		
-	}))
+	handleAddItemGroup = event => {}
 
-	handleSaveItemGroup = event => {
+	handleSaveItemGroup = async event => {
 		// const item = this.state.items[]
 	}
 

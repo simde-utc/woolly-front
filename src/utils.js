@@ -29,6 +29,28 @@ export function deepcopy(object) {
 	return JSON.parse(JSON.stringify(object));
 }
 
+export function arrayToMap(array, key) {
+	if (typeof key === 'string')
+		key = object => object[key];
+	return array.reduce((map, object) => {
+		map[key(object)] = object;
+		return map;
+	}, {});
+}
+
+export function areDifferent(a, b, path) {
+	let steps = path.split('.');
+	const lastStep = steps.pop();
+	for (const step of steps) {
+		if (!a.hasOwnProperty(step) || !b.hasOwnProperty(step))
+			return false;
+		a = a[step];
+		b = b[step];
+	}
+	return a[lastStep] !== b[lastStep];
+}
+
+
 /*
 |---------------------------------------------------------
 |		Text utils

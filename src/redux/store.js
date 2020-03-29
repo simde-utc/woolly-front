@@ -202,7 +202,7 @@ function makeResourceSuccessful(resource, timestamp, status) {
 }
 
 function processPagination(payload) {
-	if ('results' in payload) {
+	if (payload.hasOwnProperty('results')) {
 		const { results, ...pagination } = payload;
 		return { data: results, pagination: pagination };
 	} else {
