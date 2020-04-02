@@ -23,7 +23,7 @@ class ItemEditor extends React.Component {
                         <h4>Description</h4>
                         {this.field.text('name', 'Nom')}
                         {this.field.text('description', 'Description')}
-                        {this.field.select('group', 'Groupe', [])}
+                        {this.field.select('group', 'Groupe', this.props.itemgroups)}
                         {this.field.select('usertype', 'Type d\'acheteur', this.props.usertypes)}
                         {this.field.number('price', 'Prix')}
                     </Grid>

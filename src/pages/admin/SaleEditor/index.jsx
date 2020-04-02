@@ -5,10 +5,11 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { isEmpty, areDifferent, deepcopy } from '../../../utils';
+import { isEmpty, areDifferent, dataToChoices, deepcopy } from '../../../utils';
 
-import { Button } from '@material-ui/core';
+import { Button, Paper } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
+import ItemsDisplay from './ItemsDisplay';
 import ItemEditor from './ItemEditor';
 import Loader from '../../../components/common/Loader';
 
@@ -22,25 +23,18 @@ const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id || null;
 
 	const assos = store.getAuthRelatedData('associations', {});
-	const assosChoices = Object.values(assos).map(asso => ({
-		value: asso.id,
-		label: asso.shortname,
-	}));
-
 	const usertypes = store.get('usertypes');
-	const usertypesChoices = Object.values(usertypes.data).map(usertype => ({
-		value: usertype.id,
-		label: usertype.name,
-	}));
+	const itemgroups = saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {};
 
 	return {
 		saleId,
-		assosChoices,
+		assosChoices: dataToChoices(assos, 'shortname'),
 		usertypes,
-		usertypesChoices,
+		usertypesChoices: dataToChoices(usertypes.data, 'name'),
 		sale: saleId ? store.getData(['sales', saleId], null) : null,
 		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
-		itemgroups: saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {},
+		itemgroups,
+		itemgroupsChoices: dataToChoices(itemgroups, 'name'),
 		// itemfields: saleId ? store.getData(['items', itemId, 'itemfields'], {}) : {},
 		fields: store.getData(['fields'], {}),
 	};
@@ -220,11 +214,15 @@ class SaleEditor extends React.Component {
 		}))
 	}
 
+	handleSelectResource = event => {
+		const { name: resource, value: id } = event.currentTarget;
+		this.setState({ selected: { resource, id } });
+	}
+
 	handleSaveResource = async event => {
 		const saleId = this.props.saleId;
 		const { name: resource, value: id } = event.currentTarget;
 		let data = deepcopy(this.state[resource][id]);
-		console.log(resource, id)
 
 		// TODO Set item as loading
 		// this.setState(prevState => produce(prevState, draft => {
@@ -277,6 +275,7 @@ class SaleEditor extends React.Component {
 
 	render() {
 		const isCreator = this.isCreator();
+		const { selected = null } = this.state;
 		const title = isCreator ? (
 			"Création d'une vente"
 		) : (
@@ -291,18 +290,58 @@ class SaleEditor extends React.Component {
 				{this.state.loading_details ? (
 					<Loader text="Chargement des détails de la vente..." />
 				) : (
-					<DetailsEditor
-						details={this.state.details}
-						errors={this.state.errors.details}
-						assos={this.props.assosChoices}
-						handleChange={this.handleChange}
-						handleSave={this.handleSaveDetails}
-						saving={this.state.saving_details}
-						isCreator={isCreator}
-					/>
+					<Paper>
+						<DetailsEditor
+							details={this.state.details}
+							errors={this.state.errors.details}
+							assos={this.props.assosChoices}
+							handleChange={this.handleChange}
+							handleSave={this.handleSaveDetails}
+							saving={this.state.saving_details}
+							isCreator={isCreator}
+						/>
+					</Paper>
 				)}
 
 				{!isCreator && (
+					<React.Fragment>
+						<h2>Articles</h2>
+						{(this.state.loading_items || !this.props.usertypes.fetched) ? (
+							<Loader text="Chargement des articles..." />
+						) : (
+							<div>
+								<ItemsDisplay
+									items={this.state.items}
+									itemgroups={this.state.itemgroups}
+									handleSelect={this.handleSelectResource}
+								/>
+
+								{selected && selected.resource === 'items' && (
+									<ItemEditor
+										item={this.state.items[selected.id]}
+										itemgroups={this.props.itemgroupsChoices}
+										usertypes={this.props.usertypesChoices}
+										errors={this.state.errors.items[selected.id] || {}}
+										handleChange={this.handleChange}
+										handleSave={this.handleSaveResource}
+										handleDelete={this.handleDeleteResource}
+										//saving={this.state.saving_details}
+										isCreator={isCreator}
+									/>
+								)}
+							</div>
+						)}
+						<br/>
+						<Button onClick={this.handleAddResource} name="itemgroups">
+							Ajouter un groupe
+						</Button>
+						<Button onClick={this.handleAddResource} name="items">
+							Ajouter un article
+						</Button>
+					</React.Fragment>
+				)}
+
+				{false && (
 					<React.Fragment>
 						<h2>Articles</h2>
 						{(this.state.loading_items || !this.props.usertypes.fetched) ? (
@@ -313,12 +352,12 @@ class SaleEditor extends React.Component {
 									<ItemEditor
 										key={item.id}
 										item={item}
-										groups={this.props.itemgroups}
+										itemgroups={this.props.itemgroupsChoices}
+										usertypes={this.props.usertypesChoices}
 										errors={this.state.errors.items[item.id] || {}}
 										handleChange={this.handleChange}
 										handleSave={this.handleSaveResource}
 										handleDelete={this.handleDeleteResource}
-										usertypes={this.props.usertypesChoices}
 										//saving={this.state.saving_details}
 										isCreator={isCreator}
 									/>

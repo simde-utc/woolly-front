@@ -19,22 +19,23 @@ class DetailsEditor extends React.Component {
 
 	render() {
 		const { classes, isCreator } = this.props;
-		const onlyCreate = { disabled: !isCreator };
+		const onlyCreate = { required: true, disabled: !isCreator };
+		const required = { required: true };
 		return (
 			<React.Fragment>
 				<Grid container spacing={3}>
-					<Grid item xs={12} sm={8} className={classes.column}>
+					<Grid item xs={12} sm={8} xl={6} className={classes.column}>
+						<h4>Description</h4>
+						{this.field.text('name', 'Nom', required)}
 						{this.field.text('id', 'ID', onlyCreate)}
-						{this.field.text('name', 'Nom')}
 						{this.field.select('association', 'Association', this.props.assos, onlyCreate)}
-						{this.field.text('description', 'Description', { multiline: true, rows: 4 })}
+						{this.field.text('description', 'Description', { required: true, multiline: true, rows: 4 })}
 					</Grid>
 
 					<Grid container item xs={12} sm={4} className={mergeClasses(classes, 'column', 'controls')}>
-						<Grid item xs={12}>
-							{this.field.datetime('begin_at', 'Ouverture')}
-							{this.field.datetime('end_at', 'Fermeture')}
-						</Grid>
+						<h4>Disponibilité</h4>
+						{this.field.datetime('begin_at', 'Ouverture', required)}
+						{this.field.datetime('end_at', 'Fermeture', required)}
 						{this.field.boolean('is_active', 'Active')}
 						{this.field.boolean('is_public', 'Publique')}
 						{this.field.number('max_item_quantity', 'Quantité max')}
