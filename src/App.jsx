@@ -3,9 +3,13 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import actions from './redux/actions';
+
+// Style
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
+import { WoollyTheme } from './themes';
 
 // Layout components
 import Header from './components/Header';
@@ -34,7 +38,26 @@ const HEADER_HEIGHT = 64;
 const FOOTER_HEIGHT = 40;
 
 
+function Wrappers(props) {
+	return (
+		<Provider store={store}>
+			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+				<CssBaseline />
+				<ThemeProvider theme={WoollyTheme}>
+					<MainLoader>
+						<BrowserRouter>
+							{props.children}	
+						</BrowserRouter>
+					</MainLoader>
+				</ThemeProvider>
+			</MuiPickersUtilsProvider>
+		</Provider>
+	);
+}
+
+
 class App extends React.Component {
+
 	componentDidMount() {
 		// Get connected user
 		store.dispatch(actions.auth().all());
@@ -42,40 +65,33 @@ class App extends React.Component {
 
 	render() {
 		return (
-			<Provider store={store}>
-				<MuiPickersUtilsProvider utils={DateFnsUtils}>
-					<CssBaseline />
-					<MainLoader>
-						<BrowserRouter>
-							<div style={{
-								paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT,
-								height: '100%', boxSizing: 'border-box', overflowY: 'auto',
-							}}>
-								<Header height={HEADER_HEIGHT} />
-								<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
-									<Switch>
-										<ProtectedRoute path="/admin" component={AdminSite} />
-										<Route path="/" exact component={PublicSite} />
+			<Wrappers>
+				<div style={{
+					paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT,
+					height: '100%', boxSizing: 'border-box', overflowY: 'auto',
+				}}>
+					<Header height={HEADER_HEIGHT} />
+					<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
+						<Switch>
+							<ProtectedRoute path="/admin" component={AdminSite} />
+							<Route path="/" exact component={PublicSite} />
 
-										<Route path="/sales" exact component={Sales} />
-										<Route path="/sales/:sale_id" exact component={SaleDetail} />
+							<Route path="/sales" exact component={Sales} />
+							<Route path="/sales/:sale_id" exact component={SaleDetail} />
 
-										<ProtectedRoute path="/account" exact component={Account} />
-										<ProtectedRoute path="/orders" exact component={Orders} />
-										<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
+							<ProtectedRoute path="/account" exact component={Account} />
+							<ProtectedRoute path="/orders" exact component={Orders} />
+							<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
 
-										<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
-										<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
+							<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
+							<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />
 
-										<Route component={Error404} />
-									</Switch>
-								</React.Suspense>
-								<Footer height={FOOTER_HEIGHT} />
-							</div>
-						</BrowserRouter>
-					</MainLoader>
-				</MuiPickersUtilsProvider>
-			</Provider>
+							<Route component={Error404} />
+						</Switch>
+					</React.Suspense>
+					<Footer height={FOOTER_HEIGHT} />
+				</div>
+			</Wrappers>
 		);
 	}
 }

@@ -8,7 +8,7 @@ import React from 'react';
 */
 
 export function mergeClasses(classes, ...names) {
-	return names.reduce((name, merged) => `${merged} ${classes[name]}`, '').slice(1);
+	return names.reduce((merged, name) => `${merged} ${classes[name]}`, '').slice(1);
 }
 
 /*
@@ -50,6 +50,12 @@ export function areDifferent(a, b, path) {
 	return a[lastStep] !== b[lastStep];
 }
 
+export function dataToChoices(data, labelKey) {
+	return Object.values(data).map(object => ({
+		value: object.id,
+		label: object[labelKey],
+	}));
+}
 
 /*
 |---------------------------------------------------------
