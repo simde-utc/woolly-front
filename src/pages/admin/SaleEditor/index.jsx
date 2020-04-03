@@ -7,7 +7,7 @@ import produce from 'immer';
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
 import { isEmpty, areDifferent, dataToChoices, deepcopy } from '../../../utils';
 
-import { Button, Paper } from '@material-ui/core';
+import { Grid, Button, Paper } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
 import ItemsDisplay from './ItemsDisplay';
 import ItemEditor from './ItemEditor';
@@ -157,7 +157,10 @@ class SaleEditor extends React.Component {
 
 		// Update value in state
 		this.setState(prevState => produce(prevState, draft => {
+			name.split('.', 0)
 			name.split('.').reduce((place, step, index, stepsArr) => {
+				if (step === 'details' || stepsArr[0] !== 'details' && index === 1)
+					place[step]._editing = true;
 				if (index === stepsArr.length - 1)
 					place[step] = value;
 				return place[step];
@@ -167,7 +170,7 @@ class SaleEditor extends React.Component {
 	}
 
 	handleSaveDetails = async event => {
-		const details = this.state.details;
+		const { _editing, ...details } = this.state.details;
 
 		// Check values
 		if (!REGEX_SLUG.test(details.id)) {
@@ -210,12 +213,14 @@ class SaleEditor extends React.Component {
 			[resource]: {
 				...prevState[resource],
 				[id]: { id, _isNew: true, ...BLANK_RESOURCES[resource] },
-			}
+			},
+			selected: { resource, id },
 		}))
 	}
 
 	handleSelectResource = event => {
-		const { name: resource, value: id } = event.currentTarget;
+		const resource = event.currentTarget.getAttribute('name');
+		const id = event.currentTarget.getAttribute('value');
 		this.setState({ selected: { resource, id } });
 	}
 
@@ -223,6 +228,7 @@ class SaleEditor extends React.Component {
 		const saleId = this.props.saleId;
 		const { name: resource, value: id } = event.currentTarget;
 		let data = deepcopy(this.state[resource][id]);
+		delete data._editing;
 
 		// TODO Set item as loading
 		// this.setState(prevState => produce(prevState, draft => {
@@ -273,9 +279,62 @@ class SaleEditor extends React.Component {
 
 	// Rendering
 
+	renderArticles() {
+		if (this.state.loading_items || !this.props.usertypes.fetched)
+			return <Loader text="Chargement des articles..." />
+
+		const selected = this.state.selected;
+		const display = (
+			<ItemsDisplay
+				items={this.state.items}
+				itemgroups={this.state.itemgroups}
+				usertypes={this.props.usertypes.data}
+				handleSelect={this.handleSelectResource}
+				selected={selected}
+			/>
+		);
+
+		let editor = null;
+		if (selected) {
+			if (selected.resource === 'items')
+				editor = (
+					<ItemEditor
+						item={this.state.items[selected.id]}
+						itemgroups={this.props.itemgroupsChoices}
+						usertypes={this.props.usertypesChoices}
+						errors={this.state.errors.items[selected.id] || {}}
+						handleChange={this.handleChange}
+						handleSave={this.handleSaveResource}
+						handleDelete={this.handleDeleteResource}
+						//saving={this.state.saving_details}
+						isCreator={this.isCreator()}
+					/>
+				);
+			else if (selected.resource === 'itemgroups')
+				editor = 'TODO'
+		}
+
+		return (
+			<React.Fragment>
+				<h2>Articles</h2>
+				<Grid container spacing={4}>
+					<Grid item md={editor ? 6 : 12}>{display}</Grid>
+					{editor && <Grid item md={6}>{editor}</Grid>}
+				</Grid>
+				<div style={{ textAlign: 'center' }}>
+					<Button onClick={this.handleAddResource} name="itemgroups">
+						Ajouter un groupe
+					</Button>
+					<Button onClick={this.handleAddResource} name="items">
+						Ajouter un article
+					</Button>
+				</div>
+			</React.Fragment>
+		);
+	}
+
 	render() {
 		const isCreator = this.isCreator();
-		const { selected = null } = this.state;
 		const title = isCreator ? (
 			"Création d'une vente"
 		) : (
@@ -303,78 +362,7 @@ class SaleEditor extends React.Component {
 					</Paper>
 				)}
 
-				{!isCreator && (
-					<React.Fragment>
-						<h2>Articles</h2>
-						{(this.state.loading_items || !this.props.usertypes.fetched) ? (
-							<Loader text="Chargement des articles..." />
-						) : (
-							<div>
-								<ItemsDisplay
-									items={this.state.items}
-									itemgroups={this.state.itemgroups}
-									handleSelect={this.handleSelectResource}
-								/>
-
-								{selected && selected.resource === 'items' && (
-									<ItemEditor
-										item={this.state.items[selected.id]}
-										itemgroups={this.props.itemgroupsChoices}
-										usertypes={this.props.usertypesChoices}
-										errors={this.state.errors.items[selected.id] || {}}
-										handleChange={this.handleChange}
-										handleSave={this.handleSaveResource}
-										handleDelete={this.handleDeleteResource}
-										//saving={this.state.saving_details}
-										isCreator={isCreator}
-									/>
-								)}
-							</div>
-						)}
-						<br/>
-						<Button onClick={this.handleAddResource} name="itemgroups">
-							Ajouter un groupe
-						</Button>
-						<Button onClick={this.handleAddResource} name="items">
-							Ajouter un article
-						</Button>
-					</React.Fragment>
-				)}
-
-				{false && (
-					<React.Fragment>
-						<h2>Articles</h2>
-						{(this.state.loading_items || !this.props.usertypes.fetched) ? (
-							<Loader text="Chargement des articles..." />
-						) : (
-							!isEmpty(this.state.items) ? (
-								Object.values(this.state.items).map((item, index) => (
-									<ItemEditor
-										key={item.id}
-										item={item}
-										itemgroups={this.props.itemgroupsChoices}
-										usertypes={this.props.usertypesChoices}
-										errors={this.state.errors.items[item.id] || {}}
-										handleChange={this.handleChange}
-										handleSave={this.handleSaveResource}
-										handleDelete={this.handleDeleteResource}
-										//saving={this.state.saving_details}
-										isCreator={isCreator}
-									/>
-								))
-							) : (
-								<div>Aucun article</div>
-							)
-						)}
-						<br/>
-						<Button onClick={this.handleAddResource} name="itemgroups">
-							Ajouter un groupe
-						</Button>
-						<Button onClick={this.handleAddResource} name="items">
-							Ajouter un article
-						</Button>
-					</React.Fragment>
-				)}
+				{!isCreator && this.renderArticles()}
 			</div>
 		);
 	}

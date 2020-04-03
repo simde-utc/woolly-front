@@ -1,5 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardActions, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { 
+    Box, Grid, Card, CardContent, CardActions, Button,
+} from '@material-ui/core';
 import { isEmpty } from '../../../utils';
 
 /*
@@ -20,31 +23,69 @@ import { isEmpty } from '../../../utils';
 }
 */
 
-export function ItemCard({ item, ...props }) {
+const priceFormatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+
+const useStyles = makeStyles(theme => ({
+    item: {
+        display: 'inline-block',
+        flex: 1,
+        minWidth: 200,
+        marginBottom: theme.spacing(2),
+    }
+}));
+
+function isSelected(selected, resource, id) {
     return (
-        <Card raised={props.selected} style={{ display: 'inlineBlock' }}>
-            <CardContent>
-                <h5>{item.name}</h5>
-            </CardContent>
-            <CardActions>
-                <Button
-                    name="items"
-                    value={item.id}
-                    onClick={props.handleSelect}
-                    size="small"
-                >
-                    Modifier
-                </Button>
-            </CardActions>
-        </Card>
+        selected
+        && selected.resource === resource
+        && selected.id === String(id)
     );
 }
 
-export function GroupBlock({ itemgroup, items, ...props}) {
+function displayQuantity(quantity, yesText, noText=null) {
+    if (quantity)
+        return <li><b>{quantity}</b> {yesText}</li>;
+    else if (noText)
+        return <li>{noText}</li>;
+    return null;
+}
+
+export function ItemCard({ item, usertype, ...props }) {
+    const classes = useStyles();
+    // item._editing
     return (
-        <React.Fragment>
-            <h4>{itemgroup.name}</h4>
-            <div>
+        <Grid item className={classes.item}>
+            <Card
+                name="items"
+                value={item.id}
+                onClick={props.handleSelect}
+                raised={props.selected}
+            >
+                <CardContent>
+                    <h5>{item.name || 'Création en cours...'}</h5>
+                    <ul>
+                        <li><b>{item.price ? priceFormatter.format(item.price) : 'Gratuit' }</b></li>
+                        {displayQuantity(item.quantity, 'en vente', 'Quantitées illimitées')}
+                        {displayQuantity(item.max_per_user, 'max par acheteur')}
+                        {usertype && <li>{usertype.name}</li>}
+                    </ul>
+                </CardContent>
+            </Card>
+        </Grid>
+    );
+}
+
+export function GroupBlock({ itemgroup, items, selected, ...props}) {
+    return (
+        <div>
+            <h4
+                name="itemgroups"
+                value={itemgroup.id}
+                onClick={props.handleSelect}
+            >
+                {itemgroup.name}
+            </h4>
+            <Grid container spacing={2}>
                 {isEmpty(itemgroup.items) ? (
                     <span>No items</span>
                 ) : (
@@ -52,18 +93,19 @@ export function GroupBlock({ itemgroup, items, ...props}) {
                         <ItemCard
                             key={id}
                             item={items[id]}
-                            selected={props.selected === id}
+                            usertype={props.usertypes[items[id].usertype]}
+                            selected={isSelected(selected, 'items', id)}
                             handleSelect={props.handleSelect}
                         />
                     ))
                 )}
-            </div>
-        </React.Fragment>
+            </Grid>
+        </div>
     );
 }
 
-function ItemsDisplay({ itemgroups, items, ...props }) {
-    const orphanItems = Object.values(items).filter(item => item.group === null).map(item => item.id);
+function ItemsDisplay({ itemgroups, ...props }) {
+    const orphanItems = Object.values(props.items).filter(item => item.group === null).map(item => item.id);
     const hasOrphans = !isEmpty(orphanItems);
 
     if (hasOrphans && isEmpty(itemgroups))
@@ -74,17 +116,13 @@ function ItemsDisplay({ itemgroups, items, ...props }) {
                 <GroupBlock 
                     key={itemgroup.id}
                     itemgroup={itemgroup}
-                    items={items}
-                    selected={props.selected}
-                    handleSelect={props.handleSelect}
+                    {...props}
                 />
             ))}
             {hasOrphans && (
                 <GroupBlock
                     itemgroup={{ name: 'Sans groupe', items: orphanItems }}
-                    items={items}
-                    selected={props.selected}
-                    handleSelect={props.handleSelect}
+                    {...props}
                 />
             )}
         </div>
