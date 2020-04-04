@@ -10,36 +10,17 @@ class FieldGenerator {
 
 	// TODO Finish error texts
 
-	constructor(store, errors, handleChange, keyPrefix = null, defaultProps = null) {
+	constructor(store, errors, onChange, keyPrefix = null, defaultProps = null) {
 		this.store = store;
 		this.errors = errors;
-		this.handleChange = handleChange;
+		this.onChange = onChange;
 		this.keyPrefix = keyPrefix;
 		this.defaultProps = defaultProps;
 	}
 
-	handleChangeDatetime = name => value => {
+	onChangeDatetime = name => value => {
 		const fakeEvent = { target: { name, value } };
-		return this.handleChange(fakeEvent);
-	}
-
-	needUpdate = (store, errors, handleChange, key = null) => {
-		let needUpdate = false;
-		if (this.store !== store) {
-			this.store = store;
-			needUpdate = true;
-		}
-		if (this.errors !== errors) {
-			this.errors = errors;
-			needUpdate = true;
-		}
-		if (key != null && this.keyPrefix !== key) {
-			this.keyPrefix = key;
-			needUpdate = true;
-		}
-		if (this.handleChange !== handleChange)
-			this.handleChange = handleChange;
-		return needUpdate;
+		return this.onChange(fakeEvent);
 	}
 
 	getKey = (key) => (this.keyPrefix ? `${this.keyPrefix}.${key}` : key)
@@ -61,7 +42,7 @@ class FieldGenerator {
 			label={label}
 			name={this.getKey(key)}
 			value={this.getValue(key, props) || ''}
-			onChange={this.handleChange}
+			onChange={this.onChange}
 			error={Boolean(this.errors[key])}
 			helperText={this.displayErrors(key)}
 			{...this.getProps(props)}
@@ -73,7 +54,7 @@ class FieldGenerator {
 			label={label}
 			name={this.getKey(key)}
 			value={this.getValue(key, props) || 0}
-			onChange={this.handleChange}
+			onChange={this.onChange}
 			type="number"
 			error={Boolean(this.errors[key])}
 			helperText={this.displayErrors(key)}
@@ -90,7 +71,7 @@ class FieldGenerator {
 				<Checkbox
 					name={this.getKey(key)}
 					checked={this.getValue(key, props) || false}
-					onChange={this.handleChange}
+					onChange={this.onChange}
 				/>
 			}
 		/>
@@ -100,7 +81,7 @@ class FieldGenerator {
 		<KeyboardDateTimePicker
 			label={label}
 			value={this.getValue(key, props) || new Date()}
-			onChange={this.handleChangeDatetime(this.getKey(key))}
+			onChange={this.onChangeDatetime(this.getKey(key))}
 			format="yyyy/MM/dd hh:mm:ss"
 			showTodayButton
 			{...this.getProps(props)}
@@ -113,7 +94,7 @@ class FieldGenerator {
 			<Select
 				name={this.getKey(key)}
 				value={this.getValue(key, props) || ''}
-				onChange={this.handleChange}
+				onChange={this.onChange}
 				labelId={this.getKey(key)}
 				// helperText={this.displayErrors(key)}
 				{...this.getProps(props)}

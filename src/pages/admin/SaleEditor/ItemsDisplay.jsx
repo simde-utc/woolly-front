@@ -1,8 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { 
-    Box, Grid, Card, CardContent, CardActions, Button,
-} from '@material-ui/core';
+import { Box, Grid, Card, CardContent, CardActions, Button, } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
 import { isEmpty } from '../../../utils';
 
 /*
@@ -77,30 +76,43 @@ export function ItemCard({ item, usertype, ...props }) {
 
 export function GroupBlock({ itemgroup, items, selected, ...props}) {
     return (
-        <div>
+        <Box display="inline-block" mr={3}>
             <h4
                 name="itemgroups"
                 value={itemgroup.id}
                 onClick={props.handleSelect}
             >
-                {itemgroup.name}
+                {itemgroup.name || 'Création en cours...'}
             </h4>
             <Grid container spacing={2}>
                 {isEmpty(itemgroup.items) ? (
                     <span>No items</span>
                 ) : (
                     itemgroup.items.map(id => (
-                        <ItemCard
-                            key={id}
-                            item={items[id]}
-                            usertype={props.usertypes[items[id].usertype]}
-                            selected={isSelected(selected, 'items', id)}
-                            handleSelect={props.handleSelect}
-                        />
+                        items[id] ? (
+                            <ItemCard
+                                key={id}
+                                item={items[id]}
+                                usertype={props.usertypes[items[id].usertype]}
+                                selected={isSelected(selected, 'items', id)}
+                                handleSelect={props.handleSelect}
+                            />
+                        ) : (
+                            <Grid item key={id}>
+                                <Skeleton
+                                    variant="rect"
+                                    width={210}
+                                    height={120}
+                                    // borderRadius={10}
+                                    style={{ borderRadius: 4 }}
+                                    mb={2}
+                                />
+                            </Grid>
+                        )
                     ))
                 )}
             </Grid>
-        </div>
+        </Box>
     );
 }
 
@@ -111,7 +123,7 @@ function ItemsDisplay({ itemgroups, ...props }) {
     if (hasOrphans && isEmpty(itemgroups))
         return <div>Empty</div>;
     return (
-        <div>
+        <Box mr={-3}>
             {Object.values(itemgroups).map(itemgroup => (
                 <GroupBlock 
                     key={itemgroup.id}
@@ -125,7 +137,7 @@ function ItemsDisplay({ itemgroups, ...props }) {
                     {...props}
                 />
             )}
-        </div>
+        </Box>
     );
 }
 

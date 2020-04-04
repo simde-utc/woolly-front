@@ -5,7 +5,7 @@ import actions from '../../../redux/actions';
 import produce from 'immer';
 
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
-import { isEmpty, areDifferent, dataToChoices, deepcopy } from '../../../utils';
+import { areDifferent, dataToChoices, deepcopy } from '../../../utils';
 
 import { Grid, Button, Paper } from '@material-ui/core';
 import DetailsEditor from './DetailsEditor';
@@ -157,12 +157,15 @@ class SaleEditor extends React.Component {
 
 		// Update value in state
 		this.setState(prevState => produce(prevState, draft => {
-			name.split('.', 0)
+			// if (name)
 			name.split('.').reduce((place, step, index, stepsArr) => {
-				if (step === 'details' || stepsArr[0] !== 'details' && index === 1)
+				// Set as editing
+				if (step === 'details' || (stepsArr[0] !== 'details' && index === 1))
 					place[step]._editing = true;
+				// Update last value
 				if (index === stepsArr.length - 1)
 					place[step] = value;
+				// Go forward
 				return place[step];
 			}, draft);
 			return draft;
@@ -221,7 +224,8 @@ class SaleEditor extends React.Component {
 	handleSelectResource = event => {
 		const resource = event.currentTarget.getAttribute('name');
 		const id = event.currentTarget.getAttribute('value');
-		this.setState({ selected: { resource, id } });
+		if (id)
+			this.setState({ selected: { resource, id } });
 	}
 
 	handleSaveResource = async event => {
@@ -277,6 +281,19 @@ class SaleEditor extends React.Component {
 		}));
 	}
 
+	handleResetResource = event => {
+		const { name: resource, value: id } = event.currentTarget;
+		if (resource === 'details')
+			this.setState(this.getStateFor('sale'))
+		else
+			this.setState((prevState, props) => ({
+				[resource]: {
+					...prevState[resource],
+					[id]: props[resource][id],
+				},
+			}));
+	}
+
 	// Rendering
 
 	renderArticles() {
@@ -295,31 +312,47 @@ class SaleEditor extends React.Component {
 		);
 
 		let editor = null;
+		let editorTitle = null;
 		if (selected) {
-			if (selected.resource === 'items')
+			const isNew = this.state[selected.resource][selected.id]._isNew;
+			editorTitle = isNew ? "Ajouter " : "Modifier ";
+			const editorProps = {
+				'onChange': this.handleChange,
+				'onSave': this.handleSaveResource,
+				'onDelete': this.handleDeleteResource,
+				'onReset': this.handleResetResource,
+			};
+
+			if (selected.resource === 'items') {
+				editorTitle += "un article";
 				editor = (
 					<ItemEditor
 						item={this.state.items[selected.id]}
 						itemgroups={this.props.itemgroupsChoices}
 						usertypes={this.props.usertypesChoices}
 						errors={this.state.errors.items[selected.id] || {}}
-						handleChange={this.handleChange}
-						handleSave={this.handleSaveResource}
-						handleDelete={this.handleDeleteResource}
 						//saving={this.state.saving_details}
-						isCreator={this.isCreator()}
+						{...editorProps}
 					/>
 				);
-			else if (selected.resource === 'itemgroups')
+			}
+			else if (selected.resource === 'itemgroups') {
+				editorTitle += "un groupe";
 				editor = 'TODO'
+			}
 		}
 
 		return (
 			<React.Fragment>
-				<h2>Articles</h2>
 				<Grid container spacing={4}>
-					<Grid item md={editor ? 6 : 12}>{display}</Grid>
-					{editor && <Grid item md={6}>{editor}</Grid>}
+					<Grid item md={editor ? 6 : 12}>
+						<h2>Articles</h2>
+						{display}
+					</Grid>
+					{editor && <Grid item md={6}>
+						<h2>{editorTitle}</h2>
+						{editor}
+					</Grid>}
 				</Grid>
 				<div style={{ textAlign: 'center' }}>
 					<Button onClick={this.handleAddResource} name="itemgroups">
@@ -354,10 +387,10 @@ class SaleEditor extends React.Component {
 							details={this.state.details}
 							errors={this.state.errors.details}
 							assos={this.props.assosChoices}
-							handleChange={this.handleChange}
-							handleSave={this.handleSaveDetails}
 							saving={this.state.saving_details}
 							isCreator={isCreator}
+							onChange={this.handleChange}
+							onSave={this.handleSaveDetails}
 						/>
 					</Paper>
 				)}
