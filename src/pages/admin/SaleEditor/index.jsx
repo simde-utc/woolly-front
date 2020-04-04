@@ -34,7 +34,7 @@ const connector = connect((store, props) => {
 		sale: saleId ? store.getData(['sales', saleId], null) : null,
 		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
 		itemgroups,
-		itemgroupsChoices: dataToChoices(itemgroups, 'name'),
+		itemgroupsChoices: dataToChoices(itemgroups, 'name').concat({ label: 'Sans groupe', value: 'null' }),
 		// itemfields: saleId ? store.getData(['items', itemId, 'itemfields'], {}) : {},
 		fields: store.getData(['fields'], {}),
 	};
@@ -144,27 +144,50 @@ class SaleEditor extends React.Component {
 
 	// Handlers
 
+	_removeItemFromGroup(draft, itemId) {
+		itemId = String(itemId)
+		const item = draft.items[itemId];
+		const group = draft.itemgroups[item.group];
+		if (group)
+			group.items = group.items.filter(id => String(id) !== itemId)
+	}
+
 	handleChange = event => {
 		const valueKey = event.target.hasOwnProperty('checked') ? 'checked' : 'value';
-		const { name, [valueKey]: value } = event.target;
-		// const { maxsize } = event.currentTarget.dataset;
+		let value = event.target[valueKey];
+
+		const name = event.target.name;
+		const steps = name.split('.');
+		const n = steps.length - 1;
 
 		// Value verification
-		// if (name === 'details.id' && value.length && !REGEX_SLUG.test(value))
-		// 	return;
-		// if (maxsize)
-		// 	value = value.slice(maxsize)
+		const { maxsize } = event.currentTarget.dataset;
+		if (maxsize)
+			value = value.slice(maxsize)
 
 		// Update value in state
 		this.setState(prevState => produce(prevState, draft => {
-			// if (name)
-			name.split('.').reduce((place, step, index, stepsArr) => {
+			// Change item group
+			if (steps[0] === 'items' && steps[n] === 'group') {
+				const itemId = steps[1];
+				this._removeItemFromGroup(draft, itemId);
+
+				// Clean if without new group or Add item id to new group
+				if (value === 'null')
+					value = null;
+				else if (draft.itemgroups[value])
+					draft.itemgroups[value].items.push(itemId);
+			}
+
+			steps.reduce((place, step, index, steps) => {
 				// Set as editing
-				if (step === 'details' || (stepsArr[0] !== 'details' && index === 1))
+				if (step === 'details' || (steps[0] !== 'details' && index === 1))
 					place[step]._editing = true;
+
 				// Update last value
-				if (index === stepsArr.length - 1)
+				if (index === n)
 					place[step] = value;
+
 				// Go forward
 				return place[step];
 			}, draft);
@@ -208,14 +231,17 @@ class SaleEditor extends React.Component {
 	}
 
 	handleAddResource = event => {
-		const resource = event.currentTarget.name;
-
 		// Create a random id only for state purposes
+		const resource = event.currentTarget.name;
 		const id = "fake_" + Math.random().toString(36).slice(2);
 		this.setState(prevState => ({
 			[resource]: {
 				...prevState[resource],
-				[id]: { id, _isNew: true, ...BLANK_RESOURCES[resource] },
+				[id]: {
+					id,
+					_isNew: true,
+					...BLANK_RESOURCES[resource],
+				},
 			},
 			selected: { resource, id },
 		}))
@@ -246,16 +272,20 @@ class SaleEditor extends React.Component {
 				delete data._isNew;
 				data.sale = saleId;
 
+				// Create resource
 				const action = actions.sales(saleId)[resource].create(null, data);
 				await action.payload;
 
-				// Creation succeeded, dispatch created and remove fake id
-				this.props.dispatch(action);
+				// Creation succeeded, remove fake id and dispatch created
 				this.setState(prevState => produce(prevState, draft => {
-					delete draft[resource][id];
+					if (resource === 'items')
+						this._removeItemFromGroup(draft, id);
+					
 					// delete draft[`saving_${resource}`][id];
+					draft.selected = null;
+					delete draft[resource][id];
 					return draft;
-				}));
+				}), () => this.props.dispatch(action));
 			} else {
 				this.props.dispatch(actions[resource].update(id, null, data));
 			}
@@ -274,24 +304,30 @@ class SaleEditor extends React.Component {
 
 	handleDeleteResource = async event => {
 		const { name: resource, value: id } = event.currentTarget;
-		this.props.dispatch(actions[resource].delete(id));
 		this.setState(prevState => produce(prevState, draft => {
+			if (resource === 'items')
+				this._removeItemFromGroup(draft, id);
+
+			draft.selected = null;
 			delete draft[resource][id];
 			return draft;
-		}));
+		}), () => this.props.dispatch(actions[resource].delete(id)));
 	}
 
 	handleResetResource = event => {
 		const { name: resource, value: id } = event.currentTarget;
-		if (resource === 'details')
-			this.setState(this.getStateFor('sale'))
-		else
+		if (resource === 'details') {
+			this.setState((prevState, props) => ({
+				details: props.sales,
+			}));
+		} else {
 			this.setState((prevState, props) => ({
 				[resource]: {
 					...prevState[resource],
 					[id]: props[resource][id],
 				},
 			}));
+		}
 	}
 
 	// Rendering
@@ -314,20 +350,21 @@ class SaleEditor extends React.Component {
 		let editor = null;
 		let editorTitle = null;
 		if (selected) {
-			const isNew = this.state[selected.resource][selected.id]._isNew;
-			editorTitle = isNew ? "Ajouter " : "Modifier ";
+			const resource = this.state[selected.resource][selected.id]
+			const isNew = resource && resource._isNew;
 			const editorProps = {
 				'onChange': this.handleChange,
 				'onSave': this.handleSaveResource,
 				'onDelete': this.handleDeleteResource,
 				'onReset': this.handleResetResource,
 			};
+			editorTitle = isNew ? "Ajouter " : "Modifier ";
 
 			if (selected.resource === 'items') {
 				editorTitle += "un article";
 				editor = (
 					<ItemEditor
-						item={this.state.items[selected.id]}
+						item={resource}
 						itemgroups={this.props.itemgroupsChoices}
 						usertypes={this.props.usertypesChoices}
 						errors={this.state.errors.items[selected.id] || {}}

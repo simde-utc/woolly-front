@@ -29,6 +29,7 @@ const useStyles = makeStyles(theme => ({
         display: 'inline-block',
         flex: 1,
         minWidth: 200,
+        maxWidth: 300,
         marginBottom: theme.spacing(2),
     }
 }));
@@ -101,7 +102,7 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
                             <Grid item key={id}>
                                 <Skeleton
                                     variant="rect"
-                                    width={210}
+                                    width={250}
                                     height={120}
                                     // borderRadius={10}
                                     style={{ borderRadius: 4 }}
@@ -117,13 +118,13 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
 }
 
 function ItemsDisplay({ itemgroups, ...props }) {
-    const orphanItems = Object.values(props.items).filter(item => item.group === null).map(item => item.id);
-    const hasOrphans = !isEmpty(orphanItems);
+    const orphanItemIds = Object.values(props.items).filter(item => item.group === null).map(item => item.id);
+    const hasOrphans = !isEmpty(orphanItemIds);
 
     if (hasOrphans && isEmpty(itemgroups))
         return <div>Empty</div>;
     return (
-        <Box mr={-3}>
+        <Box mr={-3} display="flex" flexWrap="wrap">
             {Object.values(itemgroups).map(itemgroup => (
                 <GroupBlock 
                     key={itemgroup.id}
@@ -133,7 +134,7 @@ function ItemsDisplay({ itemgroups, ...props }) {
             ))}
             {hasOrphans && (
                 <GroupBlock
-                    itemgroup={{ name: 'Sans groupe', items: orphanItems }}
+                    itemgroup={{ name: 'Sans groupe', items: orphanItemIds }}
                     {...props}
                 />
             )}

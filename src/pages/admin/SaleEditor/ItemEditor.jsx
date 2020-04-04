@@ -5,6 +5,7 @@ import FieldGenerator from '../../../components/common/FieldGenerator';
 
 function ItemEditor({ item, ...props }) {
     const Field = new FieldGenerator(item, props.errors, props.onChange, `items.${item.id}`);
+    const buttonProps = { name: 'items', value: item.id };
 	return (
         <div>
             <Grid container spacing={3}>
@@ -12,7 +13,7 @@ function ItemEditor({ item, ...props }) {
                     <h4>Description</h4>
                     {Field.text('name', 'Nom')}
                     {Field.text('description', 'Description')}
-                    {Field.select('group', 'Groupe', props.itemgroups)}
+                    {Field.select('group', 'Groupe', props.itemgroups, { default: 'null' })}
                     {Field.select('usertype', 'Type d\'acheteur', props.usertypes)}
                     {Field.number('price', 'Prix')}
                 </Grid>
@@ -29,14 +30,14 @@ function ItemEditor({ item, ...props }) {
             <p>TODO w/ chips</p>
 
             <div>
-                <Button name="items" value={item.id} onClick={props.onReset}>
+                <Button onClick={props.onReset} {...buttonProps}>
                     Annuler
                 </Button>
-                <Button name="items" value={item.id} onClick={props.onSave}>
+                <Button onClick={props.onSave} {...buttonProps}>
                     {item._isNew ? "Créer" : "Sauvegarder" }
                 </Button>
                 {!item._isNew && (
-                    <Button name="items" value={item.id} onClick={props.onDelete}>
+                    <Button onClick={props.onDelete} {...buttonProps}>
                         Supprimer
                     </Button>
                 )}

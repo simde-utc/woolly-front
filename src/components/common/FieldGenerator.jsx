@@ -26,7 +26,7 @@ class FieldGenerator {
 	getKey = (key) => (this.keyPrefix ? `${this.keyPrefix}.${key}` : key)
 
 	getValue = (key, params) => (
-		key.split('.').reduce((props, step) => props[step], this.store)
+		key.split('.').reduce((props, step) => props[step], this.store) || params.default
 	)
 
 	getProps = (props) => (
@@ -101,10 +101,10 @@ class FieldGenerator {
 			>
 				{choices.map(choice => (
 					<MenuItem
-						key={choice.value || choice}
-						value={choice.value || choice}
+						key={choice.value}
+						value={choice.value}
 					>
-						{choice.label || choice}
+						{choice.label}
 					</MenuItem>
 				))}
 			</Select>
