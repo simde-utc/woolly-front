@@ -4,14 +4,14 @@ import { connect } from 'react-redux';
 import actions from '../../../redux/actions';
 import produce from 'immer';
 
+import { Container } from '@material-ui/core';
+
 import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
 import { areDifferent, dataToChoices, deepcopy } from '../../../utils';
 
-import { Grid, Button, Paper } from '@material-ui/core';
-import DetailsEditor from './DetailsEditor';
-import ItemsDisplay from './ItemsDisplay';
-import ItemEditor from './ItemEditor';
 import Loader from '../../../components/common/Loader';
+import DetailsEditor from './DetailsEditor';
+import ItemsManager from './ItemsManager/';
 
 
 const BLANK_RESOURCES = {
@@ -250,8 +250,11 @@ class SaleEditor extends React.Component {
 	handleSelectResource = event => {
 		const resource = event.currentTarget.getAttribute('name');
 		const id = event.currentTarget.getAttribute('value');
+		console.log('select', resource, id)
 		if (id)
 			this.setState({ selected: { resource, id } });
+		if (resource === 'unselect')
+			this.setState({ selected: null });
 	}
 
 	handleSaveResource = async event => {
@@ -332,79 +335,9 @@ class SaleEditor extends React.Component {
 
 	// Rendering
 
-	renderArticles() {
-		if (this.state.loading_items || !this.props.usertypes.fetched)
-			return <Loader text="Chargement des articles..." />
-
-		const selected = this.state.selected;
-		const display = (
-			<ItemsDisplay
-				items={this.state.items}
-				itemgroups={this.state.itemgroups}
-				usertypes={this.props.usertypes.data}
-				handleSelect={this.handleSelectResource}
-				selected={selected}
-			/>
-		);
-
-		let editor = null;
-		let editorTitle = null;
-		if (selected) {
-			const resource = this.state[selected.resource][selected.id]
-			const isNew = resource && resource._isNew;
-			const editorProps = {
-				'onChange': this.handleChange,
-				'onSave': this.handleSaveResource,
-				'onDelete': this.handleDeleteResource,
-				'onReset': this.handleResetResource,
-			};
-			editorTitle = isNew ? "Ajouter " : "Modifier ";
-
-			if (selected.resource === 'items') {
-				editorTitle += "un article";
-				editor = (
-					<ItemEditor
-						item={resource}
-						itemgroups={this.props.itemgroupsChoices}
-						usertypes={this.props.usertypesChoices}
-						errors={this.state.errors.items[selected.id] || {}}
-						//saving={this.state.saving_details}
-						{...editorProps}
-					/>
-				);
-			}
-			else if (selected.resource === 'itemgroups') {
-				editorTitle += "un groupe";
-				editor = 'TODO'
-			}
-		}
-
-		return (
-			<React.Fragment>
-				<Grid container spacing={4}>
-					<Grid item md={editor ? 6 : 12}>
-						<h2>Articles</h2>
-						{display}
-					</Grid>
-					{editor && <Grid item md={6}>
-						<h2>{editorTitle}</h2>
-						{editor}
-					</Grid>}
-				</Grid>
-				<div style={{ textAlign: 'center' }}>
-					<Button onClick={this.handleAddResource} name="itemgroups">
-						Ajouter un groupe
-					</Button>
-					<Button onClick={this.handleAddResource} name="items">
-						Ajouter un article
-					</Button>
-				</div>
-			</React.Fragment>
-		);
-	}
-
 	render() {
 		const isCreator = this.isCreator();
+		const selected = this.state.selected;
 		const title = isCreator ? (
 			"Création d'une vente"
 		) : (
@@ -412,14 +345,13 @@ class SaleEditor extends React.Component {
 		);
 
 		return (
-			<div className="container">
+			<Container>
 				<h1>{title}</h1>
 				
 				<h2>Détails</h2>
 				{this.state.loading_details ? (
 					<Loader text="Chargement des détails de la vente..." />
 				) : (
-					<Paper>
 						<DetailsEditor
 							details={this.state.details}
 							errors={this.state.errors.details}
@@ -429,11 +361,31 @@ class SaleEditor extends React.Component {
 							onChange={this.handleChange}
 							onSave={this.handleSaveDetails}
 						/>
-					</Paper>
 				)}
 
-				{!isCreator && this.renderArticles()}
-			</div>
+				{!isCreator && (
+					<ItemsManager
+						selected={selected}
+						items={this.state.items}
+						itemgroups={this.state.itemgroups}
+						usertypes={this.props.usertypes.data}
+						errors={this.state.errors}
+							// [selected.resource][selected.id]) || {}}
+						choices={{
+							itemgroups: this.props.itemgroupsChoices,
+							usertypes: this.props.usertypesChoices,
+						}}
+						editorProps={{
+							onChange: this.handleChange,
+							onSave: this.handleSaveResource,
+							onDelete: this.handleDeleteResource,
+							onReset: this.handleResetResource,
+						}}
+						onAdd={this.handleAddResource}
+						onSelect={this.handleSelectResource}
+					/>
+				)}
+			</Container>
 		);
 	}
 

@@ -1,18 +1,14 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Grid, Card, CardContent, CardActions, Button, } from '@material-ui/core';
+import { Box, Grid, Card, CardContent } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { isEmpty } from '../../../utils';
+import { isEmpty } from '../../../../utils';
+
 
 /*
 {
   "id": 5,
   "sale": "mega-vente",
-  "group": null,
-  "usertype": "exterieur",
-  "quantity_left": null,
-  "name": "azdazd",
-  "description": "",
   "is_active": true,
   "quantity": null,
   "max_per_user": null,
@@ -58,7 +54,7 @@ export function ItemCard({ item, usertype, ...props }) {
             <Card
                 name="items"
                 value={item.id}
-                onClick={props.handleSelect}
+                onClick={props.onSelect}
                 raised={props.selected}
             >
                 <CardContent>
@@ -81,7 +77,7 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
             <h4
                 name="itemgroups"
                 value={itemgroup.id}
-                onClick={props.handleSelect}
+                onClick={props.onSelect}
             >
                 {itemgroup.name || 'Création en cours...'}
             </h4>
@@ -96,7 +92,7 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
                                 item={items[id]}
                                 usertype={props.usertypes[items[id].usertype]}
                                 selected={isSelected(selected, 'items', id)}
-                                handleSelect={props.handleSelect}
+                                onSelect={props.onSelect}
                             />
                         ) : (
                             <Grid item key={id}>
@@ -117,7 +113,7 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
     );
 }
 
-function ItemsDisplay({ itemgroups, ...props }) {
+export function ItemsDisplay({ itemgroups, ...props }) {
     const orphanItemIds = Object.values(props.items).filter(item => item.group === null).map(item => item.id);
     const hasOrphans = !isEmpty(orphanItemIds);
 
