@@ -349,8 +349,8 @@ class SaleEditor extends React.Component {
 				<h1>{title}</h1>
 				
 				<h2>Détails</h2>
-				{this.state.loading_details ? (
-					<Loader text="Chargement des détails de la vente..." />
+				{true || this.state.loading_details ? (
+					<Loader text="DEBUG Chargement des détails de la vente..." />
 				) : (
 						<DetailsEditor
 							details={this.state.details}
@@ -370,17 +370,14 @@ class SaleEditor extends React.Component {
 						itemgroups={this.state.itemgroups}
 						usertypes={this.props.usertypes.data}
 						errors={this.state.errors}
-							// [selected.resource][selected.id]) || {}}
 						choices={{
 							itemgroups: this.props.itemgroupsChoices,
 							usertypes: this.props.usertypesChoices,
 						}}
-						editorProps={{
-							onChange: this.handleChange,
-							onSave: this.handleSaveResource,
-							onDelete: this.handleDeleteResource,
-							onReset: this.handleResetResource,
-						}}
+						onChange={this.handleChange}
+						onSave={this.handleSaveResource}
+						onDelete={this.handleDeleteResource}
+						onReset={this.handleResetResource}
 						onAdd={this.handleAddResource}
 						onSelect={this.handleSelectResource}
 					/>
