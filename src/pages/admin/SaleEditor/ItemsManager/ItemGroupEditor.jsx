@@ -1,42 +1,20 @@
 import React from 'react';
-import { Button } from '@material-ui/core';
-import FieldGenerator from '../../../components/common/FieldGenerator';
+
+import FieldGenerator from '../../../../components/common/FieldGenerator';
+import { withFormStyles } from '../../../../styles';
 
 
-class ItemGroupEditor extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.field = new FieldGenerator(props.itemgroup, props.errors, props.handleChange, `itemgroups.${props.itemgroup.id}`);
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        return this.field.needUpdate(nextProps.itemgroup, nextProps.errors, nextProps.handleChange, `itemgroups.${nextProps.itemgroup.id}`);
-    }
-
-    render() {
-        const isNew = this.props.itemgroup._isNew;
-        return (
-            <React.Fragment>
-                {this.field.text('name', 'Nom')}
-                {this.field.boolean('is_active', 'Actif')}
-                {this.field.number('quantity', 'Quantité')}
-                {this.field.number('max_per_user', 'Max par acheteur')}
-
-                <Button name="itemgroups" value={this.props.itemgroup.id} onClick={this.props.handleSave}>
-                    {isNew ? "Créer" : "Sauvegarder" }
-                </Button>
-                {!isNew && (
-                    <Button name="itemgroups" value={this.props.itemgroup.id} onClick={this.props.handleDelete}>
-                        Supprimer
-                    </Button>
-                )}
-
-            </React.Fragment>
-        );
-    }
+function ItemGroupEditor({ classes, itemgroup, disabled, ...props }) {
+    disabled = disabled || props.saving;
+    const Field = new FieldGenerator(itemgroup, props.errors, props.onChange, `itemgroups.${itemgroup.id}`, { disabled });
+    return (
+        <div className={classes.column}>
+            {Field.text('name', 'Nom', { autoFocus: true })}
+            {Field.boolean('is_active', 'Actif')}
+            {Field.number('quantity', 'Quantité')}
+            {Field.number('max_per_user', 'Max par acheteur')}
+        </div>
+    );
 }
 
-
-
-export default ItemGroupEditor;
+export default withFormStyles(ItemGroupEditor);

@@ -4,7 +4,7 @@ import {
 	FormControl, InputLabel, Select, MenuItem
 } from '@material-ui/core';
 import { KeyboardDateTimePicker } from '@material-ui/pickers';
-
+// import CheckInput from './CheckInput';
 
 class FieldGenerator {
 
@@ -72,6 +72,7 @@ class FieldGenerator {
 					name={this.getKey(key)}
 					checked={this.getValue(key, props) || false}
 					onChange={this.onChange}
+					{...this.getProps(props)}
 				/>
 			}
 		/>

@@ -38,6 +38,10 @@ function isSelected(selected, resource, id) {
     );
 }
 
+function isEditing(editing, resource, id) {
+    return editing[resource][id];
+}
+
 function displayQuantity(quantity, yesText, noText=null) {
     if (quantity)
         return <li><b>{quantity}</b> {yesText}</li>;
@@ -51,29 +55,36 @@ export function ItemCard({ item, usertype, ...props }) {
     // item._editing
     return (
         <Grid item className={classes.item}>
-            <Card
-                name="items"
-                value={item.id}
-                onClick={props.onSelect}
-                raised={props.selected}
-            >
-                <CardContent>
-                    <h5>{item.name || 'Création en cours...'}</h5>
-                    <ul>
-                        <li><b>{item.price ? priceFormatter.format(item.price) : 'Gratuit' }</b></li>
-                        {displayQuantity(item.quantity, 'en vente', 'Quantitées illimitées')}
-                        {displayQuantity(item.max_per_user, 'max par acheteur')}
-                        {usertype && <li>{usertype.name}</li>}
-                    </ul>
-                </CardContent>
-            </Card>
+            <Box clone border={2} borderColor={props.editing ? 'yellow' : 'transparent'}>
+                <Card
+                    name="items"
+                    value={item.id}
+                    onClick={props.onSelect}
+                    raised={props.selected}
+                >
+                    <CardContent>
+                        <h5>{item.name || 'Création en cours...'}</h5>
+                        <ul>
+                            <li><b>{item.price ? priceFormatter.format(item.price) : 'Gratuit' }</b></li>
+                            {displayQuantity(item.quantity, 'en vente', 'Quantitées illimitées')}
+                            {displayQuantity(item.max_per_user, 'max par acheteur')}
+                            {usertype && <li>{usertype.name}</li>}
+                        </ul>
+                    </CardContent>
+                </Card>
+            </Box>
         </Grid>
     );
 }
 
-export function GroupBlock({ itemgroup, items, selected, ...props}) {
+export function GroupBlock({ itemgroup, items, selected, editing, ...props}) {
     return (
-        <Box display="inline-block" mr={3}>
+        <Box
+            display="inline-block"
+            mr={3}
+            border={2}
+            borderColor={isEditing(editing, 'itemgroups', itemgroup.id) ? 'yellow' : 'transparent'}
+        >
             <h4
                 name="itemgroups"
                 value={itemgroup.id}
@@ -92,6 +103,7 @@ export function GroupBlock({ itemgroup, items, selected, ...props}) {
                                 item={items[id]}
                                 usertype={props.usertypes[items[id].usertype]}
                                 selected={isSelected(selected, 'items', id)}
+                                editing={isEditing(editing, 'items', id)}
                                 onSelect={props.onSelect}
                             />
                         ) : (

@@ -45,7 +45,6 @@ class SaleEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = this.getStateFor('create');
-		window.props = this.props;  // DEBUG
 	}
 
 	// Props and state management
@@ -93,7 +92,7 @@ class SaleEditor extends React.Component {
 		this.props.dispatch(actions.sales(saleId).itemgroups.all());
 	}
 
-	getStateFor(resource, prevState = null) {
+	getStateFor(resource, prevState = {}) {
 		switch (resource) {
 			case 'create':
 				return {
@@ -113,9 +112,12 @@ class SaleEditor extends React.Component {
 					loading_details: false,
 					loading_items: false,
 					loading_itemgroups: false,
+					editing_details: false,
+					editing_item: {},
+					editing_itemgroup: {},
 					saving_details: false,
-					saving_item: {},
-					saving_itemgroup: {},
+					saving_items: {},
+					saving_itemgroups: {},
 				};
 			case 'sale':
 				if (this.props.sale === null)
@@ -125,6 +127,7 @@ class SaleEditor extends React.Component {
 						name: this.props.sale.name,
 						details: this.props.sale,
 						loading_details: false,
+						editing_details: false,
 						saving_details: false,
 					};
 			case 'items':
@@ -132,8 +135,10 @@ class SaleEditor extends React.Component {
 				// TODO Update single resource ??
 				return {
 					[`loading_${resource}`]: false,
+					[`editing_${resource}`]: {},
+					[`saving_${resource}`]: {},
 					[resource]: {
-						...(prevState ? prevState[resource] : {}),
+						...(prevState[resource] || {}),
 						...this.props[resource],
 					},
 				};
@@ -167,6 +172,12 @@ class SaleEditor extends React.Component {
 
 		// Update value in state
 		this.setState(prevState => produce(prevState, draft => {
+			// Set as editing
+			if (steps[0] === 'details')
+				draft.editing_details = true;
+			else
+				draft[`editing_${steps[0]}`][steps[1]] = true;
+
 			// Change item group
 			if (steps[0] === 'items' && steps[n] === 'group') {
 				const itemId = steps[1];
@@ -207,6 +218,7 @@ class SaleEditor extends React.Component {
 		}
 
 		try {
+			this.setState({ saving_details: true });
 			if (this.isCreator()) {
 				// Create sale
 				const action = actions.sales.create(null, details);
@@ -216,7 +228,6 @@ class SaleEditor extends React.Component {
 				this.props.history.push(`/admin/sales/${response.data.id}/edit`);
 			} else {
 				// Update sale details
-				this.setState({ saving_details: true });
 				this.props.dispatch(actions.sales.update(this.props.saleId, null, details));
 			}
 		} catch(error) {
@@ -250,7 +261,6 @@ class SaleEditor extends React.Component {
 	handleSelectResource = event => {
 		const resource = event.currentTarget.getAttribute('name');
 		const id = event.currentTarget.getAttribute('value');
-		console.log('select', resource, id)
 		if (id)
 			this.setState({ selected: { resource, id } });
 		if (resource === 'unselect')
@@ -264,11 +274,10 @@ class SaleEditor extends React.Component {
 		delete data._editing;
 
 		// TODO Set item as loading
-		// this.setState(prevState => produce(prevState, draft => {
-		// 	draft[`saving_${resource}`][id] = true;
-		// 	return draft;
-		// }));
-
+		this.setState(prevState => produce(prevState, draft => {
+			draft[`saving_${resource}`][id] = true;
+			return draft;
+		}));
 		try {
 			if (data._isNew) {
 				delete data.id; // Remove fake id
@@ -284,12 +293,18 @@ class SaleEditor extends React.Component {
 					if (resource === 'items')
 						this._removeItemFromGroup(draft, id);
 					
-					// delete draft[`saving_${resource}`][id];
+					delete draft[`editing_${resource}`][id];
+					delete draft[`saving_${resource}`][id];
 					draft.selected = null;
 					delete draft[resource][id];
 					return draft;
 				}), () => this.props.dispatch(action));
 			} else {
+				this.setState(prevState => produce(prevState, draft => {
+					delete draft[`editing_${resource}`][id];
+					delete draft[`saving_${resource}`][id];
+					return draft;
+				}));
 				this.props.dispatch(actions[resource].update(id, null, data));
 			}
 		} catch(error) {
@@ -321,13 +336,19 @@ class SaleEditor extends React.Component {
 		const { name: resource, value: id } = event.currentTarget;
 		if (resource === 'details') {
 			this.setState((prevState, props) => ({
-				details: props.sales,
+				details: props.sale,
+				editing_details: false,
 			}));
 		} else {
+			const editing = `editing_${resource}`;
 			this.setState((prevState, props) => ({
 				[resource]: {
 					...prevState[resource],
 					[id]: props[resource][id],
+				},
+				[editing]: {
+					...prevState[editing],
+					[id]: false,
 				},
 			}));
 		}
@@ -349,22 +370,28 @@ class SaleEditor extends React.Component {
 				<h1>{title}</h1>
 				
 				<h2>Détails</h2>
-				{true || this.state.loading_details ? (
-					<Loader text="DEBUG Chargement des détails de la vente..." />
+				{this.state.loading_details ? (
+					<Loader text="Chargement des détails de la vente..." />
 				) : (
 						<DetailsEditor
+							// Data
 							details={this.state.details}
 							errors={this.state.errors.details}
 							assos={this.props.assosChoices}
-							saving={this.state.saving_details}
 							isCreator={isCreator}
+							// Handlers
 							onChange={this.handleChange}
 							onSave={this.handleSaveDetails}
+							onReset={this.handleResetResource}
+							// State
+							editing={this.state.editing_details}
+							saving={this.state.saving_details}
 						/>
 				)}
 
 				{!isCreator && (
 					<ItemsManager
+						// Data
 						selected={selected}
 						items={this.state.items}
 						itemgroups={this.state.itemgroups}
@@ -374,12 +401,21 @@ class SaleEditor extends React.Component {
 							itemgroups: this.props.itemgroupsChoices,
 							usertypes: this.props.usertypesChoices,
 						}}
+						// Handlers
 						onChange={this.handleChange}
 						onSave={this.handleSaveResource}
 						onDelete={this.handleDeleteResource}
 						onReset={this.handleResetResource}
 						onAdd={this.handleAddResource}
 						onSelect={this.handleSelectResource}
+						editing={{
+							items: this.state.editing_items,
+							itemgroups: this.state.editing_itemgroups,
+						}}
+						saving={{
+							items: this.state.saving_items,
+							itemgroups: this.state.saving_itemgroups,
+						}}
 					/>
 				)}
 			</Container>

@@ -26,7 +26,9 @@ export const WoollyTheme = createResponseTheme({
         MuiFormControl: {
             root: {
                 marginBottom: 10,
-            }
+                minWidth: 100,
+                maxWidth: 300,
+            },
         },
-    }
+    },
 });

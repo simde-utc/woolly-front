@@ -18,6 +18,6 @@ export const withFormStyles = withStyles({
         paddingBottom: '0 !important',
     },
     controls: {
-        maxWidth: 300,
+        maxWidth: 240,
     },
 });
