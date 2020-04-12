@@ -3,6 +3,7 @@ import { Dialog, Box, Paper, Grid, Button, IconButton, useMediaQuery } from '@ma
 // import { Skeleton } from '@material-ui/lab';
 import { Close } from '@material-ui/icons';
 
+import { useFormStyles } from '../../../../styles';
 import { LoadingButton, ConfirmButton } from '../../../../components/common/Buttons';
 import ItemsDisplay from './ItemsDisplay';
 import ItemEditor from './ItemEditor';
@@ -26,7 +27,16 @@ function ItemsTutorialFull(props) {
             <h2>Ajouter/modifier des articles</h2>
             <Box clone p={2}>
                 <Paper>
-                    <p>Hello</p>
+                    <h5>Ajouter</h5>
+                    <p>
+                        Vous pouvez ajouter des articles et des groupes
+                        en utilisant les boutons ci-dessous.
+                    </p>
+                    <h5>Modifier</h5>
+                    <p>
+                        Une fois ajoutés, cliquez sur les titres de groupe
+                        ou sur les cartes d'article pour les modifier.
+                    </p>
                 </Paper>
             </Box>
         </Grid>
@@ -36,6 +46,7 @@ function ItemsTutorialFull(props) {
 
 function ItemsManager({ selected, ...props }) {
     const inDialog = useMediaQuery(theme => theme.breakpoints.down('sm'));
+    const classes = useFormStyles();
 
     // TODO Loading
     // if (this.state.loading_items || !this.props.usertypes.fetched)
@@ -142,11 +153,9 @@ function ItemsManager({ selected, ...props }) {
         ) : (
             <Grid item xs={12} md={6}>
                 {editorTitle}
-                <Box clone p={2} border={1} borderColor={editorProps.editing ? 'yellow' : 'transparent'}>
-                    <Paper>
-                        {editor}
-                    </Paper>
-                </Box>
+                <Paper className={classes.editor}>
+                    {editor}
+                </Paper>
             </Grid>
         )
     }

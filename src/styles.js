@@ -23,9 +23,9 @@ export const useFormStyles = makeStyles(theme => ({
         maxWidth: 240,
     },
     editor: {
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderColor: 'transparent',
+        // borderWidth: 1,
+        // borderStyle: 'solid',
+        // borderColor: 'transparent',
         padding: theme.spacing(2),
     },
     editing: {

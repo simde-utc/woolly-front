@@ -41,12 +41,12 @@ const FOOTER_HEIGHT = 40;
 function Wrappers(props) {
 	return (
 		<Provider store={store}>
+			<CssBaseline />
 			<MuiPickersUtilsProvider utils={DateFnsUtils}>
-				<CssBaseline />
 				<ThemeProvider theme={WoollyTheme}>
 					<MainLoader>
 						<BrowserRouter>
-							{props.children}	
+							{props.children}
 						</BrowserRouter>
 					</MainLoader>
 				</ThemeProvider>

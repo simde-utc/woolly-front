@@ -67,9 +67,21 @@ export function textOrIcon(text, Icon, displayText) {
 	return displayText ? text : <Icon title={text} />
 }
 
+export const priceFormatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+
+export function formatPrice(price, defaultValue = undefined) {
+	if (!price || price === '0') {
+		if (defaultValue !== undefined)
+			return defaultValue;
+		else
+			price = 0;
+	}
+	return priceFormatter.format(price);
+}
+
 /*
 |---------------------------------------------------------
-|		Right utils
+|		Rights utils
 |---------------------------------------------------------
 */
 

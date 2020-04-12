@@ -6,19 +6,17 @@ import { LoadingButton } from '../../../components/common/Buttons';
 import FieldGenerator from '../../../components/common/FieldGenerator';
 
 export default function DetailsEditor({ disabled, editing, isCreator, ...props }) {
-	const classes = useFormStyles();
 	disabled = disabled || props.saving;
-
+	const classes = useFormStyles();
 	const Field = new FieldGenerator(props.details, props.errors, props.onChange, 'details', { disabled });
+
 	const onlyCreate = { required: true, disabled: !isCreator || disabled };
-	const required = { required: true };
-	const editorState = editing ? 'editing' : '';
 	return (
-		<Paper className={mergeClasses(classes, 'editor', editorState)}>
+		<Paper className={classes.editor}>
 			<Grid container spacing={3}>
 				<Grid item xs={12} sm={6} className={classes.column}>
 					<h4>Description</h4>
-					{Field.text('name', 'Nom', { ...required, autoFocus: !disabled })}
+					{Field.text('name', 'Nom', { required: true, autoFocus: true })}
 					{Field.text('id', 'ID', onlyCreate)}
 					{Field.select('association', 'Association', props.assos, onlyCreate)}
 					{Field.text('description', 'Description', { required: true, multiline: true, rows: 4 })}
@@ -26,8 +24,8 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 
 				<Grid container item xs={12} sm={6} className={mergeClasses(classes, 'column', 'controls')}>
 					<h4>Disponibilité</h4>
-					{Field.datetime('begin_at', 'Ouverture', required)}
-					{Field.datetime('end_at', 'Fermeture', required)}
+					{Field.datetime('begin_at', 'Ouverture', { required: true })}
+					{Field.datetime('end_at', 'Fermeture', { required: true })}
 					{Field.boolean('is_active', 'Active')}
 					{Field.boolean('is_public', 'Publique')}
 					{Field.number('max_item_quantity', 'Quantité max')}
