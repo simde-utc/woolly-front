@@ -34,6 +34,10 @@ class AssoDashboard extends React.Component {
 		if (asso === null)
 			return <Loader />
 
+		const createRedirect = {
+			pathname: "/admin/sales/create",
+			state: { asso_id: asso.id },
+		};
 		return (
 			<div className="container">
 				<h1>Dashboard de l'asso {asso.shortname}</h1>
@@ -56,7 +60,7 @@ class AssoDashboard extends React.Component {
 						</ul>
 					)
 				)}
-				<NavButton to="/admin/sales/create">Créer une vente</NavButton>
+				<NavButton to={createRedirect}>Créer une vente</NavButton>
 			</div>
 		);
 	}

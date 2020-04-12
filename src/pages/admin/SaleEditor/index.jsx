@@ -95,9 +95,14 @@ class SaleEditor extends React.Component {
 	getStateFor(resource, prevState = {}) {
 		switch (resource) {
 			case 'create':
+				const association = (
+					this.props.location.state
+					&& this.props.location.state.asso_id
+				) || null;
 				return {
 					details: {
 						...BLANK_SALE_DETAILS,
+						association,
 						begin_at: new Date(),
 						end_at: new Date(),
 					},
@@ -166,9 +171,9 @@ class SaleEditor extends React.Component {
 		const n = steps.length - 1;
 
 		// Value verification
-		const { maxsize } = event.currentTarget.dataset;
-		if (maxsize)
-			value = value.slice(maxsize)
+		const options = event.target.dataset || {};
+		if (options.maxsize)
+			value = value.slice(options.maxsize)
 
 		// Update value in state
 		this.setState(prevState => produce(prevState, draft => {
