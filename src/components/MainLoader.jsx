@@ -11,8 +11,14 @@ const decorator = connect(store => ({
 class MainLoader extends React.Component {
 	render() {
 		const { classes, auth } = this.props
+		if (auth.error) {
+			console.warn(auth.error)
+			throw new Error("Impossible de contacter le serveur")
+		}
+
 		if (auth.fetched && auth.data && Object.entries(auth.data).length)
 			return this.props.children;
+
 
 		return (
 			<div className={classes.container}>

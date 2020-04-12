@@ -1,26 +1,25 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../redux/actions';
+import actions from '../../redux/actions';
 import axios from 'axios';
 
-import Loader from '../components/common/Loader';
-import ItemsTable from '../components/sales/ItemsTable';
-import UnpaidOrderDialog from '../components/orders/UnpaidOrderDialog';
-import { Link } from '../components/common/Nav';
+import Loader from '../../components/common/Loader';
+import ItemsTable from '../../components/sales/ItemsTable';
+import UnpaidOrderDialog from '../../components/orders/UnpaidOrderDialog';
+import { Link } from '../../components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, FormControlLabel, Checkbox } from '@material-ui/core';
-import { ShoppingCart, Save, Delete } from '@material-ui/icons';
+import { ShoppingCart, Delete } from '@material-ui/icons';
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
 	return {
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
-		sale: store.getData(['sales', saleId], null),
+		sale: store.findData('sales', saleId, 'id', null),
 		order: store.getData(['sales', saleId, 'userOrder'], null),
-		items: store.getData(['sales', saleId, 'items'], []),
-		itemsFetched: store.isFetched(['sales', saleId, 'items']),
+		items: store.get(['sales', saleId, 'items']),
 	};
 })
 class SaleDetail extends React.Component{
@@ -39,7 +38,7 @@ class SaleDetail extends React.Component{
 			this.fetchOrder();
 		if (!this.props.sale)
 			this.props.dispatch(actions.sales.find(saleId, { include: 'association' }));
-		if (!this.props.itemsFetched)
+		if (!this.props.items.fetched)
 			this.props.dispatch(actions.sales(saleId).items.get());
 	}
 
@@ -231,11 +230,11 @@ class SaleDetail extends React.Component{
 					</p>
 				)}
 
-				<Loader text="Loading items..." loading={!this.props.itemsFetched}>
+				<Loader text="Loading items..." loading={!this.props.items.fetched}>
 					<Paper className={classes.tableRoot}>
 						<ItemsTable
 							disabled={this.areItemsDisabled()}
-							items={this.props.items}
+							items={Object.values(this.props.items.data)}
 							quantities={this.state.quantities}
 							onQuantityChange={this.handleQuantityChange}
 						/>				

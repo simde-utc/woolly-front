@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions from '../redux/actions';
 
@@ -15,17 +14,14 @@ const connector = connect(store => {
 	const auth = store.getData('auth', {})
 	return {
 		user: auth.authenticated ? auth.user : null,
-		orders: auth.authenticated ? store.getData(ORDERS_PATH, []) : [],
-		fetching: store.isFetching(ORDERS_PATH),
-		fetched: store.isFetched(ORDERS_PATH),
-		// pagination: store.getPagination('orders'),
+		orders: store.get(ORDERS_PATH),
 	};
 })
 
 class Account extends React.Component {
 
 	componentDidMount() {
-		if (!this.props.fetched)
+		if (!this.props.orders.fetched)
 			this.fetchOrders();
 	}
 
@@ -35,9 +31,9 @@ class Account extends React.Component {
 	}
 
 	fetchOrders = () => {
-		this.props.dispatch(actions(`users/${this.props.user.id}/orders`)
-							.definePath(ORDERS_PATH)
-							.all({ include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems' }));
+		this.props.dispatch(actions.defineUri(`users/${this.props.user.id}/orders`)
+		                           .definePath(ORDERS_PATH)
+		                           .all({ include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems' }));
 	}
 
 	render() {
@@ -51,19 +47,14 @@ class Account extends React.Component {
 					</Grid>
 					<Grid item xs={12} md={8}>
 						<h2>Mes commandes</h2>
-						<Loader loading={this.props.fetching && !this.props.fetched}>
-							<OrdersList orders={this.props.orders} updateOrders={this.fetchOrders} />
+						<Loader loading={this.props.orders.fetching && !this.props.orders.fetched}>
+							<OrdersList orders={Object.values(this.props.orders.data)} updateOrders={this.fetchOrders} />
 						</Loader>
 					</Grid>
 				</Grid>
 			</div>
 		)
 	}
-}
-
-Account.propTypes = {
-	user: PropTypes.object.isRequired,
-	orders: PropTypes.arrayOf(PropTypes.object).isRequired,
 }
 
 export default connector(Account);

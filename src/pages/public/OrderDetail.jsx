@@ -1,12 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import actions from '../redux/actions';
+import actions from '../../redux/actions';
 import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, Paper, TextField, Chip } from '@material-ui/core';
-import { ORDER_STATUS, isList } from '../utils';
-import Loader from '../components/common/Loader';
+import { ORDER_STATUS } from '../../constants';
+import { isList } from '../../utils';
+import Loader from '../../components/common/Loader';
 
 const connector = connect((store, props) => ({
 	order: store.getData(['auth', 'currentOrder'], {}),
@@ -44,10 +45,12 @@ class OrderDetail extends React.Component {
 
 	fetchOrder = () => {
 		const orderId = this.props.match.params.order_id;
-		this.props.dispatch(actions(`/orders/${orderId}?include=orderlines,`
-															+ 'orderlines__item,orderlines__orderlineitems,'
-															+ 'orderlines__orderlineitems__orderlinefields')
-													.definePath(['auth', 'currentOrder']).get())
+		this.props.dispatch(actions.defineUri([
+		                              `/orders/${orderId}?include=orderlines`,
+		                              'orderlines__item', 'orderlines__orderlineitems',
+		                              'orderlines__orderlineitems__orderlinefields'
+		                            ].join(','))
+		                            .definePath(['auth', 'currentOrder']).get())
 	}
 
 	updateStatus = async () => {

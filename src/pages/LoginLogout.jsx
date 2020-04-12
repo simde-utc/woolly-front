@@ -1,6 +1,7 @@
 import React from 'react';
-import axios from 'axios';
 import Loader from '../components/common/Loader';
+import { API_URL } from '../constants';
+
 
 class Login extends React.Component {
 	componentDidMount() {
@@ -8,10 +9,9 @@ class Login extends React.Component {
 	}
 
 	redirect() {
-		const apiURL = axios.defaults.baseURL;
 		const action = this.props.action;
 		const callback = String(window.location).replace(/(.*)log(in|out)\/?$/, '$1');
-		window.location.replace(`${apiURL}/auth/${action}?redirect=${callback}`);
+		window.location.replace(`${API_URL}/auth/${action}?redirect=${callback}`);
 	}
 
 	render() {

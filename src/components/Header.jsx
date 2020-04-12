@@ -1,16 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import actions from '../redux/actions';
 
 import { withStyles } from '@material-ui/core/styles';
 import { MoreVert, Home, ShoppingCart, AccountCircle } from '@material-ui/icons';
 import { AppBar, Toolbar, Button, Menu, Divider } from '@material-ui/core';
 import { NavLink } from 'react-router-dom';
 import { NavButton, NavMenuItem } from './common/Nav.jsx';
-import { textOrIcon } from '../utils';
+import { hasManagerRights, textOrIcon } from '../utils';
 
 const decorator = connect(store => ({
 	auth: store.getData('auth', {}),
+	userAssos: store.getAuthRelatedData('associations', null),
 }));
 
 class Header extends React.Component {
@@ -22,7 +24,13 @@ class Header extends React.Component {
 		};
 	}
 
-	componentWillMount() {
+	componentDidMount() {
+		// Fetch user's associations
+		const { authenticated, user } = this.props.auth;
+		if (authenticated && user && user.id && !this.props.userAssos)
+			this.props.dispatch(actions.auth(user.id).associations.all());
+
+		// Add Media Query listener for Hamburger menu
 		const mediaQuery = window.matchMedia('(min-width: 600px)');
 		this.setSize(mediaQuery);
 		mediaQuery.addListener(this.setSize);
@@ -34,7 +42,7 @@ class Header extends React.Component {
 	closeAuthMenu = event => this.setState({ authMenuTarget: null })
 
 	render() {
-		const { auth, classes } = this.props;
+		const { auth, userAssos, classes } = this.props;
 		const { largeDisplay } = this.state;
 		return (
 			<AppBar position="fixed" style={{ minHeight: this.props.height }}>
@@ -57,7 +65,7 @@ class Header extends React.Component {
 								>
 									<NavMenuItem to="/account">Mon compte</NavMenuItem>
 									<NavMenuItem to="/orders">Mes commandes</NavMenuItem>
-									{auth.user.is_admin && (
+									{hasManagerRights(auth, userAssos) && (
 										<NavMenuItem to="/admin">Administration</NavMenuItem>
 									)}
 									<Divider />
