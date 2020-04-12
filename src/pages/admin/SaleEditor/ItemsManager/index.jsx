@@ -9,6 +9,31 @@ import ItemEditor from './ItemEditor';
 import ItemGroupEditor from './ItemGroupEditor';
 // import Loader from '../../../components/common/Loader';
 
+
+function ItemsTutorialMini(props) {
+    return (
+        <Box clone p={2}>
+            <Paper>
+                <p>Hello</p>
+            </Paper>
+        </Box>
+    );
+}
+
+function ItemsTutorialFull(props) {
+    return (
+        <Grid item xs={12} md={6}>
+            <h2>Ajouter/modifier des articles</h2>
+            <Box clone p={2}>
+                <Paper>
+                    <p>Hello</p>
+                </Paper>
+            </Box>
+        </Grid>
+    );
+}
+
+
 function ItemsManager({ selected, ...props }) {
     const inDialog = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
@@ -129,8 +154,9 @@ function ItemsManager({ selected, ...props }) {
     return (
         <React.Fragment>
             <Grid container spacing={4}>
-                <Grid item md={editor ? 6 : 12}>
+                <Grid item xs={12} md={6}>
                     <h2>Articles</h2>
+                    {inDialog && editor === null && <ItemsTutorialMini />}
                     <ItemsDisplay
                         items={props.items}
                         itemgroups={props.itemgroups}
@@ -149,7 +175,7 @@ function ItemsManager({ selected, ...props }) {
                         </Button>
                     </Box>
                 </Grid>
-                {editor}
+                {editor || (!inDialog && <ItemsTutorialFull />)}
             </Grid>
         </React.Fragment>
     );

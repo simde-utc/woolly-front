@@ -1,12 +1,19 @@
 import React from 'react';
 
 import FieldGenerator from '../../../../components/common/FieldGenerator';
-import { withFormStyles } from '../../../../styles';
+import { useFormStyles } from '../../../../styles';
 
 
-function ItemGroupEditor({ classes, itemgroup, disabled, ...props }) {
-    disabled = disabled || props.saving;
-    const Field = new FieldGenerator(itemgroup, props.errors, props.onChange, `itemgroups.${itemgroup.id}`, { disabled });
+export default function ItemGroupEditor({ itemgroup, ...props }) {
+    const classes = useFormStyles()
+    const Field = new FieldGenerator(
+        itemgroup,
+        props.errors,
+        props.onChange,
+        `itemgroups.${itemgroup.id}`,
+        { disabled: props.disabled || props.saving }
+    );
+
     return (
         <div className={classes.column}>
             {Field.text('name', 'Nom', { autoFocus: true })}
@@ -16,5 +23,3 @@ function ItemGroupEditor({ classes, itemgroup, disabled, ...props }) {
         </div>
     );
 }
-
-export default withFormStyles(ItemGroupEditor);

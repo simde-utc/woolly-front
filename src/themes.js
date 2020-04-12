@@ -4,7 +4,10 @@ function createResponseTheme(...args) {
     return responsiveFontSizes(createMuiTheme(...args));
 }
 
-// https://material.io/inline-tools/color/ #ff7300
+// https://material.io/inline-tools/color/
+// #FF7300
+// #F37000
+// #F27405
 
 export const WoollyTheme = createResponseTheme({
     themeName: 'Woolly',

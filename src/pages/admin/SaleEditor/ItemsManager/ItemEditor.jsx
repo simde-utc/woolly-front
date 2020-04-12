@@ -2,12 +2,19 @@ import React from 'react';
 import { Grid } from '@material-ui/core';
 
 import FieldGenerator from '../../../../components/common/FieldGenerator';
-import { withFormStyles } from '../../../../styles';
+import { useFormStyles } from '../../../../styles';
 
 
-function ItemEditor({ classes, item, disabled, ...props }) {
-    disabled = disabled || props.saving;
-    const Field = new FieldGenerator(item, props.errors, props.onChange, `items.${item.id}`, { disabled });
+export default function ItemEditor({ item, ...props }) {
+    const classes = useFormStyles()
+    const Field = new FieldGenerator(
+        item,
+        props.errors,
+        props.onChange,
+        `items.${item.id}`,
+        { disabled: props.disabled || props.saving }
+    );
+
     return (
         <React.Fragment>
             <Grid container spacing={3}>
@@ -37,5 +44,3 @@ function ItemEditor({ classes, item, disabled, ...props }) {
         </React.Fragment>
     );
 }
-
-export default withFormStyles(ItemEditor);

@@ -45,6 +45,7 @@ export const BLANK_SALE_DETAILS = {
 export const BLANK_ITEMGROUP = {
 	name: "",
 	description: "",
+	is_active: true,
 };
 
 export const BLANK_ITEM = {
