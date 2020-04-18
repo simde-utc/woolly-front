@@ -6,8 +6,11 @@ import produce from 'immer';
 
 import { Container } from '@material-ui/core';
 
-import { REGEX_SLUG, BLANK_SALE_DETAILS, BLANK_ITEMGROUP, BLANK_ITEM } from '../../../constants';
 import { areDifferent, dataToChoices, deepcopy } from '../../../utils';
+import {
+	REGEX_SLUG, BLANK_SALE_DETAILS,
+	BLANK_ITEMGROUP, BLANK_ITEM, BLANK_ITEMFIELD
+} from '../../../constants';
 
 import Loader from '../../../components/common/Loader';
 import DetailsEditor from './DetailsEditor';
@@ -32,7 +35,7 @@ const connector = connect((store, props) => {
 		sale: saleId ? store.getData(['sales', saleId], null) : null,
 		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
 		itemgroups,
-		itemgroupsChoices: dataToChoices(itemgroups, 'name').concat({ label: 'Sans groupe', value: 'null' }),
+		itemgroupsChoices: { ...dataToChoices(itemgroups, 'name'), null: { label: 'Sans groupe', value: 'null' } },
 
 		assosChoices: dataToChoices(assos, 'shortname'),
 		usertypes,
@@ -250,24 +253,19 @@ class SaleEditor extends React.Component {
 
 	handleAddResource = event => {
 		// Create a random id only for state purposes
-		const resource = event.currentTarget.name;
 		const id = "fake_" + Math.random().toString(36).slice(2);
-		this.setState(prevState => ({
-			[resource]: {
-				...prevState[resource],
-				[id]: {
-					id,
-					_isNew: true,
-					...BLANK_RESOURCES[resource],
-				},
-			},
-			selected: { resource, id },
-		}))
+		const resource = event.currentTarget.name;
+		this.setState(prevState => produce(prevState, draft => {
+			draft[resource][id] = { ...BLANK_RESOURCES[resource], id };
+			draft.selected = { resource, id };
+			return draft;
+		}));
 	}
 
 	handleSelectResource = event => {
 		const resource = event.currentTarget.getAttribute('name');
 		const id = event.currentTarget.getAttribute('value');
+		event.stopPropagation();
 		if (id)
 			this.setState({ selected: { resource, id } });
 		if (resource === 'unselect')
@@ -308,6 +306,9 @@ class SaleEditor extends React.Component {
 					return draft;
 				}), () => this.props.dispatch(action));
 			} else {
+				if (resource === 'items')
+					this._saveItemFields(data);
+
 				this.setState(prevState => produce(prevState, draft => {
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
@@ -325,6 +326,7 @@ class SaleEditor extends React.Component {
 
 	handleDeleteResource = async event => {
 		const { name: resource, value: id } = event.currentTarget;
+		const isNew = this.state[resource][id]._isNew;
 		this.setState(prevState => produce(prevState, draft => {
 			if (resource === 'items')
 				this._removeItemFromGroup(draft, id);
@@ -332,7 +334,7 @@ class SaleEditor extends React.Component {
 			draft.selected = null;
 			delete draft[resource][id];
 			return draft;
-		}), () => this.props.dispatch(actions[resource].delete(id)));
+		}), () => isNew || this.props.dispatch(actions[resource].delete(id)));
 	}
 
 	handleResetResource = event => {
@@ -357,20 +359,38 @@ class SaleEditor extends React.Component {
 		}
 	}
 
+	handleItemFieldChange = item => event => {
+		const { name: action, value: index } = event.currentTarget;
+		this.setState(prevState => produce(prevState, draft => {
+			const itemfields = draft.items[item].itemfields;
+			switch (action) {
+				case 'add':
+					itemfields.push({ ...BLANK_ITEMFIELD, item });
+					break;
+				case 'delete':
+					itemfields.splice(index, 1);
+					break;
+			}
+			return draft;
+		}));
+	}
+
 	// Rendering
 
 	render() {
-		const isCreator = this.isCreator();
-		const selected = this.state.selected;
-		const title = isCreator ? (
-			"Création d'une vente"
-		) : (
-			"Édition de la vente " + (this.state.name || '...')
-		);
+		// DEBUG
+		window.props = this.props;
+		window.actions = actions;
 
+		const isCreator = this.isCreator();
 		return (
 			<Container>
-				<h1>{title}</h1>
+				<h1>
+					{(isCreator
+						? "Création d'une vente"
+						: `Édition de la vente ${this.state.name || '...'}`
+					)}
+				</h1>
 				
 				<h2>Détails</h2>
 				{this.state.loading_details ? (
@@ -395,12 +415,13 @@ class SaleEditor extends React.Component {
 				{!isCreator && (
 					<ItemsManager
 						// Data
-						selected={selected}
+						selected={this.state.selected}
 						items={this.state.items}
 						itemgroups={this.state.itemgroups}
 						usertypes={this.props.usertypes.data}
 						errors={this.state.errors}
 						choices={{
+							fields: this.props.fieldsChoices,
 							itemgroups: this.props.itemgroupsChoices,
 							usertypes: this.props.usertypesChoices,
 						}}
@@ -411,6 +432,8 @@ class SaleEditor extends React.Component {
 						onReset={this.handleResetResource}
 						onAdd={this.handleAddResource}
 						onSelect={this.handleSelectResource}
+						onItemFieldChange={this.handleItemFieldChange}
+						// State data
 						editing={{
 							items: this.state.editing_items,
 							itemgroups: this.state.editing_itemgroups,

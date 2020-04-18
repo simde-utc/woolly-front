@@ -31,10 +31,8 @@ const useStyles = makeStyles(theme => ({
 export default function GroupBlock({ itemgroup, items, selected, editing, ...props}) {
     const classes = useStyles();
     return (
-        <Box display="inline-block" mr={3}>
-            <h4 name="itemgroups" value={itemgroup.id} onClick={props.onSelect}>
-                {itemgroup.name || 'Création en cours...'}
-            </h4>
+        <Box display="inline-block" mr={3} name="itemgroups" value={itemgroup.id} onClick={props.onSelect}>
+            <h4>{itemgroup.name || 'Création en cours...'}</h4>
             <Grid container spacing={2}>
                 {isEmpty(itemgroup.items) ? (
                     <Grid item className={classes.item}>
