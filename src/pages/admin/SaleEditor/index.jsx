@@ -25,18 +25,20 @@ const connector = connect((store, props) => {
 	const assos = store.getAuthRelatedData('associations', {});
 	const usertypes = store.get('usertypes');
 	const itemgroups = saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {};
+	const fields = store.get('fields');
 
 	return {
 		saleId,
-		assosChoices: dataToChoices(assos, 'shortname'),
-		usertypes,
-		usertypesChoices: dataToChoices(usertypes.data, 'name'),
 		sale: saleId ? store.getData(['sales', saleId], null) : null,
 		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
 		itemgroups,
 		itemgroupsChoices: dataToChoices(itemgroups, 'name').concat({ label: 'Sans groupe', value: 'null' }),
-		// itemfields: saleId ? store.getData(['items', itemId, 'itemfields'], {}) : {},
-		fields: store.getData(['fields'], {}),
+
+		assosChoices: dataToChoices(assos, 'shortname'),
+		usertypes,
+		usertypesChoices: dataToChoices(usertypes.data, 'name'),
+		fields,
+		fieldsChoices: dataToChoices(fields.data, 'name'),
 	};
 })
 
@@ -88,7 +90,7 @@ class SaleEditor extends React.Component {
 		});
 		const saleId = this.props.saleId;
 		this.props.dispatch(actions.sales.find(saleId));
-		this.props.dispatch(actions.sales(saleId).items.all());
+		this.props.dispatch(actions.sales(saleId).items.all({ include: 'itemfields' }));
 		this.props.dispatch(actions.sales(saleId).itemgroups.all());
 	}
 
@@ -278,14 +280,15 @@ class SaleEditor extends React.Component {
 		let data = deepcopy(this.state[resource][id]);
 		delete data._editing;
 
-		// TODO Set item as loading
+		// Set item as loading
 		this.setState(prevState => produce(prevState, draft => {
 			draft[`saving_${resource}`][id] = true;
 			return draft;
 		}));
 		try {
 			if (data._isNew) {
-				delete data.id; // Remove fake id
+				// Remove fake id
+				delete data.id;
 				delete data._isNew;
 				data.sale = saleId;
 
@@ -313,14 +316,9 @@ class SaleEditor extends React.Component {
 				this.props.dispatch(actions[resource].update(id, null, data));
 			}
 		} catch(error) {
-			this.setState(prevState => ({
-				errors: {
-					...prevState.errors,
-					[resource]: {
-						...prevState.errors[resource],
-						[id]: error.response.data,
-					}
-				},
+			this.setState(prevState => produce(prevState, draft => {
+				draft.errors[resource][id] = error.response.data;
+				return draft;
 			}));
 		}
 	}

@@ -27,6 +27,7 @@ export default function ItemCard({ item, usertype, ...props }) {
                     {displayQuantity(item.quantity, 'en vente', 'Quantitées illimitées')}
                     {displayQuantity(item.max_per_user, 'max par acheteur')}
                     {usertype && <li>{usertype.name}</li>}
+                    {displayQuantity(item.itemfields.length, 'champs', 'Aucun champ')}
                 </ul>
             </CardContent>
         </Card>
