@@ -19,11 +19,13 @@ export function deepcopy(object) {
 	return JSON.parse(JSON.stringify(object));
 }
 
-export function arrayToMap(array, key) {
-	if (typeof key === 'string')
-		key = object => object[key];
-	return array.reduce((map, object) => {
-		map[key(object)] = object;
+export function arrayToMap(array, getKey) {
+	if (typeof getKey === 'string') {
+		const key = getKey;
+		getKey = obj => obj[key];
+	}
+	return array.reduce((map, obj) => {
+		map[getKey(obj)] = obj;
 		return map;
 	}, {});
 }
