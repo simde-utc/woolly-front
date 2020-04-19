@@ -10,7 +10,6 @@ import { useFormStyles } from '../../../../styles';
 
 
 function ItemFieldsTable({ Field, itemfields, fields, ...props}) {
-    // const Field
     return (
         <TableContainer>
             <Table size="small">
@@ -31,7 +30,7 @@ function ItemFieldsTable({ Field, itemfields, fields, ...props}) {
                             <TableRow key={index}>
                                 <TableCell>
                                     {(itemfield._isNew
-                                        ? Field.select(`itemfields.${index}.field`, null, fields)
+                                        ? Field.select(`itemfields.${index}.field`, null, fields, { required: true })
                                         : fields[itemfield.field].label
                                     )}
                                 </TableCell>

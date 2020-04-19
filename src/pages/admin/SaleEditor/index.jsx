@@ -6,7 +6,7 @@ import produce from 'immer';
 
 import { Container } from '@material-ui/core';
 
-import { areDifferent, dataToChoices, deepcopy } from '../../../utils';
+import { areDifferent, dataToChoices, arrayToMap, deepcopy } from '../../../utils';
 import {
 	REGEX_SLUG, BLANK_SALE_DETAILS,
 	BLANK_ITEMGROUP, BLANK_ITEM, BLANK_ITEMFIELD
@@ -77,9 +77,10 @@ class SaleEditor extends React.Component {
 		}
 		// Get or update details/items/itemgroups
 		else {
+			// FIXME UI not updating when one item has changed
 			for (const resource of ['sale', 'items', 'itemgroups'])
 				if (areDifferent(prevProps, this.props, resource))
-					this.setState(prevState => this.getStateFor(resource, !differentSale && prevState));
+					this.setState(prevState => this.getStateFor(resource, prevState));
 		}
 	}
 
@@ -165,6 +166,33 @@ class SaleEditor extends React.Component {
 		const group = draft.itemgroups[item.group];
 		if (group)
 			group.items = group.items.filter(id => String(id) !== itemId)
+	}
+
+	_saveItemFields(item) {
+		const changes = {
+			to_create: item.itemfields.filter(obj => obj._isNew),
+			to_update: [],
+			to_delete: [],
+		};
+
+		// Get itemfields changes
+		const itemfields = arrayToMap(item.itemfields, 'id');
+		this.props.items[item.id].itemfields.forEach(({ id, ...prevField }) => {
+			if (id in itemfields) {
+				if (prevField.editable !== itemfields[id].editable)
+					changes.to_update.push([ id, itemfields[id] ]);
+			} else {
+				changes.to_delete.push(id);
+			}
+		});
+
+		// Save changes and return a Promise for all calls
+		// TODO Get and update items from items(itemId).itemfields
+		return Promise.all([
+			...changes.to_create.map(data => actions.itemfields.create(null, data)),
+			...changes.to_update.map(([id, data]) => actions.itemfields.update(id, null, data)),
+			...changes.to_delete.map(id => actions.itemfields.delete(id)),
+		].map(action => action.payload));
 	}
 
 	handleChange = event => {
@@ -307,16 +335,18 @@ class SaleEditor extends React.Component {
 				}), () => this.props.dispatch(action));
 			} else {
 				if (resource === 'items')
-					this._saveItemFields(data);
+					await this._saveItemFields(data);
 
 				this.setState(prevState => produce(prevState, draft => {
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
 					return draft;
 				}));
-				this.props.dispatch(actions[resource].update(id, null, data));
+				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
+				this.props.dispatch(actions[resource].update(id, queryParams, data));
 			}
 		} catch(error) {
+			console.error(error)
 			this.setState(prevState => produce(prevState, draft => {
 				draft.errors[resource][id] = error.response.data;
 				return draft;
@@ -370,6 +400,8 @@ class SaleEditor extends React.Component {
 				case 'delete':
 					itemfields.splice(index, 1);
 					break;
+				default:
+					throw Error(`Unknown action '${action}'`)
 			}
 			return draft;
 		}));
