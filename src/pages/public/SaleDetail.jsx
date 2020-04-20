@@ -33,7 +33,7 @@ class SaleDetail extends React.Component{
 	}
 
 	componentDidMount() {
-		const saleId = Number(this.props.match.params.sale_id);
+		const saleId = this.props.match.params.sale_id;
 		if (this.props.authenticated && !this.props.order)
 			this.fetchOrder();
 		if (!this.props.sale)
@@ -57,12 +57,12 @@ class SaleDetail extends React.Component{
 	}
 
 	fetchOrder = () => {
-		const saleId = Number(this.props.match.params.sale_id);
+		const saleId = this.props.match.params.sale_id;
 		this.props.dispatch(
 			actions.sales(saleId).orders
-						 .definePath(['sales', saleId, 'userOrder' ])
-						 .setOptions({ meta: { action: 'updateAll'} })
-						 .create({ include: 'orderlines,orderlines__item' })
+				.definePath(['sales', saleId, 'userOrder' ])
+				.setOptions({ meta: { action: 'updateAll'} })
+				.create({ include: 'orderlines,orderlines__item' })
 		);
 	}
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
 	TextField, Checkbox, FormControlLabel,
-	FormControl, InputLabel, Select, MenuItem
+	FormControl, InputLabel, Select, MenuItem, Chip
 } from '@material-ui/core';
 import { KeyboardDateTimePicker } from '@material-ui/pickers';
 // import CheckInput from './CheckInput';
@@ -100,7 +100,38 @@ class FieldGenerator {
 				// helperText={this.displayErrors(key)}
 				{...this.getProps(props)}
 			>
-				{choices.map(choice => (
+				{Object.values(choices).map(choice => (
+					<MenuItem
+						key={choice.value}
+						value={choice.value}
+					>
+						{choice.label}
+					</MenuItem>
+				))}
+			</Select>
+		</FormControl>
+	)
+
+	selectChips = (key, label, choices, props = {}) => (
+		<FormControl error={Boolean(this.errors[key])}>
+			<InputLabel htmlFor={this.getKey(key)}>{label}</InputLabel>
+			<Select
+				multiple
+				name={this.getKey(key)}
+				value={this.getValue(key, props) || ''}
+				onChange={this.onChange}
+				labelId={this.getKey(key)}
+				// helperText={this.displayErrors(key)}
+                renderValue={selected => (
+                    <div>
+                        {selected.map(value => (
+                            <Chip key={value} label={choices[value].label} />
+                        ))}
+                    </div>
+                )}
+				{...this.getProps(props)}
+			>
+				{Object.values(choices).map(choice => (
 					<MenuItem
 						key={choice.value}
 						value={choice.value}

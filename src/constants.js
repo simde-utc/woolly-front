@@ -43,12 +43,14 @@ export const BLANK_SALE_DETAILS = {
 };
 
 export const BLANK_ITEMGROUP = {
+	_isNew: true,
 	name: "",
 	description: "",
 	is_active: true,
 };
 
 export const BLANK_ITEM = {
+	_isNew: true,
 	name: "",
 	description: "",
 	price: 0,
@@ -59,7 +61,14 @@ export const BLANK_ITEM = {
 	max_per_user: null,
 
 	usertype: null,
-	fields: [],
+	itemfields: [],
 
 	nemopay_id: null,
+};
+
+export const BLANK_ITEMFIELD = {
+	_isNew: true,
+	item: null,
+	field: null,
+	editable: true,
 };

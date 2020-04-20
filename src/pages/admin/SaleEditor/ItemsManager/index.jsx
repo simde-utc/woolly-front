@@ -78,6 +78,7 @@ function ItemsManager({ selected, ...props }) {
                 editor = (
                     <ItemEditor
                         item={resource}
+                        onItemFieldChange={props.onItemFieldChange}
                         {...props.choices}
                         {...editorProps}
                     />
