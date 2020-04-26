@@ -156,6 +156,15 @@ export const apiStore = {
 		return replacement;
 	},
 
+	getResourceDataById(path, resource, replacement = null) {
+		const pathResources = this.get(path).resources;
+		return Object.keys(pathResources).reduce((acc, id) => {
+			const subResources = pathResources[id].resources[resource] || {};
+			acc[id] = subResources.fetched ? subResources.data : replacement;
+			return acc;
+		}, {});
+	},
+
 	// TODO Custom methods
 	getAuthUser(path, replacement = null, forceReplacement = true) {
 		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);

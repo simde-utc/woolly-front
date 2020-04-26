@@ -1,48 +1,36 @@
 import React from 'react'
-import { connect } from 'react-redux';
 import actions from '../../redux/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import { Container, Grid } from '@material-ui/core';
 
-// import Loader from '../../components/common/Loader';
-import AssoCard from '../../components/sales/AssoCard';
+import AssoSalesList from '../../components/sales/AssoSalesList';
 
-const connnector = connect(store => {
-	const authId = store.getAuthUser('id');
-	return {
-		authId,
-		assos: authId ? store.getAuthRelatedData('associations', {}) : {},
-		sales: store.get('sales'),
-	};
-})
+export default function Dashboard(props) {
+    const dispatch = useDispatch();
+    const assos = useSelector(store => store.getAuthRelatedData('associations', {}));
+    const sales = useSelector(store => store.getResourceDataById('associations', 'sales', null))
 
-class Dashboard extends React.Component {
-	componentDidMount() {
-		if (this.props.authId)
-			this.props.dispatch(actions.auth(this.props.authId).associations.all());
-	}
+    function handleFetchSales(assoId) {
+        dispatch(actions.associations(assoId).sales.all({ include_inactive: true }));
+    }
 
-	componentDidUpdate(prevProps) {
-		if (this.props.authId && this.props.authId !== prevProps.authId)
-			this.props.dispatch(actions.auth(this.props.authId).associations.all());
-	}
+    return (
+        <Container>
+            <h1>Admin - Dashboard</h1>
 
-	render() {
-		const { assos } = this.props;
-		return (
-			<div className="container">
-				<h1>Admin Dashboard</h1>
-
-				<h2>Mes associations</h2>
-				{/* <p>{associations}</p> */}
-				{/* <Loader loading={!fetched || fetching} text=" Récupération des ventes en cours..."> */}
-					<div style={{ display: 'flex' }}>
-						{Object.values(assos).map(asso => (
-							<AssoCard key={asso.id} asso={asso} />
-						))}
-					</div>
-				{/* </Loader> */}
-			</div>
-		);
-	}
+            <Grid container spacing={3}>
+                <Grid item md={6}>
+                    <h2>Dernières ventes</h2>
+                </Grid>
+                <Grid item md={6}>
+                    <h2>Mes associations</h2>
+                    <AssoSalesList
+                        assos={assos}
+                        sales={sales}
+                        fetchSales={handleFetchSales}
+                    />
+                </Grid>
+            </Grid>
+        </Container>
+    );
 }
-
-export default connnector(Dashboard);
