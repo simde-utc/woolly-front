@@ -1,8 +1,10 @@
 import React from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    Button, CircularProgress,
+    Button, CircularProgress, Tooltip
 } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
+import copy from 'copy-to-clipboard';
 
 export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon = null, ...props }) {
     const loader = <CircularProgress size="1em" {...LoaderProps} />;
@@ -15,6 +17,28 @@ export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon =
     );
 }
 
+export function CopyButton({ title = 'Copié!', placement = 'right', ...props }) {
+    const [copied, setCopied] = React.useState(false);
+    function handleClick() {
+        copy(props.value);
+        setCopied(true);
+    }
+
+    return (
+        <Tooltip
+            title={title}
+            placement={placement}
+            open={copied}
+            onClose={() => setCopied(false)}
+        >
+            <Button
+                startIcon={<FileCopy />}
+                onClick={handleClick}
+                {...props}
+            />
+        </Tooltip>
+    );    
+}
 
 export function ConfirmButton(props) {
     const {
