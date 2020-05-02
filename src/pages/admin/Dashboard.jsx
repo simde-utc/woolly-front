@@ -5,6 +5,7 @@ import { Container, Grid } from '@material-ui/core';
 
 import AssoSalesList from '../../components/sales/AssoSalesList';
 
+
 export default function Dashboard(props) {
 	const dispatch = useDispatch();
 	const assos = useSelector(store => store.getAuthRelatedData('associations', {}));

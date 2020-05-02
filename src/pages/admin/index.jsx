@@ -6,7 +6,7 @@ import { hasManagerRights } from '../../utils';
 import Loader from '../../components/common/Loader';
 import Dashboard from './Dashboard';
 import AssoDashboard from './AssoDashboard';
-import SaleDetail from './SaleDetail';
+import SaleDetail from './SaleDetail/';
 import SaleEditor from './SaleEditor/';
 import Error404 from '../Error404';
 

@@ -25,6 +25,7 @@ export default function AssoSalesList({ assos, sales, ...props}) {
 		// Toggle collapse
 		setOpen({ ...isOpen, [id]: !isOpen[id] });
 	}
+
 	return (
 		<List>
 			{Object.values(assos).map(({ id, ...asso }) => (

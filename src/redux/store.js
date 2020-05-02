@@ -9,13 +9,12 @@
  */
 
 import produce from 'immer';
-import { createStore, applyMiddleware, compose } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { deepcopy, isEmpty } from '../utils';
 
 // Import Middlewares
 import thunk from 'redux-thunk';
 import { createPromise } from 'redux-promise-middleware';
-// import { createLogger } from 'redux-logger';
 
 
 /*
@@ -23,8 +22,6 @@ import { createPromise } from 'redux-promise-middleware';
 |		Middlewares
 |---------------------------------------------------------
 */
-
-export const API_SUFFIX = 'API';
 
 // Suffixes des actions asynchrones
 const ASYNC_SUFFIXES = {
@@ -34,17 +31,11 @@ const ASYNC_SUFFIXES = {
 };
 
 // Configure Middlewares
-let middlewares = applyMiddleware(
+const middlewares = applyMiddleware(
 	thunk,
 	createPromise({ promiseTypeSuffixes: Object.values(ASYNC_SUFFIXES) }),
-	// createLogger({ collapse: true }),
+	// require('redux-logger').createLogger({ collapsed: true }),
 );
-
-/* eslint-disable no-underscore-dangle */
-if (process.env.NODE_ENV === 'development') {
-	middlewares = (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose)(middlewares);
-}
-/* eslint-enable no-underscore-dangle */
 
 
 /*
@@ -54,8 +45,8 @@ if (process.env.NODE_ENV === 'development') {
 */
 
 /**
- * Casse une route uri (string) en array
- * Exemple: 'assos/calendars' => ['assos', 'calendars']
+ * Split a URI route into an array
+ * Example: 'assos/1/calendars' => ['assos', '1', 'calendars']
  */
 export function pathToArray(path) {
 	if (typeof path === 'string')
@@ -90,6 +81,8 @@ function getPathFromMeta(meta) {
 | This API store is auto building itself with each request
 */
 
+export const API_SUFFIX = 'API';
+
 // Base storage for each resource
 export const INITIAL_RESOURCE_STATE = {
 	data: {},							// A map of the needed data by id
@@ -119,11 +112,10 @@ export const apiStore = {
 	 */
 	get(path, replacement = INITIAL_RESOURCE_STATE, forceReplacement = true) {
 		let data = this;
-		path = pathToArray(path);
 
 		// Find the resource from the path
-		// Search directly and in resources
-		for (const step of path) {
+		// Search in direct data and in resources
+		for (const step of pathToArray(path)) {
 			if (data[step] !== undefined)
 				data = data[step];
 			else if (data.resources && data.resources[step] !== undefined)
@@ -159,6 +151,15 @@ export const apiStore = {
 		return replacement;
 	},
 
+	/**
+	 * Get specified resource for multiple data by id
+	 * Example: ('sales', 'assos') => { a: asso_of_sale_a, b: asso_of_sale_b }
+	 * 
+	 * @param  {[type]} path        [description]
+	 * @param  {[type]} resource    [description]
+	 * @param  {[type]} replacement [description]
+	 * @return {Object}             La map de resource par id
+	 */
 	getResourceDataById(path, resource, replacement = null) {
 		const pathResources = this.get(path).resources;
 		return Object.keys(pathResources).reduce((acc, id) => {
@@ -176,8 +177,6 @@ export const apiStore = {
 		return this.getData(['auth', 'resources', ...pathToArray(path)], replacement, forceReplacement);
 	},
 };
-
-// TODO Define accessors
 
 
 /*
