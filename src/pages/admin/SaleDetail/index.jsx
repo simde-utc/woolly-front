@@ -1,13 +1,13 @@
 import React from 'react';
 import { useStoreAPIData } from '../../../redux/hooks';
 
-import { Container, Grid, Chip, CircularProgress } from '@material-ui/core';
+import { Container, Grid, Chip } from '@material-ui/core';
 import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
 
 import { Link } from '../../../components/common/Nav';
 import { CopyButton } from '../../../components/common/Buttons';
 import Stat from '../../../components/common/Stat';
-
+import QuantitiesSold from './QuantitiesSold';
 
 export default function SaleDetail(props) {
 	const saleId = props.match.params.sale_id;
@@ -20,7 +20,6 @@ export default function SaleDetail(props) {
 	if (!sale)
 		return "Loading"
 
-	window.props = props
 	const saleLink = window.location.href.replace('/admin/', '/');
 	return (
 		<Container>
@@ -47,7 +46,7 @@ export default function SaleDetail(props) {
 			<hr/>
 			<p>Timeline</p>
 
-			<Grid container>
+			<Grid container spacing={2}>
 				<Grid item sm={4}>
 					<h5>Description</h5>
 					<p>{sale.description}</p>
@@ -61,8 +60,11 @@ export default function SaleDetail(props) {
 						}
 					</ul>
 				</Grid>
-				<Grid item>
-					Stats
+				<Grid item xs>
+					<QuantitiesSold
+						items={items}
+						itemgroups={itemgroups}
+					/>
 				</Grid>
 			</Grid>
 
