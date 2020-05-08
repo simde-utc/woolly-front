@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { useHistory } from 'react-router';
+import { useDispatch } from 'react-redux'
+import actions from '../../redux/actions';
 
 import {
 	TableContainer, Table, TableHead, TableBody,
@@ -9,14 +10,14 @@ import {
 } from '@material-ui/core';
 
 import OrderLinesList from './OrderLinesList';
-import { ORDER_STATUS, ORDER_ACTIONS } from '../../constants';
+import { ORDER_STATUS, ORDER_ACTIONS, API_URL } from '../../constants';
 
 
 const STATUS_ACTIONS = {
 
 	download(event) {
 		const orderId = event.currentTarget.getAttribute('data-order-id');
-		window.open(`${axios.defaults.baseURL}/orders/${orderId}/pdf?download`, '_blank');
+		window.open(`${API_URL}/orders/${orderId}/pdf?download`, '_blank');
 	},
 
 	modify(event) {
@@ -31,8 +32,7 @@ const STATUS_ACTIONS = {
 
 	cancel(event) {
 		const orderId = event.currentTarget.getAttribute('data-order-id');
-		axios.delete(`/orders/${orderId}`, { withCredentials: true })
-		     .then(this.updateOrders);
+		this.delete(orderId);
 	},
 };
 
@@ -98,11 +98,16 @@ ActionOrderRow.propTypes = {
 
 export default function UserOrdersList({ orders, updateOrders, ...props }) {
 
+	const dispatch = useDispatch();
 	const history = useHistory();
-	const actions = {
+	const statusActions = {
 		...STATUS_ACTIONS,
-		updateOrders,
 		goto: history.push,
+		delete(orderId) {
+			const action = actions.orders(orderId).delete();
+			dispatch(action);
+			action.payload.finally(updateOrders);
+		},
 	};
 
 	return (
@@ -121,7 +126,7 @@ export default function UserOrdersList({ orders, updateOrders, ...props }) {
 						<ActionOrderRow
 							key={order.id}
 							order={order}
-							actions={actions}
+							actions={statusActions}
 						/>
 					))}
 				</TableBody>
