@@ -1,10 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
     Button, CircularProgress,
 } from '@material-ui/core';
 
-export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon = null, ...props }) {
+
+export function LoadingButton({ loading, disabled, LoaderProps, startIcon, ...props }) {
     const loader = <CircularProgress size="1em" {...LoaderProps} />;
     return (
         <Button
@@ -15,11 +17,25 @@ export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon =
     );
 }
 
+LoadingButton.propTypes = {
+    loading: PropTypes.bool,
+    disabled: PropTypes.bool,
+    LoaderProps: PropTypes.object,
+    startIcon: PropTypes.element,
+};
+
+LoadingButton.defaultProps = {
+    loading: false,
+    disabled: false,
+    LoaderProps: {},
+    startIcon: null,
+};
+
 
 export function ConfirmButton(props) {
     const {
-        onClick, content, title, text, yes = "Oui", no = "Non",
-        buttons, colors = {}, ...buttonProps
+        onClick, content, title, text, yes, no,
+        buttons, colors, ...buttonProps
     } = props;
     const [event, setEvent] = React.useState(null);
     const close = () => setEvent(null);
@@ -27,6 +43,7 @@ export function ConfirmButton(props) {
         onClick(event);
         close();
     }
+
     return (
         <React.Fragment>
             <Dialog open={event !== null} onClose={close}>
@@ -62,9 +79,29 @@ export function ConfirmButton(props) {
                 )}
             </Dialog>
             <Button
-                onClick={event => { setEvent({ target: event.target, currentTarget: event.currentTarget }) }}
+                onClick={event => { setEvent({ ...event }) }}
                 {...buttonProps}
             />
         </React.Fragment>
     );
 }
+
+ConfirmButton.propTypes = {
+    content: PropTypes.element,
+    title: PropTypes.string.isRequired,
+    text: PropTypes.node,
+    onClick: PropTypes.func.isRequired,
+    buttons: PropTypes.func,
+    yes: PropTypes.string,
+    no: PropTypes.string,
+    colors: PropTypes.object,
+};
+
+ConfirmButton.defaultProps = {
+    content: null,
+    text: null,
+    buttons: null,
+    yes: "Oui",
+    no: "Non",
+    colors: {}, 
+};

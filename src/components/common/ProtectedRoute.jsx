@@ -1,63 +1,55 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Route, Redirect } from 'react-router-dom';
 import { hasManagerRights } from '../../utils';
 
-const connector = connect(store => ({
-	auth: store.getData('auth', {}),
-	userAssos: store.getAuthRelatedData('associations'),
-}))
-class ProtectedRoute extends React.Component {
 
-	isAuthorized = only => {
-		const { auth, userAssos } = this.props;
-		if (typeof only == 'function')
-			return only(auth, userAssos);
+const authFunctions = {
+	logged(auth, userAssos, props) {
+		return auth.authenticated;
+	},
+	admin(auth, userAssos, props) {
+		return auth.authenticated && auth.is_admin;
+	},
+	manager(auth, userAssos, props) {
+		return hasManagerRights(auth, userAssos);
+	},
+	asso_manager(auth, userAssos, props) {
+		const asso_id = this.props.computedMatch.params.asso_id;
+		return hasManagerRights(auth, userAssos, props) && (asso_id in userAssos || auth.is_admin);
+	},
+};
 
-		if (auth === null)
-			return false;
-		switch (only) {
-			case 'admin':
-				return auth.authenticated && auth.is_admin;
-			case 'manager':
-				return hasManagerRights(auth, userAssos)
-			case 'asso_manager':
-				const asso_id = this.props.computedMatch.params.asso_id;
-				return hasManagerRights(auth, userAssos) && (asso_id in userAssos || auth.is_admin);
-			case 'logged':
-				return auth.authenticated;
-			default:
-				throw Error(`Authorization type '${only}' is not implemented.`);
-		}
-	}
+export default function ProtectedRoute({ only, authOptions, redirection, component: Component, ...routeProps }) {
+	const auth = useSelector(store => store.getData('auth'));
+	const userAssos = useSelector(store => store.getAuthRelatedData('associations'));
 
-	render() {
-		const { auth, only, authOptions, redirection, component: Component, ...routeProps } = this.props;
-		return (
-			<Route
-				{...routeProps} 
-				render={props => (this.isAuthorized(only)
-					? <Component {...props} />
-					: <Redirect to={redirection} />
-				)}
-			/>
-		);
-	}
+	const isAuthorized = (
+		typeof only == 'function'
+			? only(auth, userAssos, routeProps)
+			: (auth && authFunctions[only](auth, userAssos, routeProps))
+	);
+	return (
+		<Route
+			{...routeProps} 
+			render={props => (
+				isAuthorized ? <Component {...props} />
+				             : <Redirect to={redirection} />
+			)}
+		/>
+	);
 }
 
 ProtectedRoute.propTypes = {
-	auth: PropTypes.object.isRequired,
+	redirection: PropTypes.string,
 	only: PropTypes.oneOfType([
 		PropTypes.string,
 		PropTypes.func,
 	]),
-	redirection: PropTypes.string,
-}
+};
 
 ProtectedRoute.defaultProps = {
-	only: 'logged',
 	redirection: '/login',
-}
-
-export default connector(ProtectedRoute);
+	only: 'logged',
+};
