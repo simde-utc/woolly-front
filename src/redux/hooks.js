@@ -41,5 +41,8 @@ export function useStoreAPIData(path, options = {}) {
 			throw Error(resource.error);
 	}, [resource, path, options, dispatch]);
 
-	return resource.data || options.fetchingValue;
+	if (!resource.fetched)
+		return options.fetchingValue;
+
+	return resource.data;
 }
