@@ -7,17 +7,20 @@ import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
 import { Link } from '../../../components/common/Nav';
 import { CopyButton } from '../../../components/common/Buttons';
 import Stat from '../../../components/common/Stat';
+
 import QuantitiesSold from './QuantitiesSold';
+import OrdersList from './OrdersList';
 
 export default function SaleDetail(props) {
-	const [tab, setTab] = React.useState('quantities');
+	const [tab, setTab] = React.useState('orders');
 
 	const saleId = props.match.params.sale_id;
 	const sale = useStoreAPIData(['sales', saleId], { queryParams: { include: 'association' } });
 	const items = useStoreAPIData(['sales', saleId, 'items']);
 	const itemgroups = useStoreAPIData(['sales', saleId, 'itemgroups']);
+    const orders = useStoreAPIData(['sales', saleId, 'orders'], { queryParams: { include: 'owner,orderlines,orderlines__orderlineitems,orderlines__orderlineitems__orderlinefields' } });
 
-	window.data = { sale, items, itemgroups }
+	window.data = { sale, items, itemgroups, orders }
 
 	if (!sale)
 		return "Loading"
@@ -80,7 +83,13 @@ export default function SaleDetail(props) {
 								/>
 							</React.Fragment>
 						)) || (tab === 'orders' && (
-							<p>Orders tab</p>
+							<React.Fragment>
+								<p>Search + Pagination </p>
+								<OrdersList
+									orders={orders}
+									items={items}
+								/>
+							</React.Fragment>
 						)) || (tab === 'chart' && (
 							<p>Chart tab</p>
 						)) || (
