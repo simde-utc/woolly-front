@@ -6,7 +6,7 @@ import { List, ListItem, ListItemText } from '@material-ui/core';
 export default function OrderLinesList({ orderlines, prefix, ...props }) {
 	return (
 		<List {...props}>
-			{orderlines.map(orderline => (
+			{Object.values(orderlines).map(orderline => (
 				<ListItem key={orderline.id}>
 					<ListItemText>
 						{prefix}{orderline.quantity} &times; {orderline.item.name}
