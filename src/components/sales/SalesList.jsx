@@ -3,36 +3,19 @@ import PropTypes from 'prop-types';
 import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import { NavListItem, NavIconButton } from '../common/Nav';
 import { Add, Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { SkeletonList } from '../../components/common/Skeletons';
 import { isEmpty } from '../../utils';
 
 
 export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }) {
-	// Skeleton loader
-	if (!sales) {
-		return (
-			<List {...props}>
-				{[...Array(3).keys()].map(i => (
-					<ListItem key={i}>
-						<ListItemText
-							primary={<Skeleton variant="text" style={{ maxWidth: 300 }} />}
-							secondary={<Skeleton variant="text" style={{ maxWidth: 200 }} />}
-						/>
-						<ListItemSecondaryAction>
-							<Skeleton variant="circle" width={30} height={30} />
-						</ListItemSecondaryAction>
-					</ListItem>
-				))}
-			</List>
-		);
-	}
+
+	if (!sales)
+		return <SkeletonList nRows={2} withSecondary withAction {...props} />;
 
 	const createSaleLink = {
 		pathname: "/admin/sales/create",
 		state: { asso_id: assoId },
 	};
-
-	// Sales list
 	return (
 		<List {...props}>
 			{isEmpty(sales) ? (				

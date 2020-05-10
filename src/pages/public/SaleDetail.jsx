@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../../redux/actions';
-import axios from 'axios';
+import actions, { apiAxios } from '../../redux/actions';
+import { formatDate } from '../../utils';
 
 import Loader from '../../components/common/Loader';
 import ItemsTable from '../../components/sales/ItemsTable';
@@ -10,62 +10,71 @@ import UnpaidOrderDialog from '../../components/orders/UnpaidOrderDialog';
 import { Link } from '../../components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Button, Paper, FormControlLabel, Checkbox } from '@material-ui/core';
+import { Container, Box, Grid, Button, Paper, FormControlLabel, Checkbox, Collapse } from '@material-ui/core';
 import { ShoppingCart, Delete } from '@material-ui/icons';
+import { Alert, AlertTitle } from '@material-ui/lab';
+
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
 	return {
+		saleId,
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
 		sale: store.findData('sales', saleId, 'id', null),
 		order: store.getData(['sales', saleId, 'userOrder'], null),
-		items: store.get(['sales', saleId, 'items']),
+		items: store.getData(['sales', saleId, 'items'], null),
 	};
-})
+});
+
 class SaleDetail extends React.Component{
-	constructor(props) {
-		super(props);
-		this.state = {
-			quantities: {},
-			buying: false,
-			cgvAccepted: false,
-		};
+
+	state = {
+		quantities: {},
+		buying: false,
+		cgvAccepted: false,
 	}
 
 	componentDidMount() {
-		const saleId = this.props.match.params.sale_id;
+		const saleId = this.props.saleId;
 		if (this.props.authenticated && !this.props.order)
 			this.fetchOrder();
+
 		if (!this.props.sale)
 			this.props.dispatch(actions.sales.find(saleId, { include: 'association' }));
-		if (!this.props.items.fetched)
+
+		if (!this.props.items)
 			this.props.dispatch(actions.sales(saleId).items.get());
 	}
 
 	componentDidUpdate(prevProps) {
-		const { order } = this.props;
+		const order = this.props.order;
 
 		// Update quantities from current order
-		if (prevProps.order !== order) {
+		if (prevProps.order !== order && order && order.orderlines.length) {
 			this.setState({
-				quantities: order ? order.orderlines.reduce((acc, { item, quantity }) => {
-					acc[item.id || item] = quantity;
+				quantities: order.orderlines.reduce((acc, orderline) => {
+					acc[orderline.item] = orderline.quantity;
 					return acc;
-				}, {}) : {},
+				}, {})
 			});
 		}
 	}
 
+	// -----------------------------------------------------
+	// 		Order handlers
+	// -----------------------------------------------------
+
 	fetchOrder = () => {
-		const saleId = this.props.match.params.sale_id;
+		const saleId = this.props.saleId;
 		this.props.dispatch(
 			actions.sales(saleId).orders
-				.definePath(['sales', saleId, 'userOrder' ])
-				.setOptions({ meta: { action: 'updateAll'} })
-				.create({ include: 'orderlines,orderlines__item' })
+			       .definePath(['sales', saleId, 'userOrder' ])
+			       .setOptions({ meta: { action: 'updateAll'} })
+			       .create({ include: 'orderlines' })
 		);
 	}
 
+	/** Sabe order on the server */
 	saveOrder = (event, notif = true, update = false) => {
 		if (!this.props.order) {
 			console.warn("No order")
@@ -75,17 +84,42 @@ class SaleDetail extends React.Component{
 		// Save all orderlines
 		const order = this.props.order.id;
 		const options = { withCredentials: true };
-		const promiseList = Object.entries(this.state.quantities).reduce((acc, [item, quantity]) => {
-			acc.push(axios.post('orderlines', { order, item: parseInt(item), quantity }, options));
-			return acc;
-		}, []);
+		const promises = Promise.all(
+			Object.entries(this.state.quantities).reduce((calls, [item, quantity]) => {
+				const data = { order, item, quantity };
+				calls.push(apiAxios.post('orderlines', data, options));
+				return calls;
+			}, [])
+		);
 
-		const promise = Promise.all(promiseList);
 		if (notif) // TODO
-			promise.then(resp => console.log('Saved'))
+			promises.then(resp => console.log('Saved'));
 		if (update)
-			promise.then(resp => this.fetchOrder())
-		return promise
+			promises.then(this.fetchOrder);
+		return promises
+	}
+
+	/** Redirect to payment */
+	payOrder = async event => {
+		const orderId = this.props.order.id;
+		const returnUrl = window.location.href.replace(this.props.location.pathname, `/orders/${orderId}`);
+		const resp = await apiAxios.get(`/orders/${orderId}/pay?return_url=${returnUrl}`, { withCredentials: true });
+		window.location.href = resp.data['redirect_url'];
+	}
+
+	/** Cancel an order */
+	cancelOrder = event => {
+		actions.orders.delete(this.props.order.id).payload.finally(this.fetchOrder);
+	}
+
+	/** Save order and redirect to payment */
+	handleBuy = event => {
+		if (this.canBuy()) {
+			this.setState({ buying: true }, async () => {
+				await this.saveOrder();
+				await this.payOrder();
+			});
+		}
 	}
 
 	// -----------------------------------------------------
@@ -107,30 +141,6 @@ class SaleDetail extends React.Component{
 
 	handleReset = event => this.setState({ quantities: {} })
 
-	handleBuy = event => {
-		if (this.canBuy()) {
-			// Save order and redirect to payment
-			this.setState({ buying: true }, async () => {
-				await this.saveOrder();
-				await this.handlePay();
-			});
-		}
-	}
-
-	/** Redirect to payment */
-	handlePay = async event => {
-		const order = this.props.order.id;
-		const returnUrl = window.location.href.replace(this.props.location.pathname, `/orders/${order}`);
-		const resp = await axios.get(`/orders/${order}/pay?return_url=${returnUrl}`, { withCredentials: true });
-		window.location.href = resp.data['redirect_url'];
-	}
-
-	/** Cancel an order */
-	handleCancel = event => {
-		axios.delete(`/orders/${this.props.order.id}`, { withCredentials: true })
-		     .finally(this.fetchOrder);
-	}
-
 	// -----------------------------------------------------
 	// 		Display
 	// -----------------------------------------------------
@@ -151,103 +161,113 @@ class SaleDetail extends React.Component{
 		if (!sale || this.props.fetchingSale)
 			return <Loader fluid text="Loading sale..." />
 
-		const buttonProps = { size: 'large', color: 'primary', variant: 'outlined', className: classes.button };
+		const CGVLink = props => <Link href={sale.cgv} rel="noopener" target="_blank" {...props} />
 		return (
-			<div className="container">
-				<div className={classes.titleContainer}>
-					<h1 className={classes.title}>{sale.name}</h1>
-					<h2 className={classes.subtitle}>Organisé par {sale.association.shortname}</h2>
-				</div>
+			<Container>
+				<h1>{sale.name}</h1>
 
-				<div className={classes.details}>
-					<div className={classes.description}>
-						<h4 className={classes.detailsTitles}>Description</h4>
+				<Grid container spacing={2}>
+					<Grid item xs sm={4}>
+						<h2>Organisé par {sale.association.shortname}</h2>
+						<h4>Description</h4>
 						<p>{sale.description}</p>
-					</div>
-					<div className={classes.numbersContainer}>
-						<div className={classes.numbers}>
-							<h4 className={classes.detailsTitles}>Dates</h4>
-							<span className={classes.date}>Ouverture: {sale.begin_at}</span>
-							<span className={classes.date}>Fermeture: {sale.end_at}</span>
-						</div>
-						{sale.max_item_quantity !== null && (
-							<div className={classes.numbers}>
-								<h4 className={classes.detailsTitles}>Quantités </h4>
-								<p style={{fontSize: "1.6em"}}>{sale.max_item_quantity}</p>
-							</div>
-						)}
-					</div>
-				</div>
 
-				<div className={classes.itemsHead}>
-					<h3 className={classes.itemsTitle}>Items en ventes</h3>
-					<div className={classes.itemsButtons}>
-						<Button
-							{...buttonProps} variant="contained"
-							disabled={!this.canBuy()}
-							onClick={this.handleBuy}
-						>
-							<ShoppingCart className={classes.icon} /> Acheter
-						</Button>
-						<Button
-							{...buttonProps}
-							disabled={!this.hasUnpaidOrder()}
-							onClick={this.handleReset}
-						>
-							<Delete className={classes.icon} /> Vider
-						</Button>
-						{/* SAVE BUTTON, utile  ??
-						<Button
-							{...buttonProps}
-							// disabled={!canBuy}
-							onClick={this.saveOrder}
-						>
-							<Save className={classes.icon} /> Sauvegarder
-						</Button>
-						 */}
-					</div>
-				</div>
+						<h4>Dates</h4>
+						<ul>
+							<li>Ouverture: {formatDate(sale.begin_at)}</li>
+							<li>Fermeture: {formatDate(sale.end_at)}</li>
+						</ul>
+					</Grid>
 
-				<p>
-					<FormControlLabel
-						control={<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />}
-						label={(
-							<span>
-								J'accepte les <Link href={sale.cgv} rel="noopener" target="_blank">conditions générales de ventes</Link>
-							</span>
-						)}
-					/>
-				</p>
+					<Grid item xs sm={8}>
+						<h3>Articles en ventes</h3>
 
-				{!this.props.authenticated && (
-					<p className={classes.alert}>
-						Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
-					</p>
-				)}
-				{!this.state.cgvAccepted && (
-					<p className={classes.alert}>
-						Veuillez accepter les CGV pour acheter.
-					</p>
-				)}
+						<FormControlLabel
+							control={(
+								<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
+							)}
+							label={(
+								<span>
+									J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
+								</span>
+							)}
+						/>
 
-				<Loader text="Loading items..." loading={!this.props.items.fetched}>
-					<Paper className={classes.tableRoot}>
-						<ItemsTable
-							disabled={this.areItemsDisabled()}
-							items={Object.values(this.props.items.data)}
-							quantities={this.state.quantities}
-							onQuantityChange={this.handleQuantityChange}
-						/>				
-					</Paper>
-				</Loader>
+						<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
+							<Box clone my={1}>
+								<Alert severity="info">
+									<AlertTitle>Pour acheter</AlertTitle>
+									<Box component="ul" m={0} pl={2}>
+										{!this.props.authenticated && (
+											<li>
+												Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
+											</li>
+										)}
+										{!this.state.cgvAccepted && (
+											<li>
+												Veuillez accepter les CGV ci-dessus pour acheter.
+											</li>
+										)}
+									</Box>
+								</Alert>
+							</Box>
+						</Collapse>
+
+						<Box clone my={2}>
+							<Paper>
+								<ItemsTable
+									disabled={this.areItemsDisabled()}
+									items={this.props.items}
+									quantities={this.state.quantities}
+									onQuantityChange={this.handleQuantityChange}
+								/>
+							</Paper>
+						</Box>
+
+						<Box display="flex" justifyContent="flex-end">
+							<Button
+								onClick={this.handleReset}
+								disabled={!this.hasUnpaidOrder()}
+								startIcon={<Delete />}
+								className={classes.button}
+								variant="outlined"
+							>
+								Vider
+							</Button>
+							{/* SAVE BUTTON, utile  ??
+							<Button
+								onClick={this.saveOrder}
+								// disabled={!canBuy}
+								startIcon={<Save />}
+								className={classes.button}
+								variant="outlined"
+							>
+								Sauvegarder
+							</Button>
+							 */}
+							<Button
+								onClick={this.handleBuy}
+								disabled={!this.canBuy()}
+								startIcon={<ShoppingCart />}
+								className={classes.button}
+								variant="contained"
+								color="primary"
+							>
+								Acheter
+							</Button>
+						</Box>
+					</Grid>
+
+				</Grid>
 
 				<UnpaidOrderDialog
 					order={this.props.order}
+					items={this.props.items}
 					open={this.hasUnpaidOrder()}
-					payOrder={this.handlePay}
-					cancelOrder={this.handleCancel}
+					payOrder={this.payOrder}
+					cancelOrder={this.cancelOrder}
 				/>
-			</div>
+			</Container>
 		)
 	}
 }
@@ -257,96 +277,12 @@ SaleDetail.propTypes = {
 };
 
 const styles = theme => ({
-	titleContainer: {
-		paddingTop: theme.spacing(5),
-		paddingBottom: theme.spacing(5),
-	},
-	title: {
-		fontWeight: 100,
-		fontSize: '3rem',
-		textAlign: 'center',
-		margin: 0,
-		marginBottom: 5,
-	},
-	subtitle: {
-		textAlign: 'center',
-		fontWeight: 100,
-		fontSize: '1.3rem',
-		margin: 0,
-	},
-	details: {
-		display: 'flex',
-		flexDirection: 'row',
-		[theme.breakpoints.down('xs')]: {
-			flexDirection: 'column',
-		},
-	},
-	description: {
-		textAlign: 'justify',
-		paddingRight: '24px',
-		fontWeight: '100',
-		flex: '0 0 50%',
-		maxWidth: '50%',
-		[theme.breakpoints.down('xs')]:{
-			maxWidth: '100%',
-			paddingRight: 0,
-		},
-	},
-	numbersContainer: {
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'space-around',
-		flexGrow: 2,
-	},
-	text: {
-		margin: 0,
-		fontSize: 18,
-		fontWeight: 100,
-	},
-	icon: {
-		marginRight: 10,
-	},
-	date: {
-		display: 'block',
-		fontWeight: 100,
-	},
-	detailsTitles: {
-		fontWeight: 100,
-		fontSize: '1.4rem',
-	},
-	itemsHead: {
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		[theme.breakpoints.down('sm')]: {
-			flexDirection: 'column',
-		},
-	},
-	itemsTitle: {
-		fontWeight: 100,
-		fontSize: '2rem',
-		flex: '0 0 50%',
-	},
-	itemsButtons: {
-		flex: '0 0 50%',
-		display: 'flex',
-		flexDirection: 'row-reverse',
-	},
-	tableRoot: {
-		width: '100%',
-		overflowX: 'auto',
-		marginTop: theme.spacing(3),
-		marginBottom: theme.spacing(3),
-	},
 	button: {
 		margin: theme.spacing(1),
 	},
 	alert: {
 		textAlign: 'center',
-		margin: '25px 0',
 		color: '#f50057',
-		fontSize: '1.2em',
-		fontWeight: 100,
 	},
 });
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
     Button, CircularProgress, Tooltip
@@ -6,7 +7,8 @@ import {
 import { FileCopy } from '@material-ui/icons';
 import copy from 'copy-to-clipboard';
 
-export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon = null, ...props }) {
+
+export function LoadingButton({ loading, disabled, LoaderProps, startIcon, ...props }) {
     const loader = <CircularProgress size="1em" {...LoaderProps} />;
     return (
         <Button
@@ -17,7 +19,22 @@ export function LoadingButton({ loading, disabled, LoaderProps = {}, startIcon =
     );
 }
 
-export function CopyButton({ title = 'Copié!', placement = 'right', ...props }) {
+LoadingButton.propTypes = {
+    loading: PropTypes.bool,
+    disabled: PropTypes.bool,
+    LoaderProps: PropTypes.object,
+    startIcon: PropTypes.element,
+};
+
+LoadingButton.defaultProps = {
+    loading: false,
+    disabled: false,
+    LoaderProps: {},
+    startIcon: null,
+};
+
+
+export function CopyButton({ title, placement, ...props }) {
     const [copied, setCopied] = React.useState(false);
     function handleClick() {
         copy(props.value);
@@ -40,10 +57,21 @@ export function CopyButton({ title = 'Copié!', placement = 'right', ...props })
     );    
 }
 
+CopyButton.propTypes = {
+    title: PropTypes.string,
+    placement: PropTypes.string,
+};
+
+CopyButton.defaultProps = {
+    title: 'Copié !',
+    placement: 'right',
+};
+
+
 export function ConfirmButton(props) {
     const {
-        onClick, content, title, text, yes = "Oui", no = "Non",
-        buttons, colors = {}, ...buttonProps
+        onClick, content, title, text, yes, no,
+        buttons, colors, ...buttonProps
     } = props;
     const [event, setEvent] = React.useState(null);
     const close = () => setEvent(null);
@@ -51,6 +79,7 @@ export function ConfirmButton(props) {
         onClick(event);
         close();
     }
+
     return (
         <React.Fragment>
             <Dialog open={event !== null} onClose={close}>
@@ -86,9 +115,29 @@ export function ConfirmButton(props) {
                 )}
             </Dialog>
             <Button
-                onClick={event => { setEvent({ target: event.target, currentTarget: event.currentTarget }) }}
+                onClick={event => { setEvent({ ...event }) }}
                 {...buttonProps}
             />
         </React.Fragment>
     );
 }
+
+ConfirmButton.propTypes = {
+    content: PropTypes.element,
+    title: PropTypes.string.isRequired,
+    text: PropTypes.node,
+    onClick: PropTypes.func.isRequired,
+    buttons: PropTypes.func,
+    yes: PropTypes.string,
+    no: PropTypes.string,
+    colors: PropTypes.object,
+};
+
+ConfirmButton.defaultProps = {
+    content: null,
+    text: null,
+    buttons: null,
+    yes: "Oui",
+    no: "Non",
+    colors: {}, 
+};
