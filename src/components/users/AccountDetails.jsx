@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { TableContainer, Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import { capitalFirst } from '../../utils';
 
+
 const useStyles = makeStyles({
 	topborder: {
 		borderTop: '1px solid rgba(224, 224, 224, 1)',
@@ -17,7 +18,6 @@ const useStyles = makeStyles({
 		fontWeight: 200,
 	},
 });
-
 
 export default function AccountDetails ({ user }) {
 	const classes = useStyles();

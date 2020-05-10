@@ -3,15 +3,14 @@ import { makeStyles } from '@material-ui/styles';
 import { Collapse, List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import { NavListItem, NavIconButton } from '../common/Nav';
 import { ExpandMore, ExpandLess, Visibility } from '@material-ui/icons';
-
 import SalesList from './SalesList';
+
 
 const useStyles = makeStyles(theme => ({
 	nested: {
 		paddingLeft: theme.spacing(4),
 	},
 }));
-
 
 export default function AssoSalesList({ assos, sales, ...props}) {
 	const [isOpen, setOpen] = React.useState({});
