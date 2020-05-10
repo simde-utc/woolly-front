@@ -23,18 +23,29 @@ export default function UnpaidOrderDialog({ order, ...props }) {
 				<DialogContentText id="unpaid-order-dialog-description" component="div">
 					Vous avez déjà une commande non payée pour cette vente:
 					<OrderLinesList
-						orderlines={(order && order.orderlines) || []}
+						orderlines={order && order.orderlines}
+						items={props.items}
 						prefix=" - "
 					/>
 					Veuillez la payer ou l'annuler avant d'en refaire une autre.
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={props.cancelOrder} color="secondary">
-					<Delete style={{ marginRight: 10 }} /> Annuler
+				<Button
+					onClick={props.cancelOrder}
+					color="secondary"
+					startIcon={<Delete />}
+				>
+					Annuler
 				</Button>
-				<Button onClick={props.payOrder} color="primary" autoFocus>
-					<Payment style={{ marginRight: 10 }} /> Payer
+				<Button
+					onClick={props.payOrder}
+					color="primary"
+					variant="contained"
+					autoFocus
+					startIcon={<Payment />}
+				>
+					Payer
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -45,6 +56,7 @@ UnpaidOrderDialog.propTypes = {
 	open: PropTypes.bool.isRequired,
 	onClose: PropTypes.func,
 	order: PropTypes.object,
+	items: PropTypes.object,
 	payOrder: PropTypes.func.isRequired,
 	cancelOrder: PropTypes.func.isRequired,
 };
