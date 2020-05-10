@@ -10,7 +10,7 @@ import { isEmpty } from '../../utils';
 export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }) {
 
 	if (!sales)
-		return <SkeletonList nRows={2} withSecondary withAction />
+		return <SkeletonList nRows={2} withSecondary withAction {...props} />;
 
 	const createSaleLink = {
 		pathname: "/admin/sales/create",
