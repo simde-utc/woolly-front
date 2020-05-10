@@ -18,13 +18,13 @@ export default function Dashboard(props) {
 		<Container>
 			<h1>Admin - Dashboard</h1>
 
-			<Grid container spacing={3}>
-				<Grid item md={6}>
+			<Grid container spacing={3} wrap="wrap">
+				<Grid item xs={12} sm={6}>
 					<h2>Dernières ventes</h2>
 					<p>TODO</p>
 				</Grid>
 
-				<Grid item md={6}>
+				<Grid item xs={12} sm={6}>
 					<h2>Mes associations</h2>
 					<AssoSalesList
 						assos={assos}
