@@ -1,4 +1,8 @@
-import { SaveAlt, Edit, PlayCircleOutline, Clear } from '@material-ui/icons';
+import {
+    Add, Check, Clear, Delete, Edit, GetApp, FilterList, ArrowUpward,
+    FirstPage, LastPage, NavigateNext, NavigateBefore, Search, Payment
+} from '@material-ui/icons';
+
 
 export const API_URL = process.env.API_URL || 'http://localhost:8000';
 
@@ -8,6 +12,8 @@ export const REGEX_SLUG = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
 
 
 // Orders
+
+export const VALID_ORDER_STATUS = [2, 4];
 
 export const ORDER_STATUS = {
 	0: { color: '#565656', actions: ['cancel'],             label: 'En cours' },
@@ -20,9 +26,9 @@ export const ORDER_STATUS = {
 }
 
 export const ORDER_ACTIONS = {
-	download: { text: "Télécharger les billets", Icon: SaveAlt,           },
+	download: { text: "Télécharger les billets", Icon: GetApp,           },
 	modify:   { text: "Modifier la commande",    Icon: Edit,              },
-	pay:      { text: "Payer la commande",       Icon: PlayCircleOutline, },
+	pay:      { text: "Payer la commande",       Icon: Payment, },
 	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
 }
 
@@ -71,4 +77,26 @@ export const BLANK_ITEMFIELD = {
 	item: null,
 	field: null,
 	editable: true,
+};
+
+// Icons
+
+export const MaterialTableIcons = {
+    Add: Add,
+    Check: Check,
+    Clear: Clear,
+    Delete: Delete,
+    // DetailPanel: DetailPanel,
+    Edit: Edit,
+    Export: GetApp,
+    Filter: FilterList,
+    FirstPage: FirstPage,
+    LastPage: LastPage,
+    NextPage: NavigateNext,
+    PreviousPage: NavigateBefore,
+    ResetSearch: Clear,
+    Search: Search,
+    SortArrow: ArrowUpward,
+    // ThirdStateCheck: ThirdStateCheck,
+    // ViewColumn: ViewColumn,
 };
