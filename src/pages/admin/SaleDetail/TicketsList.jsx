@@ -61,6 +61,9 @@ export default function TicketsList({ saleId, items, ...props }) {
             icons={MaterialTableIcons}
             options={{
                 search: true,
+                exportButton: true,
+                exportAllData: true,
+                exportFileName: `tickets_${saleId}_${new Date().toISOString().slice(0,10)}`,
             }}
         />
     );

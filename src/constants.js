@@ -16,12 +16,12 @@ export const REGEX_SLUG = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
 export const VALID_ORDER_STATUS = [2, 4];
 
 export const ORDER_STATUS = {
-	0: { color: '#565656', actions: ['cancel'],             label: 'En cours' },
-	1: { color: '#ff5722', actions: ['cancel'],             label: 'En attente de Validation' },
+	0: { color: '#222222', actions: ['cancel'],             label: 'En cours' },
+	1: { color: '#1976d2', actions: ['cancel'],             label: 'En attente de Validation' },
 	2: { color: '#008805', actions: ['download', 'modify'], label: 'Validée' },
-	3: { color: '#ff5722', actions: ['cancel', 'pay'],      label: 'En attente de Paiement' },
+	3: { color: '#1976d2', actions: ['cancel', 'pay'],      label: 'En attente de Paiement' },
 	4: { color: '#008805', actions: ['download', 'modify'], label: 'Payé' },
-	5: { color: '#000000', actions: [],                     label: 'Expirée' },
+	5: { color: '#e00000', actions: [],                     label: 'Expirée' },
 	6: { color: '#e00000', actions: [],                     label: 'Annulée' },
 }
 

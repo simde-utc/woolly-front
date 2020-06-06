@@ -1,56 +1,78 @@
 import React from 'react';
-
-import {
-    Box, Grid, Collapse, Paper, IconButton, TableContainer,
-    Table, TableHead, TableBody, TableRow, TableCell, TableSortLabel,
- } from '@material-ui/core'
-// import { Done, Pause, ExpandLess, ExpandMore } from '@material-ui/icons';
-// import { Skeleton } from '@material-ui/lab';
-
-export function OrderDetail({ order, ...props }) {
-    return null;
-}
+import MaterialTable from 'material-table';
+import { SkeletonTable } from '../../../components/common/Skeletons';
+import OrderLinesList from '../../../components/orders/OrderLinesList';
+import { useStoreAPIData } from '../../../redux/hooks';
+import { ORDER_STATUS, MaterialTableIcons } from '../../../constants';
+import { formatDate } from '../../../utils';
+import { parseISO } from 'date-fns'
 
 
-export default function OrdersList({ orders, items, ...props }) {
+const queryParams = {
+    include: 'owner,orderlines',
+};
+
+export default function OrdersList({ saleId, items, ...props }) {
+    const orders = useStoreAPIData(['sales', saleId, 'orders'], { queryParams });
 
     if (!orders)
-        return null
+        return <SkeletonTable nCols={4} />;
+
+    // Get items names lookup
+    const ordersList = Object.values(orders).map(order => ({
+        id: order.id,
+        owner: `${order.owner.first_name} ${order.owner.last_name}`,
+        updated_at: parseISO(order.updated_at),
+        status: ORDER_STATUS[order.status] || {},
+        orderlines: order.orderlines,
+    }))
+
+    // OrderLinesList
 
     return (
-        <TableContainer>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Acheteur</TableCell>
-                        <TableCell>Article</TableCell>
-                        <TableCell>Quantitées</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {Object.values(orders).map(order => (
-                        order.orderlines.map(orderline => (
-                            <React.Fragment key={[order.id, orderline.id]}>
-                                <TableRow>
-                                    <TableCell>{order.owner && (`${order.owner.first_name} ${order.owner.last_name}`)}</TableCell>
-                                    <TableCell>{items && items[orderline.item] ? items[orderline.item].name : '...'}</TableCell>
-                                    <TableCell>{orderline.quantity}</TableCell>
-                                </TableRow>
-                                {orderline.orderlineitems.map(orderlineitem => (
-                                    <TableRow key={orderlineitem.id}>
-                                        <TableCell>{orderlineitem.id}</TableCell>
-                                        {orderlineitem.orderlinefields.map(field => (
-                                            <TableCell key={field.id}>
-                                                {field.name}: {field.value}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </React.Fragment>
-                        ))
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+        <MaterialTable
+            title="Commandes"
+            data={ordersList}
+            columns={[
+                { title: 'ID', field: 'id' },
+                { title: 'Acheteur', field: 'owner' },
+                {
+                    title: 'Status',
+                    field: 'status',
+                    render: row => (
+                        <span style={{ color: row.status.color }}>
+                            {row.status.label || 'Inconnu'}
+                        </span>
+                    ),
+                },
+                {
+                    title: 'Mise à jour',
+                    field: 'updated_at',
+                    searchable: false,
+                    render: row => (
+                        <span>{formatDate(row.updated_at, 'datetime')}</span>
+                    ),
+                },
+                {
+                    title: 'Articles',
+                    field: 'orderlines',
+                    searchable: false,
+                    render: row => (
+                        <OrderLinesList
+                            orderlines={row.orderlines}
+                            items={items}
+                            prefix="- "
+                            disablePadding
+                            dense
+                        />
+                    ),
+                },
+            ]}
+            icons={MaterialTableIcons}
+            options={{
+                search: true,
+            }}
+
+        />
     );
 }

@@ -14,15 +14,12 @@ import TicketsList from './TicketsList';
 
 
 export default function SaleDetail(props) {
-	const [tab, setTab] = React.useState('tickets');
+	const [tab, setTab] = React.useState('quantities');
 
 	const saleId = props.match.params.sale_id;
 	const sale = useStoreAPIData(['sales', saleId], { queryParams: { include: 'association' } });
 	const items = useStoreAPIData(['sales', saleId, 'items']);
 	const itemgroups = useStoreAPIData(['sales', saleId, 'itemgroups']);
-    const orders = useStoreAPIData(['sales', saleId, 'orders'], { queryParams: { include: 'owner,orderlines,orderlines__orderlineitems,orderlines__orderlineitems__orderlinefields' } });
-
-	window.data = { sale, items, itemgroups, orders }
 
 	if (!sale)
 		return "Loading"
@@ -90,25 +87,18 @@ export default function SaleDetail(props) {
 								/>
 							</React.Fragment>
 						)) || (tab === 'orders' && (
-							<React.Fragment>
-								<p>Search + Pagination </p>
-								<OrdersList
-									orders={orders}
-									items={items}
-								/>
-							</React.Fragment>
+							<OrdersList
+								saleId={sale.id}
+								items={items}
+							/>
 						)) || (tab === 'tickets' && (
-							<React.Fragment>
-								<TicketsList
-									saleId={sale.id}
-									items={items}
-								/>
-							</React.Fragment>
+							<TicketsList
+								saleId={sale.id}
+								items={items}
+							/>
 						)) || (tab === 'chart' && (
-							<p>Chart tab</p>
-						)) || (
-							<p>Default tab</p>
-						)}
+							<p>À venir...</p>
+						))}
 					</Box>
 				</Grid>
 			</Grid>

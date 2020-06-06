@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
     Box, Grid, Collapse, Paper, IconButton, TableContainer,
-    Table, TableHead, TableBody, TableRow, TableCell, TableSortLabel,
+    Table, TableHead, TableBody, TableRow, TableCell,
  } from '@material-ui/core'
 import { Done, Pause, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
