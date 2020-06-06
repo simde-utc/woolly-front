@@ -21,13 +21,18 @@ export function deepcopy(object) {
 	return JSON.parse(JSON.stringify(object));
 }
 
-export function arrayToMap(array, getKey) {
-	if (typeof getKey === 'string') {
-		const key = getKey;
-		getKey = obj => obj[key];
-	}
+export function stringToGetter(attr) {
+	return obj => obj[attr];
+}
+
+export function arrayToMap(array, getKey, getValue) {
+	if (typeof getKey === 'string')
+		getKey = stringToGetter(getKey);
+	if (typeof getValue === 'string')
+		getValue = stringToGetter(getValue);
+
 	return array.reduce((map, obj) => {
-		map[getKey(obj)] = obj;
+		map[getKey(obj)] = getValue ? getValue(obj) : obj;
 		return map;
 	}, {});
 }

@@ -1,8 +1,9 @@
 import React from 'react';
 import MaterialTable from 'material-table';
+import { SkeletonTable } from '../../../components/common/Skeletons';
 import { useStoreAPIData } from '../../../redux/hooks';
 import { VALID_ORDER_STATUS, MaterialTableIcons } from '../../../constants';
-import { SkeletonTable } from '../../../components/common/Skeletons';
+import { arrayToMap } from '../../../utils';
 
 
 const queryParams = {
@@ -12,33 +13,30 @@ const queryParams = {
 
 export default function TicketsList({ saleId, items, ...props }) {
 
-    // orderlines or orderlineitems ?
-    const orderlines = useStoreAPIData(['sales', saleId, 'orderlines' ], { queryParams })
-
+    // Get all fields for the moment, shouldn't be too much
+    const fields = useStoreAPIData('fields');
+    const orderlines = useStoreAPIData(['sales', saleId, 'orderlines'], { queryParams });
 
     if (!orderlines)
         return <SkeletonTable nCols={4} />;
 
+
     // Get items names lookup
-    const itemNames = items ? Object.values(items).reduce((names, item) => {
-        names[item.id] = item.name;
-        return names;
-    }, {}) : {};
+    const itemNames = items ? arrayToMap(Object.values(items), 'id', 'name') : {};
 
-    if (!items)
-        return 'items missing'
-
-    const fieldsColumns = Object.values(items).reduce((map, item) => {
+    // Get fields columns
+    const fieldsColumns = items ? Object.values(items).reduce((map, item) => {
         item.fields.forEach(field => {
             if (!map.hasOwnProperty(field))
                 map[field] = {
                     field: field,
-                    title: field, // TODO
+                    title: fields[field] ? fields[field].name : field,
                 };
         })
         return map;
-    }, {});
+    }, {}) : {};
 
+    // Patch data for table
     const orderlineitems = Object.values(orderlines).reduce((arr, orderline) => {
         arr.push(...orderline.orderlineitems.map(orderlineitem => ({
             ...orderlineitem,
@@ -50,9 +48,6 @@ export default function TicketsList({ saleId, items, ...props }) {
         })));
         return arr;
     }, []);
-
-    window.orderlines = orderlines
-    window.items = items
 
     return (
         <MaterialTable
