@@ -1,5 +1,7 @@
 import React from 'react';
+import { parseISO, lightFormat, formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns'
 
+window.__localeId__ = 'fr'
 
 /*
 |---------------------------------------------------------
@@ -19,13 +21,18 @@ export function deepcopy(object) {
 	return JSON.parse(JSON.stringify(object));
 }
 
-export function arrayToMap(array, getKey) {
-	if (typeof getKey === 'string') {
-		const key = getKey;
-		getKey = obj => obj[key];
-	}
+export function stringToGetter(attr) {
+	return obj => obj[attr];
+}
+
+export function arrayToMap(array, getKey, getValue) {
+	if (typeof getKey === 'string')
+		getKey = stringToGetter(getKey);
+	if (typeof getValue === 'string')
+		getValue = stringToGetter(getValue);
+
 	return array.reduce((map, obj) => {
-		map[getKey(obj)] = obj;
+		map[getKey(obj)] = getValue ? getValue(obj) : obj;
 		return map;
 	}, {});
 }
@@ -100,6 +107,25 @@ export function formatPrice(price, defaultValue = undefined) {
 			price = 0;
 	}
 	return priceFormatter.format(price);
+}
+
+export function formatDate(date, variant = 'date') {
+	if (typeof date === 'string')
+		date = parseISO(date);
+	switch (variant) {
+		case 'date':
+			return lightFormat(date, 'dd/MM/yyyy')
+		case 'datetime':
+			return lightFormat(date, 'dd/MM/yyyy HH:mm')
+		case 'datetimesec':
+			return lightFormat(date, 'dd/MM/yyyy HH:mm:ss')
+		case 'fromNow':
+			return formatDistanceToNow(date);
+		case 'fromNowStrict':
+			return formatDistanceToNowStrict(date);
+		default:
+			throw Error(`Unknown format '${variant}'`)
+	}
 }
 
 /*

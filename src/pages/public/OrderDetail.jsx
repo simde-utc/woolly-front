@@ -1,27 +1,53 @@
 import React from 'react';
+import produce from 'immer';
 import { connect } from 'react-redux';
-import actions from '../../redux/actions';
-import axios from 'axios';
+import actions, { apiAxios } from '../../redux/actions';
+import { API_URL, ORDER_STATUS } from '../../constants';
+import { arrayToMap } from '../../utils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Button, Paper, TextField, Chip } from '@material-ui/core';
-import { ORDER_STATUS } from '../../constants';
-import { isList } from '../../utils';
-import Loader from '../../components/common/Loader';
+import { Box, Container, Grid, Button, Chip, CircularProgress } from '@material-ui/core';
+import { LoadingButton } from '../../components/common/Buttons';
+import OrderLineItemTicket from '../../components/orders/OrderLineItemTicket';
 
-const connector = connect((store, props) => ({
-	order: store.getData(['auth', 'currentOrder'], {}),
-}))
+
+const INCLUDE_QUERY = [
+	'orderlines',
+	'orderlines__item',
+	'orderlines__orderlineitems',
+	'orderlines__orderlineitems__orderlinefields'
+].join(',');
+
+/** Map orderlines to orderlineitems with fields by id */
+function mapOrderlinesToItemsWithFields(orderlines) {
+	return orderlines.reduce((oliMap, orderline) => {
+		orderline.orderlineitems.forEach(({ orderlinefields, ...orderlineitem }) => {
+			// Add orderlineitem to the map
+			oliMap[String(orderlineitem.id)] = {
+				...orderlineitem,
+				item: orderline.item,
+				orderlinefields: arrayToMap(orderlinefields, olf => String(olf.id)),
+			};
+		});
+		return oliMap;
+	}, {});
+}
+
+const connector = connect((store, props) => {
+	const orderId = props.match.params.order_id;
+	return {
+		orderId,
+		order: store.getData(['orders', orderId]),
+	};
+});
 
 class OrderDetail extends React.Component {
 
-	constructor(props) {
-		super(props);
-		this.state = {
-			orderlineitems: {},
-			saving: false,
-			changing: false,
-		};
+	state = {
+		orderlineitems: {},
+		saving: false,
+		changing: false,
+		updatingStatus: false,
 	}
 
 	componentDidMount() {
@@ -37,195 +63,144 @@ class OrderDetail extends React.Component {
 					if (Object.values(this.state.orderlineitems).length === 0)
 						setTimeout(this.fetchOrder, 1000);
 				});
-			}
-			else
+			} else {
 				this.updateStatus();
+			}
 		}
 	}
 
-	fetchOrder = () => {
-		const orderId = this.props.match.params.order_id;
-		this.props.dispatch(actions.defineUri([
-		                              `/orders/${orderId}?include=orderlines`,
-		                              'orderlines__item', 'orderlines__orderlineitems',
-		                              'orderlines__orderlineitems__orderlinefields'
-		                            ].join(','))
-		                            .definePath(['auth', 'currentOrder']).get())
-	}
+	// Data handlers
 
-	updateStatus = async () => {
-		const orderId = this.props.match.params.order_id;
-		const resp = (await axios.get(`/orders/${orderId}/status`)).data
-		// Redirect to payment if needed or refresh order
-		if (resp.redirect_url )
-			window.location.href = resp.redirect_url
-		else
-			this.fetchOrder();
-	}
+	getStateFromOrder = () => ({
+		orderlineitems: mapOrderlinesToItemsWithFields(this.props.order.orderlines),
+		saving: false,
+		changing: false,
+	})
 
-	getStateFromOrder() {
-		let orderlineitems = {};
-		this.props.order.orderlines.forEach(orderline => {
-			orderline.orderlineitems.forEach(({ orderlinefields, ...orderlineitem }) => {
-				// Add orderlineitem to the map
-				orderlineitems[String(orderlineitem.id)] = {
-					...orderlineitem,
-					item: orderline.item,
-					orderlinefields: orderlinefields.reduce((acc, olf) => {
-						acc[String(olf.id)] = olf;
-						return acc;
-					}, {}),
-				};
-			});
+	fetchOrder = () => this.props.dispatch(
+		actions.orders.find(this.props.orderId, { include: INCLUDE_QUERY })
+	)
+
+	/** Fetch status and redirect to payment or refresh order */
+	updateStatus = () => {
+		this.setState({ updatingStatus: true }, async () => {
+			const resp = (await apiAxios.get(`/orders/${this.props.orderId}/status`)).data
+			if (resp.redirect_url)
+				window.location.href = resp.redirect_url;
+			else
+				this.setState({ updatingStatus: false }, this.fetchOrder);
 		});
-		return { orderlineitems, saving: false, changing: false };
 	}
+
+	downloadTickets = event => {
+		window.open(`${API_URL}/orders/${this.props.orderId}/pdf`, '_blank');
+	}
+
+	// Change handlers
 
 	handleChange = event => {
-		const { orderlineitemId: OI_id, orderlinefieldId: OF_id } = event.currentTarget.dataset;
 		const value = event.currentTarget.value;
-		this.setState(prevState => ({
-			changing: true,
-			orderlineitems: {
-				...prevState.orderlineitems,
-				[OI_id]: {
-					...prevState.orderlineitems[OI_id],
-					orderlinefields: {
-						...prevState.orderlineitems[OI_id].orderlinefields,
-						[OF_id]: {
-							...prevState.orderlineitems[OI_id].orderlinefields[OF_id],
-							value,
-						},
-					},
-				},
-			},
+		const { orderlineitemId, orderlinefieldId } = event.currentTarget.dataset;
+		this.setState(prevState => produce(prevState, draft => {
+			draft.changing = true;
+			draft.orderlineitems[orderlineitemId].orderlinefields[orderlinefieldId].value = value;
+			return draft;
 		}));
 	}
 
 	resetChanges = event => this.setState(this.getStateFromOrder())
 
 	saveChanges = event => {
-		this.setState({ saving: true }, () => {
+		this.setState({ saving: true }, () => (
 			// Update every orderlinefield
-			const options = { withCredentials: true };
-			const promiseList = Object.values(this.state.orderlineitems).map(orderlineitem => {
-				return Object.values(orderlineitem.orderlinefields).map(orderlinefield => (
-					axios.patch(`orderlinefields/${orderlinefield.id}`, { value: orderlinefield.value }, options)
-				));
-			}).flat();
-			Promise.all(promiseList)
-							.catch(error => console.log(error)) // TODO
-							.finally(this.fetchOrder)
-		});
+			Promise.all(
+				Object.values(this.state.orderlineitems).map(orderlineitem => (
+					Object.values(orderlineitem.orderlinefields).map(orderlinefield => (
+						apiAxios.patch(`orderlinefields/${orderlinefield.id}`,
+						               { value: orderlinefield.value },
+						               { withCredentials: true })
+					))
+				)).flat()
+			).finally(this.fetchOrder)
+		));
 	}
 
-	downloadTickets = event => {
-		const orderId = this.props.match.params.order_id;
-		window.open(`${axios.defaults.baseURL}/orders/${orderId}/pdf`, '_blank');
-	}
+	// Renderer
 
 	render() {
 		const { classes, order } = this.props;
-		const { orderlineitems, saving, changing } = this.state;
+		const { orderlineitems, saving, changing, updatingStatus } = this.state;
 		const status = ORDER_STATUS[order.status] || {};
 		return (
-			<div className="container">
-				<h1>Informations sur la commande n°{order.id}</h1>
-				<Chip 
-					onClick={this.updateStatus}
-					style={{ backgroundColor: status.color, color: '#fff' }}
-					label={status.label}
-				/>
-				{/* Change message // status */}
-				<p>Vous pouvez modifier les billets qui sont éditables en cliquant sur les différents champs.</p>
-				<div className={classes.ticketContainer}>
-					{Object.values(orderlineitems).map(orderlineitem => (
-						<Paper key={orderlineitem.id} className={classes.ticket}>
-							<h4 className={classes.ticketTitle}>{orderlineitem.item.name}</h4>
-							{isList(orderlineitem.orderlinefields) ? (
-								Object.values(orderlineitem.orderlinefields).map(orderlinefield => (
-									<TextField
-										key={orderlinefield.id}
-										label={orderlinefield.name}
-										value={orderlinefield.value}
-										required
-										disabled={saving || !orderlinefield.editable}
-										onChange={this.handleChange}
-										classes={{ root: classes.input }}
-										inputProps={{
-											'data-orderlineitem-id': orderlineitem.id,
-											'data-orderlinefield-id': orderlinefield.id,
-										}}
-									/>
-								))
-							) : (
-								<p className={classes.empty}>Pas de champs</p>
-							)}
-						</Paper>
-					))}
-				</div>
+			<Container>
+				<Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+					<h1>Informations sur la commande n°{order.id}</h1>
+					<Chip 
+						onClick={this.updateStatus}
+						label={status.label || '...'}
+						style={{ backgroundColor: status.color, color: '#fff' }}
+						icon={updatingStatus ? <CircularProgress size="1em" style={{ color: '#fff' }} /> : null}
+						clickable
+					/>
+				</Box>
 
-				<div className={classes.buttonContainer}>
-					<Button className={classes.button}
-									disabled={!changing || saving} onClick={this.resetChanges}>
+				{/* Change message // status */}
+				<Box my={3}>
+					Vous pouvez modifier les billets qui sont éditables
+					en cliquant sur les différents champs.
+				</Box>
+
+				<Grid container spacing={2} wrap="wrap">
+					{Object.values(orderlineitems).map(orderlineitem => (
+						<Grid item key={orderlineitem.id} xs sm="auto">
+							<OrderLineItemTicket
+								orderlineitem={orderlineitem}
+								saving={saving}
+								onChange={this.handleChange}
+							/>
+						</Grid>
+					))}
+				</Grid>
+
+				<Box textAlign="right" flexWrap="wrap" mt={3}>
+					<Button
+						onClick={this.resetChanges}
+						disabled={!changing || saving}
+						className={classes.button}
+					>
 						Annuler les changements
 					</Button>
-					<Button className={classes.button} variant="contained"
-									disabled={!changing} onClick={this.saveChanges}>
-						{saving ? (
-							<Loader size="sm" text="Sauvegarde en cours..." />
-						) : (
-							"Sauvegarder les changements"
-						)}
-					</Button>
+					<LoadingButton
+						onClick={this.saveChanges}
+						loading={saving}
+						disabled={!changing}
+						className={classes.button}
+						variant="contained"
+					>
+						Sauvegarder les changements
+					</LoadingButton>
+
 					{/* TODO Add download or not option */}
 					{ true && (
-						<Button className={classes.button} variant="contained"
-						        disabled={changing || saving} onClick={this.downloadTickets}>
+						<Button
+							onClick={this.downloadTickets}
+							disabled={changing || saving}
+							className={classes.button}
+							variant="contained"
+							color="primary"
+						>
 							Télécharger les billets
 						</Button>
-						)
-					}
-				</div>
-			</div>
+					)}
+				</Box>
+			</Container>
 		);
 	}
 }
 
 const styles = theme => ({
-	ticketContainer: {
-		// display: 'flex',
-		// flexDirection: 'columnn',
-		// flexWrap: 'wrap',
-	},
-	buttonContainer: {
-		textAlign: 'right',
-		flexWrap: 'wrap',
-		marginTop: 50,
-		// TODO breakdown + icon
-	},
-
-	ticket: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		margin: '1em 0',
-		padding: 10,
-	},
-	ticketTitle: {
-		width: '100%',
-		margin: '0 0 10px',
-		fontWeigth: 100,
-	},
-	empty: {
-		fontStyle: 'italic',
-		marginBottom: 0,
-	},
-	input: {
-		flex: 1,
-		margin: '0 5px',
-	},
 	button: {
-		margin: '0.25em 1em',
+		margin: theme.spacing(1),
 	},
 });
 

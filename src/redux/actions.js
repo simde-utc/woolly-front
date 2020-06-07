@@ -9,7 +9,7 @@
  */
 import axios from 'axios';
 import { API_URL } from '../constants';
-
+import { API_SUFFIX } from './store';
 
 // Default axios for the api
 export const apiAxios = axios.create({
@@ -27,37 +27,36 @@ export const apiAxios = axios.create({
 // Methods calling the API with alliases
 export const API_METHODS = {
 	all: {
-		type: 'ALL_',
+		type: 'ALL',
 		method: 'get',
 		action: 'updateAll',
 	},
 	find: {
-		type: 'FIND_',
+		type: 'FIND',
 		method: 'get',
 		action: 'update',
 	},
 	create: {
-		type: 'CREATE_',
+		type: 'CREATE',
 		method: 'post',
 		action: 'insert',
 	},
 	update: {
-		type: 'UPDATE_',
+		type: 'UPDATE',
 		method: 'put',
 		action: 'update',
 	},
 	remove: {
-		type: 'DELETE_',
+		type: 'DELETE',
 		method: 'delete',
 		action: 'delete',
 	},
 	delete: {
-		type: 'DELETE_',
+		type: 'DELETE',
 		method: 'delete',
 		action: 'delete',
 	},
 };
-API_METHODS.one = API_METHODS.find;
 API_METHODS.get = API_METHODS.find;
 API_METHODS.remove = API_METHODS.delete;
 
@@ -74,6 +73,13 @@ export const CONFIG_METHODS = {
 	/** Define the path for the resource in the store */
 	defineUri: action => uri => {
 		action.uri = uri;
+		return new Proxy(action, actionHandler);
+	},
+
+	setUriFromPath: action => path => {
+		action.path = path.slice();
+		action.uri = path.join('/');
+		action.idIsGiven = path.length % 2 === 0;
 		return new Proxy(action, actionHandler);
 	},
 
@@ -114,6 +120,9 @@ export const CONFIG_METHODS = {
 // Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
 export const actionHandler = {
 	get(action, attr) {
+		// Access instance
+		if (attr === '_instance')
+			return action;
 
 		// Real attribute of Action
 		if (action[attr] !== undefined)
@@ -128,9 +137,9 @@ export const actionHandler = {
 			let id, queryParams, jsonData;
 
 			// GET query on a single element
-			if (['find', 'one', 'get'].includes(attr)) {
-				if (args.length > 0 || action.idIsGiven || attr === 'one') {
-					if (action.idIsGiven || attr === 'one') {
+			if (['find', 'get'].includes(attr)) {
+				if (args.length > 0 || action.idIsGiven) {
+					if (action.idIsGiven) {
 						[queryParams, jsonData] = args;
 					} else {
 						[id, queryParams, jsonData] = args;
@@ -154,7 +163,7 @@ export const actionHandler = {
 					[queryParams, jsonData] = args;
 				} else {
 					[id, queryParams, jsonData] = args;
-					action.addUri(id);
+					action.addId(id);
 				}
 				return action.generateAction(attr, queryParams, jsonData);
 			}
@@ -172,9 +181,8 @@ export const actionHandler = {
 		// If not, callback the apiMethod and build the URI
 		// Example: `actions.users` build the URI /users
 		action.addUri(attr);
-		action.idIsGiven = false;
 
-		return new Proxy(apiMethod, {	get: (func, key) => func()[key] });
+		return new Proxy(apiMethod, { get: (func, key) => func()[key] });
 	},
 };
 
@@ -201,8 +209,10 @@ export class APIAction {
 	addUri(step) {
 		this.uri += `/${step}`;
 
-		if (!this.pathLocked)
+		if (!this.pathLocked) {
 			this.path.push(step);
+			this.idIsGiven = false;
+		}
 	}
 
 	addId(id) {
@@ -240,7 +250,7 @@ export class APIAction {
 	}
 
 	generateType(action) {
-		return this.actions[action].type + this.path.join('_').toUpperCase();
+		return [ API_SUFFIX, this.actions[action].type, ...this.path ].join('_').toUpperCase();
 	}
 
 	generateAction(action, queryParams = {}, jsonData = {}) {
