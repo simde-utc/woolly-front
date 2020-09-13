@@ -12,6 +12,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { WoollyTheme } from './themes';
 
 // Layout components
+import MessageSystem from './components/MessageSystem';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MainLoader from './components/MainLoader';
@@ -90,6 +91,7 @@ class App extends React.Component {
 						</Switch>
 					</React.Suspense>
 					<Footer height={FOOTER_HEIGHT} />
+					<MessageSystem />
 				</div>
 			</Wrappers>
 		);
