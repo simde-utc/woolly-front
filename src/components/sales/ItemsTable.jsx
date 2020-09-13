@@ -34,8 +34,9 @@ export default function ItemsTable({ items, disabled, quantities, onQuantityChan
 										inputProps={{
 											min: 0,
 											max: item.max_per_user,
-											'data-item-id': String(item.id)
+											'data-item-id': String(item.id),
 										}}
+										style={{ marginTop: 8, marginBottom: 8 }}
 										title={disabled ? "Connectez vous pour acheter" : null}
 										margin="normal"
 									/>

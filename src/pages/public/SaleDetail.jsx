@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions, { apiAxios } from '../../redux/actions';
+import actions, { apiAxios, messagesActions } from '../../redux/actions';
 import { formatDate } from '../../utils';
+import { getButtonColoredVariant } from '../../styles';
 
 import Loader from '../../components/common/Loader';
 import ItemsTable from '../../components/sales/ItemsTable';
@@ -103,8 +104,12 @@ class SaleDetail extends React.Component{
 	payOrder = async event => {
 		const orderId = this.props.order.id;
 		const returnUrl = window.location.href.replace(this.props.location.pathname, `/orders/${orderId}`);
-		const resp = await apiAxios.get(`/orders/${orderId}/pay?return_url=${returnUrl}`, { withCredentials: true });
-		window.location.href = resp.data['redirect_url'];
+		try {
+			const resp = await apiAxios.get(`/orders/${orderId}/pay?return_url=${returnUrl}`, { withCredentials: true });
+			window.location.href = resp.data['redirect_url'];
+		} catch (error) {
+			this.props.dispatch(messagesActions.pushError(error, "Erreur avec votre commande"));
+		}
 	}
 
 	/** Cancel an order */
@@ -149,10 +154,12 @@ class SaleDetail extends React.Component{
 
 	areItemsDisabled = () => Boolean(!this.props.authenticated || this.hasUnpaidOrder())
 
+	hasItemsInCart = () => Object.values(this.state.quantities).some(qt => qt > 0)
+
 	canBuy = () => (
 		this.props.authenticated
 		&& this.state.cgvAccepted
-		&& Object.values(this.state.quantities).some(qt => qt > 0)
+		&& this.hasItemsInCart()
 	)
 
 	render() {
@@ -163,111 +170,117 @@ class SaleDetail extends React.Component{
 
 		const CGVLink = props => <Link href={sale.cgv} rel="noopener" target="_blank" {...props} />
 		return (
-			<Container>
-				<h1>{sale.name}</h1>
+			<React.Fragment>
+				<Box textAlign="center" py={6}>
+					<Container>
+						<h1 className={classes.title}>{sale.name}</h1>
+						<h2 className={classes.subtitle}>Par {sale.association.shortname}</h2>
+					</Container>
+				</Box>
+				<Container>
 
-				<Grid container spacing={2}>
-					<Grid item xs sm={4}>
-						<h2>Organisé par {sale.association.shortname}</h2>
-						<h4>Description</h4>
-						<p>{sale.description}</p>
+					<Grid container spacing={2}>
+						<Grid item xs sm={4}>
+							<h3>Description</h3>
+							<p>{sale.description}</p>
 
-						<h4>Dates</h4>
-						<ul>
-							<li>Ouverture: {formatDate(sale.begin_at)}</li>
-							<li>Fermeture: {formatDate(sale.end_at)}</li>
-						</ul>
-					</Grid>
+							{/* TODO Display dates or not ? */}
+							<h4>Dates</h4>
+							<ul>
+								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at) : "Inconnue"}</li>
+								<li>Fermeture: {sale.end_at ? formatDate(sale.end_at) : "Inconnue"}</li>
+							</ul>
+						</Grid>
 
-					<Grid item xs sm={8}>
-						<h3>Articles en ventes</h3>
+						<Grid item xs sm={8}>
+							<h3>Articles en ventes</h3>
 
-						<FormControlLabel
-							control={(
-								<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
-							)}
-							label={(
-								<span>
-									J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
-								</span>
-							)}
-						/>
+							<FormControlLabel
+								control={(
+									<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
+								)}
+								label={(
+									<span>
+										J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
+									</span>
+								)}
+							/>
 
-						<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
-							<Box clone my={1}>
-								<Alert severity="info">
-									<AlertTitle>Pour acheter</AlertTitle>
-									<Box component="ul" m={0} pl={2}>
-										{!this.props.authenticated && (
-											<li>
-												Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
-											</li>
-										)}
-										{!this.state.cgvAccepted && (
-											<li>
-												Veuillez accepter les CGV ci-dessus pour acheter.
-											</li>
-										)}
-									</Box>
-								</Alert>
+							<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
+								<Box clone my={1}>
+									<Alert severity="info">
+										<AlertTitle>Pour acheter</AlertTitle>
+										<Box component="ul" m={0} pl={2}>
+											{!this.props.authenticated && (
+												<li>
+													Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
+												</li>
+											)}
+											{!this.state.cgvAccepted && (
+												<li>
+													Veuillez accepter les CGV ci-dessus pour acheter.
+												</li>
+											)}
+										</Box>
+									</Alert>
+								</Box>
+							</Collapse>
+
+							<Box clone my={2}>
+								<Paper>
+									<ItemsTable
+										disabled={this.areItemsDisabled()}
+										items={this.props.items}
+										quantities={this.state.quantities}
+										onQuantityChange={this.handleQuantityChange}
+									/>
+								</Paper>
 							</Box>
-						</Collapse>
 
-						<Box clone my={2}>
-							<Paper>
-								<ItemsTable
-									disabled={this.areItemsDisabled()}
-									items={this.props.items}
-									quantities={this.state.quantities}
-									onQuantityChange={this.handleQuantityChange}
-								/>
-							</Paper>
-						</Box>
+							<Box display="flex" justifyContent="flex-end">
+								<Button
+									onClick={this.handleReset}
+									disabled={!this.hasItemsInCart()}
+									startIcon={<Delete />}
+									className={classes.buttonEmpty}
+									variant="outlined"
+								>
+									Vider
+								</Button>
+								{/* SAVE BUTTON, utile  ??
+								<Button
+									onClick={this.saveOrder}
+									// disabled={!canBuy}
+									startIcon={<Save />}
+									className={classes.button}
+									variant="outlined"
+								>
+									Sauvegarder
+								</Button>
+								 */}
+								<Button
+									onClick={this.handleBuy}
+									disabled={!this.canBuy()}
+									startIcon={<ShoppingCart />}
+									className={classes.buttonBuy}
+									variant="contained"
+								>
+									Acheter
+								</Button>
+							</Box>
+						</Grid>
 
-						<Box display="flex" justifyContent="flex-end">
-							<Button
-								onClick={this.handleReset}
-								disabled={!this.hasUnpaidOrder()}
-								startIcon={<Delete />}
-								className={classes.button}
-								variant="outlined"
-							>
-								Vider
-							</Button>
-							{/* SAVE BUTTON, utile  ??
-							<Button
-								onClick={this.saveOrder}
-								// disabled={!canBuy}
-								startIcon={<Save />}
-								className={classes.button}
-								variant="outlined"
-							>
-								Sauvegarder
-							</Button>
-							 */}
-							<Button
-								onClick={this.handleBuy}
-								disabled={!this.canBuy()}
-								startIcon={<ShoppingCart />}
-								className={classes.button}
-								variant="contained"
-								color="primary"
-							>
-								Acheter
-							</Button>
-						</Box>
 					</Grid>
 
-				</Grid>
-
-				<UnpaidOrderDialog
-					order={this.props.order}
-					items={this.props.items}
-					open={this.hasUnpaidOrder()}
-					payOrder={this.payOrder}
-					cancelOrder={this.cancelOrder}
-				/>
-			</Container>
+					<UnpaidOrderDialog
+						order={this.props.order}
+						items={this.props.items}
+						open={this.hasUnpaidOrder()}
+						payOrder={this.payOrder}
+						cancelOrder={this.cancelOrder}
+					/>
+				</Container>
+			</React.Fragment>
 		)
 	}
 }
@@ -277,7 +290,20 @@ SaleDetail.propTypes = {
 };
 
 const styles = theme => ({
-	button: {
+	title: {
+		fontSize: '4em',
+		margin: 0,
+	},
+	subtitle: {
+		color: theme.palette.text.secondary,
+		fontWeight: 100,
+	},
+	buttonEmpty: {
+		...getButtonColoredVariant(theme, "warning", "outlined"),
+		margin: theme.spacing(1),
+	},
+	buttonBuy: {
+		...getButtonColoredVariant(theme, "success", "contained"),
 		margin: theme.spacing(1),
 	},
 	alert: {
