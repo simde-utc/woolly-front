@@ -36,7 +36,7 @@ export default function Header(props) {
 
 	React.useEffect(() => {
 		if (auth.user && !userAssos)
-			dispatch(actions.auth(auth.user.id).associations.all());
+			dispatch(actions.auth(auth.user.id).associations.all({ page_size: 'max' }));
 	});
 
 	return (
