@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	brand: {
 		fontSize: 20,
-		color: 'white',
+		color: 'inherit',
 		textDecoration: 'none',
 	},
 }))
@@ -40,7 +40,10 @@ export default function Header(props) {
 	});
 
 	return (
-		<AppBar position="fixed" style={{ minHeight: props.height }}>
+		<AppBar
+			position="fixed" color="default" 
+			elevation={0} style={{ minHeight: props.height, borderBottom: '1px solid #65656575' }}
+		>
 			<Container component={Toolbar} className={classes.toolbar}>
 				<NavLink className={classes.brand} to="/">Woolly</NavLink>
 				<div>
