@@ -31,7 +31,7 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 					{Field.number('max_item_quantity', 'Quantité max')}
 				</Grid>
 			</Grid>
-			<Box textAlign="center" mt={1}>
+			<Box textAlign="center" mt={2}>
 				<Button onClick={props.onReset} name="details" disabled={!editing}>
 					Annuler
 				</Button>

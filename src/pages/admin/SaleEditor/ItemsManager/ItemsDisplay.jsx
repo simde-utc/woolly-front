@@ -12,7 +12,7 @@ export default function ItemsDisplay({ itemgroups, ...props }) {
     const hasOrphans = !isEmpty(orphanItemIds);
 
     if (!hasOrphans && isEmpty(itemgroups))
-        return <NoItems />;
+        return <NoItems onAdd={props.onAdd} />;
 
     return (
         <Box mr={-3} display="flex" flexWrap="wrap">
@@ -25,7 +25,10 @@ export default function ItemsDisplay({ itemgroups, ...props }) {
             ))}
             {hasOrphans && (
                 <GroupBlock
-                    itemgroup={{ name: 'Sans groupe', items: orphanItemIds }}
+                    itemgroup={{
+                        name: <span style={{ fontStyle: 'italic' }}>Sans groupe</span>,
+                        items: orphanItemIds,
+                    }}
                     {...props}
                 />
             )}

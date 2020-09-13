@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import actions from '../../../redux/actions';
 import produce from 'immer';
 
-import { Container } from '@material-ui/core';
+import { Container, Box } from '@material-ui/core';
 
 import { areDifferent, dataToChoices, arrayToMap, deepcopy } from '../../../utils';
 import {
@@ -337,17 +337,23 @@ class SaleEditor extends React.Component {
 				if (resource === 'items')
 					await this._saveItemFields(data);
 
+				// Update resource and wait for feedback to dispatch
+				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
+				const action = actions[resource].update(id, queryParams, data)
+				await action.payload;
+
+				this.props.dispatch(action);
 				this.setState(prevState => produce(prevState, draft => {
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
 					return draft;
 				}));
-				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
-				this.props.dispatch(actions[resource].update(id, queryParams, data));
 			}
 		} catch(error) {
 			console.error(error)
 			this.setState(prevState => produce(prevState, draft => {
+				delete draft[`editing_${resource}`][id];
+				delete draft[`saving_${resource}`][id];
 				draft.errors[resource][id] = error.response.data;
 				return draft;
 			}));
@@ -410,10 +416,6 @@ class SaleEditor extends React.Component {
 	// Rendering
 
 	render() {
-		// DEBUG
-		window.props = this.props;
-		window.actions = actions;
-
 		const isCreator = this.isCreator();
 		return (
 			<Container>
@@ -424,7 +426,9 @@ class SaleEditor extends React.Component {
 					)}
 				</h1>
 				
-				<h2>Détails</h2>
+	            <Box clone mb={3} mt={6} textAlign="center">
+	                <h2>Détails</h2>
+	            </Box>
 				{this.state.loading_details ? (
 					<Loader text="Chargement des détails de la vente..." />
 				) : (
@@ -445,36 +449,41 @@ class SaleEditor extends React.Component {
 				)}
 
 				{!isCreator && (
-					<ItemsManager
-						// Data
-						selected={this.state.selected}
-						items={this.state.items}
-						itemgroups={this.state.itemgroups}
-						usertypes={this.props.usertypes.data}
-						errors={this.state.errors}
-						choices={{
-							fields: this.props.fieldsChoices,
-							itemgroups: this.props.itemgroupsChoices,
-							usertypes: this.props.usertypesChoices,
-						}}
-						// Handlers
-						onChange={this.handleChange}
-						onSave={this.handleSaveResource}
-						onDelete={this.handleDeleteResource}
-						onReset={this.handleResetResource}
-						onAdd={this.handleAddResource}
-						onSelect={this.handleSelectResource}
-						onItemFieldChange={this.handleItemFieldChange}
-						// State data
-						editing={{
-							items: this.state.editing_items,
-							itemgroups: this.state.editing_itemgroups,
-						}}
-						saving={{
-							items: this.state.saving_items,
-							itemgroups: this.state.saving_itemgroups,
-						}}
-					/>
+					<React.Fragment>
+			            <Box clone mb={3} mt={6} textAlign="center">
+			                <h2>Articles</h2>
+			            </Box>
+						<ItemsManager
+							// Data
+							selected={this.state.selected}
+							items={this.state.items}
+							itemgroups={this.state.itemgroups}
+							usertypes={this.props.usertypes.data}
+							errors={this.state.errors}
+							choices={{
+								fields: this.props.fieldsChoices,
+								itemgroups: this.props.itemgroupsChoices,
+								usertypes: this.props.usertypesChoices,
+							}}
+							// Handlers
+							onChange={this.handleChange}
+							onSave={this.handleSaveResource}
+							onDelete={this.handleDeleteResource}
+							onReset={this.handleResetResource}
+							onAdd={this.handleAddResource}
+							onSelect={this.handleSelectResource}
+							onItemFieldChange={this.handleItemFieldChange}
+							// State data
+							editing={{
+								items: this.state.editing_items,
+								itemgroups: this.state.editing_itemgroups,
+							}}
+							saving={{
+								items: this.state.saving_items,
+								itemgroups: this.state.saving_itemgroups,
+							}}
+						/>
+					</React.Fragment>
 				)}
 			</Container>
 		);

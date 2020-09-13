@@ -21,9 +21,9 @@ const connector = connect((store, props) => {
 	return {
 		saleId,
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
-		sale: store.findData('sales', saleId, 'id', null),
+		sale: store.findData('sales', saleId, 'id'),
 		order: store.getData(['sales', saleId, 'userOrder'], null),
-		items: store.getData(['sales', saleId, 'items'], null),
+		items: store.getData(['sales', saleId, 'items']),
 	};
 });
 

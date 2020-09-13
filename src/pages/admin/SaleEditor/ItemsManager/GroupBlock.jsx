@@ -18,6 +18,10 @@ function isSelected(selected, resource, id) {
 }
 
 const useStyles = makeStyles(theme => ({
+    group: {
+        display: 'inline-block',
+        marginRight: theme.spacing(3),
+    },
     item: {
         display: 'inline-block',
         flex: 1,
@@ -31,8 +35,12 @@ const useStyles = makeStyles(theme => ({
 export default function GroupBlock({ itemgroup, items, selected, editing, ...props}) {
     const classes = useStyles();
     return (
-        <Box display="inline-block" mr={3} name="itemgroups" value={itemgroup.id} onClick={props.onSelect}>
-            <h4>{itemgroup.name || 'Création en cours...'}</h4>
+        <Box
+            className={classes.group}
+            name="itemgroups" value={itemgroup.id}
+            onClick={props.onSelect}
+        >
+            <h4>{itemgroup.name || 'Veuillez choisir un nom'}</h4>
             <Grid container spacing={2}>
                 {isEmpty(itemgroup.items) ? (
                     <Grid item className={classes.item}>
@@ -49,13 +57,13 @@ export default function GroupBlock({ itemgroup, items, selected, editing, ...pro
                                     selected={isSelected(selected, 'items', id)}
                                     editing={editing['items'][id]}
                                     onSelect={props.onSelect}
+                                    hasErrors={!isEmpty(props.errors['items'][id])}
                                 />
                             ) : (
                                 <Skeleton
                                     variant="rect"
                                     width={250}
                                     height={120}
-                                    // borderRadius={10}
                                     style={{ borderRadius: 4 }}
                                 />
                             )}

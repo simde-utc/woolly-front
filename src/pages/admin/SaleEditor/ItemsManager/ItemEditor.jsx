@@ -18,7 +18,10 @@ function ItemFieldsTable({ Field, itemfields, fields, ...props}) {
                         <TableCell>Champ</TableCell>
                         <TableCell>Editable</TableCell>
                         <TableCell>
-                                <Button name="add" onClick={props.onChange}>
+                                <Button
+                                    name="add" onClick={props.onChange}
+                                    color="primary" variant="outlined"
+                                >
                                     Ajouter
                                 </Button>
                         </TableCell>
@@ -50,7 +53,7 @@ function ItemFieldsTable({ Field, itemfields, fields, ...props}) {
                         ))
                     ) : (
                         <TableRow>
-                            <Box component="td" colSpan="3" textAlign="center" color="text.secondary" p={1}>
+                            <Box component="td" colSpan="3" textAlign="center" color="text.secondary" py={2}>
                                 Aucun champ ! Ajouter en avec le bouton ci-dessus.
                             </Box>
                         </TableRow>
