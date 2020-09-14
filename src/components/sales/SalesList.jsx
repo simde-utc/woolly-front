@@ -17,7 +17,7 @@ export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }
 		state: { asso_id: assoId },
 	};
 	return (
-		<List {...props}>
+		<List style={{ padding: 0 }} {...props}>
 			{isEmpty(sales) ? (				
 				<ListItem button disabled>
 					<ListItemText primary="Pas de ventes" />

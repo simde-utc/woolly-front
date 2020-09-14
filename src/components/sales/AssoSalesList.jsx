@@ -27,7 +27,7 @@ export default function AssoSalesList({ assos, sales, ...props}) {
 	}
 
 	return (
-		<List disablePadding>
+		<List disablePadding style={{ padding: 0 }}>
 			{Object.values(assos).map(({ id, ...asso }) => (
 				<React.Fragment key={id}>
 					<NavListItem to={`/admin/assos/${id}`}>
