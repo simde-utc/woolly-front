@@ -419,13 +419,6 @@ class SaleEditor extends React.Component {
 		const isCreator = this.isCreator();
 		return (
 			<Container>
-				<h1>
-					{(isCreator
-						? "Création d'une vente"
-						: `Édition de la vente ${this.state.name || '...'}`
-					)}
-				</h1>
-				
 	            <Box clone mb={3} mt={6} textAlign="center">
 	                <h2>Détails</h2>
 	            </Box>

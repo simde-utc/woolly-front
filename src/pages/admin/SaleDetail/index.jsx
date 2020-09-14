@@ -4,9 +4,9 @@ import { useStoreAPIData } from '../../../redux/hooks';
 import { Box, Container, Grid, Chip, Tabs, Tab } from '@material-ui/core';
 import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
 
+import Stat from '../../../components/common/Stat';
 import { Link } from '../../../components/common/Nav';
 import { CopyButton } from '../../../components/common/Buttons';
-import Stat from '../../../components/common/Stat';
 
 import QuantitiesSold from './QuantitiesSold';
 import OrdersList from './OrdersList';
@@ -27,8 +27,6 @@ export default function SaleDetail(props) {
 	const saleLink = window.location.href.replace('/admin/', '/');
 	return (
 		<Container>
-			<h1>{sale.name}</h1>
-
 			<Grid container spacing={2}>
 				<Grid item xs md={3}>
 					<Grid container spacing={1}>
