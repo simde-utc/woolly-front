@@ -180,7 +180,7 @@ class SaleDetail extends React.Component{
 				<Container>
 
 					<Grid container spacing={2}>
-						<Grid item xs sm={4}>
+						<Grid item xs={12} sm={4}>
 							<h3>Description</h3>
 							<p>{sale.description}</p>
 
@@ -192,7 +192,7 @@ class SaleDetail extends React.Component{
 							</ul>
 						</Grid>
 
-						<Grid item xs sm={8}>
+						<Grid item xs={12} sm={8}>
 							<h3>Articles en ventes</h3>
 
 							<FormControlLabel
