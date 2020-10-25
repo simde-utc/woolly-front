@@ -90,18 +90,20 @@ const useStyles = makeStyles(theme => ({
 	nav: {
 		marginBottom: theme.spacing(2),
 	},
-	container: {
-		minHeight: 65,
-		[theme.breakpoints.down('sm')]: {
-			flexDirection: 'column',
-			justifyContent: 'stretch',
-			alignItems: 'center',
+	titleItem: {
+		paddingTop: theme.spacing(2),
+		paddingBottom: theme.spacing(2),
+		[theme.breakpoints.down('xs')]: {
+			order: -1,
+			paddingBottom: 0,
 		},
-		[theme.breakpoints.up('sm')]: {
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
-		},
+	},
+	title: {
+		margin: 0,
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textAlign: 'center',
 	},
 }));
 
@@ -116,9 +118,14 @@ export default function AdminNav(props) {
 	return (
 		<nav className={classes.nav}>
 			<Container>
-				<Grid container classes={classes}>
-					<Grid item xs={12} sm={3} md={2}>
-						<Box my={2}>
+				<Grid
+					container
+					style={{ minWidth: 65 }}
+					justify="space-between"
+					alignItems="center"
+				>
+					<Grid item xs="auto" sm={3} md={2}>
+						<Box my={2} pr={1}>
 							<Link
 								to="/admin"
 								color="inherit"
@@ -129,10 +136,10 @@ export default function AdminNav(props) {
 							</Link>
 						</Box>
 					</Grid>
-					<Grid item>
-						<h1>{title || ""}</h1>
+					<Grid item xs={12} sm zeroMinWidth className={classes.titleItem}>
+						<h1 className={classes.title}>{title || ""}</h1>
 					</Grid>
-					<Grid item xs={12} sm={3} md={2} style={{ minWidth: 144 }}>
+					<Grid item xs="auto" style={{ minWidth: 144 }}>
 						{actions}
 					</Grid>
 				</Grid>
