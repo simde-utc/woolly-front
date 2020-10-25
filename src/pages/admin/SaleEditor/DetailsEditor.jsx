@@ -14,7 +14,7 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 	return (
 		<Paper className={classes.editor}>
 			<Grid container spacing={3}>
-				<Grid item xs={12} sm={6} className={classes.column}>
+				<Grid item xs sm={6} className={classes.column}>
 					<h4>Description</h4>
 					{Field.text('name', 'Nom', { required: true, autoFocus: true })}
 					{Field.text('id', 'ID', onlyCreate)}
@@ -22,7 +22,7 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 					{Field.text('description', 'Description', { required: true, multiline: true, rows: 4 })}
 				</Grid>
 
-				<Grid container item xs={12} sm={6} className={mergeClasses(classes, 'column', 'controls')}>
+				<Grid item xs sm={6} className={mergeClasses(classes, 'column', 'controls')}>
 					<h4>Disponibilité</h4>
 					{Field.datetime('begin_at', 'Ouverture', { required: true })}
 					{Field.datetime('end_at', 'Fermeture', { required: true })}
@@ -31,7 +31,7 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 					{Field.number('max_item_quantity', 'Quantité max')}
 				</Grid>
 			</Grid>
-			<Box textAlign="center" mt={2}>
+			<Box textAlign="center" mt={4}>
 				<Button onClick={props.onReset} name="details" disabled={!editing}>
 					Annuler
 				</Button>

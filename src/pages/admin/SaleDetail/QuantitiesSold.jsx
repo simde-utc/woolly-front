@@ -34,7 +34,7 @@ export function ItemsSold({ items, ...props }) {
                             <TableCell>{item.is_active ? <Done /> : <Pause />}</TableCell>
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{formatPrice(item.price)}</TableCell>
-                            <TableCell>{item.quantity_sold} / {item.quantity ? item.quantity : <span>&infin;</span>}</TableCell>
+                            <TableCell>{item.quantity_sold || 0} / {item.quantity ? item.quantity : <span>&infin;</span>}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -55,14 +55,16 @@ export function GroupSold({ itemgroup, items, ...props }) {
                         <Box clone m={0}><h4>{itemgroup ? itemgroup.name : '...'}</h4></Box>
                     </Grid>
                     <Grid item>
-                        <span>{totalSold}</span>
+                        <span>{totalSold || 0}</span>
                         <IconButton size="small" onClick={() => setOpen(!open)}>
                             {open ? <ExpandLess /> : <ExpandMore />}
                         </IconButton>
                     </Grid>
                 </Grid>
                 <Collapse in={open} timeout="auto" unmountOnExit>
-                    <ItemsSold items={items} />
+                    <Box py={2}>
+                        <ItemsSold items={items} />
+                    </Box>
                 </Collapse>
             </Paper>
         </Box>

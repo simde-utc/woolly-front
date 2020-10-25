@@ -17,8 +17,6 @@ export default function Dashboard(props) {
 
 	return (
 		<Container>
-			<h1>Admin - Dashboard</h1>
-
 			<Grid container spacing={3} wrap="wrap">
 				<Grid item xs={12} sm={6}>
 					<h2>Dernières ventes</h2>

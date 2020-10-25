@@ -13,8 +13,6 @@ export default function AssoDashboard(props) {
 
 	return (
 		<Container>
-			<h1>Admin - Dashboard {asso ? asso.shortname : '...'}</h1>
-
 			<Grid container spacing={3}>
 				<Grid item md={6}>
 					<h2>Informations</h2>

@@ -28,27 +28,23 @@ export default function SaleDetail(props) {
 	return (
 		<Container>
 			<Grid container spacing={2}>
-				<Grid item xs md={3}>
-					<Grid container spacing={1}>
-						<Grid item xs md={12}>
-							<p>Organisé par {sale.association && sale.association.shortname}</p>
+				<Grid item xs={12} md={3}>
+					<Grid container spacing={2} justify="center">
+						<Grid item xs="auto" md={12}>
+							<h4>Organisé par {sale.association && sale.association.shortname}</h4>
 							<div>
 								{sale.is_active
-									? <Chip label="Active" color="primary" icon={<PlayArrow />} />
-									: <Chip label="Inactive" icon={<Pause />} />
+									? <Chip style={{ margin: 4 }} label="Active" color="primary" icon={<PlayArrow />} />
+									: <Chip style={{ margin: 4 }} label="Inactive" icon={<Pause />} />
 								}
 								{sale.is_public
-									? <Chip label="Publique" icon={<Public />} />
-									: <Chip label="Privée" icon={<Lock />} />
+									? <Chip style={{ margin: 4 }} label="Publique" color="primary" icon={<Public />} />
+									: <Chip style={{ margin: 4 }} label="Privée" icon={<Lock />} />
 								}
 							</div>
 						</Grid>
-						<Grid item xs md={12}>
-							<h5>Description</h5>
-							<p>{sale.description}</p>
-						</Grid>
-						<Grid item xs md={12}>
-							<h5>Liens</h5>
+						<Grid item xs="auto" md={12}>
+							<h4>Liens</h4>
 							<ul>
 								<li><CopyButton value={saleLink}>Partager la vente</CopyButton></li>
 								{sale.cgv
@@ -56,6 +52,10 @@ export default function SaleDetail(props) {
 									: <li>Pas de CGV !!</li>
 								}
 							</ul>
+						</Grid>
+						<Grid item xs="auto" sm md={12}>
+							<h4>Description</h4>
+							<p>{sale.description}</p>
 						</Grid>
 					</Grid>
 				</Grid>
@@ -75,9 +75,9 @@ export default function SaleDetail(props) {
 					<Box py={2}>
 						{(tab === 'quantities' && (
 							<React.Fragment>
-								<Box display="flex" justifyContent="space-evenly" mb={2}>
-									<Stat value={480} max={1000} />
-									<Stat value={`${1050}€`} />
+								<Box display="flex" justifyContent="space-evenly" mt={2} mb={4}>
+									<Stat title="Places vendues" value={480} max={1000} />
+									<Stat title="Argent récolté" value={1050} unit="€" />
 								</Box>
 								<QuantitiesSold
 									items={items}
