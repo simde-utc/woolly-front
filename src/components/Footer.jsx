@@ -6,9 +6,9 @@ import { Link } from '@material-ui/core';
 
 const useStyles = makeStyles({
 	container: {
-		position: 'absolute',
-		bottom: 0,
-		left: 0,
+		// position: 'absolute',
+		// bottom: 0,
+		// left: 0,
 		width: '100%',
 		display: 'flex',
 		justifyContent: 'center',

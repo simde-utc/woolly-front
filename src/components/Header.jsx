@@ -41,8 +41,13 @@ export default function Header(props) {
 
 	return (
 		<AppBar
-			position="fixed" color="default" 
-			elevation={0} style={{ minHeight: props.height, borderBottom: '1px solid #65656575' }}
+			position="static"
+			color="default"
+			elevation={0}
+			style={{
+				minHeight: props.height,
+				borderBottom: '1px solid #65656575',
+			}}
 		>
 			<Container component={Toolbar} className={classes.toolbar}>
 				<NavLink className={classes.brand} to="/">Woolly</NavLink>
