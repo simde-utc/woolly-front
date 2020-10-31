@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions, { apiAxios, messagesActions } from '../../redux/actions';
+import { isPast } from 'date-fns';
 import { formatDate } from '../../utils';
 import { getButtonColoredVariant } from '../../styles';
 
@@ -150,6 +151,17 @@ class SaleDetail extends React.Component{
 	// 		Display
 	// -----------------------------------------------------
 
+	currentSaleState = () => {
+		const sale = this.props.sale;
+		if (!sale)
+			return null;
+		if (sale.end_at && isPast(new Date(sale.end_at)))
+			return 'FINISHED';
+		if (sale.begin_at && isPast(new Date(sale.begin_at)))
+			return 'ONGOING';
+		return 'NOT_BEGUN';
+	}
+
 	hasUnpaidOrder = () => Boolean(this.props.order && this.props.order.status === 3)
 
 	areItemsDisabled = () => Boolean(!this.props.authenticated || this.hasUnpaidOrder())
@@ -159,6 +171,7 @@ class SaleDetail extends React.Component{
 	canBuy = () => (
 		this.props.authenticated
 		&& this.state.cgvAccepted
+		&& this.currentSaleState() === 'ONGOING'
 		&& this.hasItemsInCart()
 	)
 
@@ -168,6 +181,7 @@ class SaleDetail extends React.Component{
 		if (!sale || this.props.fetchingSale)
 			return <Loader fluid text="Loading sale..." />
 
+		const saleState = this.currentSaleState()
 		const CGVLink = props => <Link href={sale.cgv} rel="noopener" target="_blank" {...props} />
 		return (
 			<React.Fragment>
@@ -184,7 +198,11 @@ class SaleDetail extends React.Component{
 							<h3>Description</h3>
 							<p>{sale.description}</p>
 
-							{/* TODO Display dates or not ? */}
+							<h4>Liens</h4>
+							<ul>
+								<li><CGVLink>Conditions Vénérales de Ventes</CGVLink></li>
+							</ul>
+
 							<h4>Dates</h4>
 							<ul>
 								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at) : "Inconnue"}</li>
@@ -195,36 +213,56 @@ class SaleDetail extends React.Component{
 						<Grid item xs={12} sm={8}>
 							<h3>Articles en ventes</h3>
 
-							<FormControlLabel
-								control={(
-									<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
-								)}
-								label={(
+							{saleState === 'NOT_BEGUN' && (
+								<Alert severity="warning" color="info">
+									<AlertTitle>La vente n'a pas encore commencée</AlertTitle>
 									<span>
-										J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
+										Revenez d'ici {formatDate(sale.begin_at, 'fromNowStrict')} pour pouvoir commander.
 									</span>
-								)}
-							/>
+								</Alert>
+							)}
+							{saleState === 'FINISHED' && (
+								<Alert severity="warning" color="info">
+									<AlertTitle>La vente est terminée</AlertTitle>
+									<span>
+										Vous pouvez retrouver vos commandes liées à cette vente, <Link to="/orders">sur votre compte</Link>.
+									</span>
+								</Alert>
+							)}
+							{saleState === 'ONGOING' && (
+								<React.Fragment>
+									<FormControlLabel
+										control={(
+											<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
+										)}
+										label={(
+											<span>
+												J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
+											</span>
+										)}
+									/>
 
-							<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
-								<Box clone my={1}>
-									<Alert severity="info">
-										<AlertTitle>Pour acheter</AlertTitle>
-										<Box component="ul" m={0} pl={2}>
-											{!this.props.authenticated && (
-												<li>
-													Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
-												</li>
-											)}
-											{!this.state.cgvAccepted && (
-												<li>
-													Veuillez accepter les CGV ci-dessus pour acheter.
-												</li>
-											)}
+									<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
+										<Box clone my={1}>
+											<Alert severity="info">
+												<AlertTitle>Pour acheter</AlertTitle>
+												<Box component="ul" m={0} pl={2}>
+													{!this.props.authenticated && (
+														<li>
+															Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
+														</li>
+													)}
+													{!this.state.cgvAccepted && (
+														<li>
+															Veuillez accepter les CGV ci-dessus.
+														</li>
+													)}
+												</Box>
+											</Alert>
 										</Box>
-									</Alert>
-								</Box>
-							</Collapse>
+									</Collapse>
+								</React.Fragment>
+							)}
 
 							<Box clone my={2}>
 								<Paper>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStoreAPIData } from '../../../redux/hooks';
+import { formatDate } from '../../../utils';
 
 import { Box, Container, Grid, Chip, Tabs, Tab } from '@material-ui/core';
 import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
@@ -25,26 +26,34 @@ export default function SaleDetail(props) {
 		return "Loading"
 
 	const saleLink = window.location.href.replace('/admin/', '/');
+	const chipMargin = { marginBottom: 4, marginRight: 4 };
 	return (
 		<Container>
 			<Grid container spacing={2}>
 				<Grid item xs={12} md={3}>
 					<Grid container spacing={2} justify="center">
 						<Grid item xs="auto" md={12}>
-							<h4>Organisé par {sale.association && sale.association.shortname}</h4>
+							<h4 style={{ marginTop: 0 }}>Organisé par {sale.association && sale.association.shortname}</h4>
 							<div>
 								{sale.is_active
-									? <Chip style={{ margin: 4 }} label="Active" color="primary" icon={<PlayArrow />} />
-									: <Chip style={{ margin: 4 }} label="Inactive" icon={<Pause />} />
+									? <Chip style={chipMargin} label="Active" color="primary" icon={<PlayArrow />} />
+									: <Chip style={chipMargin} label="Inactive" icon={<Pause />} />
 								}
 								{sale.is_public
-									? <Chip style={{ margin: 4 }} label="Publique" color="primary" icon={<Public />} />
-									: <Chip style={{ margin: 4 }} label="Privée" icon={<Lock />} />
+									? <Chip style={chipMargin} label="Publique" color="primary" icon={<Public />} />
+									: <Chip style={chipMargin} label="Privée" icon={<Lock />} />
 								}
 							</div>
 						</Grid>
 						<Grid item xs="auto" md={12}>
-							<h4>Liens</h4>
+							<h4 style={{ marginTop: 0 }}>Dates</h4>
+							<ul>
+								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at, 'datetime') : "Inconnue"}</li>
+								<li>Fermeture: {sale.end_at ? formatDate(sale.end_at, 'datetime') : "Inconnue"}</li>
+							</ul>
+						</Grid>
+						<Grid item xs="auto" md={12}>
+							<h4 style={{ marginTop: 0 }}>Liens</h4>
 							<ul>
 								<li><CopyButton value={saleLink}>Partager la vente</CopyButton></li>
 								{sale.cgv
@@ -52,10 +61,6 @@ export default function SaleDetail(props) {
 									: <li>Pas de CGV !!</li>
 								}
 							</ul>
-						</Grid>
-						<Grid item xs="auto" sm md={12}>
-							<h4>Description</h4>
-							<p>{sale.description}</p>
 						</Grid>
 					</Grid>
 				</Grid>
