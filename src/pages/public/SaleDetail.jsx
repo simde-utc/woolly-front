@@ -23,7 +23,7 @@ const connector = connect((store, props) => {
 		saleId,
 		authenticated: Boolean(store.getData('auth', {}).authenticated),
 		sale: store.findData('sales', saleId, 'id'),
-		order: store.getData(['sales', saleId, 'userOrder'], null),
+		order: store.getData(['sales', saleId, 'userOrder'], null, true),
 		items: store.getData(['sales', saleId, 'items']),
 	};
 });
@@ -45,7 +45,7 @@ class SaleDetail extends React.Component{
 			this.props.dispatch(actions.sales.find(saleId, { include: 'association' }));
 
 		if (!this.props.items)
-			this.props.dispatch(actions.sales(saleId).items.get());
+			this.props.dispatch(actions.sales(saleId).items.all());
 	}
 
 	componentDidUpdate(prevProps) {
@@ -110,6 +110,7 @@ class SaleDetail extends React.Component{
 			window.location.href = resp.data['redirect_url'];
 		} catch (error) {
 			this.props.dispatch(messagesActions.pushError(error, "Erreur avec votre commande"));
+			this.fetchOrder();
 		}
 	}
 

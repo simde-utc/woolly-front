@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useSelector, useDispatch } from 'react-redux';
 import { pathToArray } from './store';
-import actions, { APIAction } from './actions';
+import actions, { APIAction, apiAxios } from './actions';
 
 
 const USE_API_STORE_DEFAULT_OPTIONS = {
@@ -14,6 +14,7 @@ const USE_API_STORE_DEFAULT_OPTIONS = {
 	fetchingValue: undefined,
 };
 
+// FIXME Process pagination
 export function useStoreAPIData(path, options = {}) {
 	// Patch params
 	path = pathToArray(path);
@@ -48,12 +49,30 @@ export function useStoreAPIData(path, options = {}) {
 	return resource.data;
 }
 
+export async function useUpdateOrderStatus(orderId, auto = { fetch: false, redirect: false }) {
+	const dispatch = useDispatch();
+	const resp = (await apiAxios.get(`/orders/${orderId}/status`)).data
+
+	const fetchOrder = () => dispatch(actions.orders.find(orderId));
+	const redirectToPayment = () => resp.redirect_url ? window.location.href = resp.redirect_url : null;
+
+	if (auto.fetch && resp.updated)
+		fetchOrder();
+	if (auto.redirect && resp.redirect_url)
+		redirectToPayment();
+
+	return { resp, fetchOrder, redirectToPayment };
+}
 
 function fetchOrders(dispatch, userId) {
 	dispatch(
-		actions.defineUri(`users/${userId}/orders`)
-		       .definePath(['auth', 'orders'])
-		       .all({ include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems' })
+		actions
+			.defineUri(`users/${userId}/orders`)
+			.definePath(['auth', 'orders'])
+			.all({
+				order_by: '-id',
+				include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems',
+			})
 	);
 }
 

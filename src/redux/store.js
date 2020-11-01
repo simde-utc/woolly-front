@@ -107,7 +107,7 @@ export const apiStore = {
 	/**
 	 * Easy access an element in the store
 	 * Should NOT return copied data from the store (arr.map, Object.values) for better performance
-	 * 
+	 *
 	 * @param      {<type>}   path                      The path to the target resource
 	 * @param      {<type>}   [replacement={}]          The returned Objet if the resource if infindable
 	 * @param      {boolean}  [forceReplacement=false]  Return remplacement resource is empty or null
@@ -134,7 +134,7 @@ export const apiStore = {
 	},
 
 	/** Retrieve the data object of a resource */
-	getData(path, replacement = {}, forceReplacement = true) {
+	getData(path, replacement = null, forceReplacement = false) {
 		return this.get(mergePath(path, 'data'), replacement, forceReplacement);
 	},
 
@@ -156,7 +156,7 @@ export const apiStore = {
 	/**
 	 * Get specified resource for multiple data by id
 	 * Example: ('sales', 'assos') => { a: asso_of_sale_a, b: asso_of_sale_b }
-	 * 
+	 *
 	 * @param  {[type]} path        [description]
 	 * @param  {[type]} resource    [description]
 	 * @param  {[type]} replacement [description]
@@ -340,7 +340,7 @@ export const apiReducer = (state = apiStore, action) => {
 						// 	buildSuccessfulDataStorePath(data[key], key);
 					}
 
-				} else {			// Single element 
+				} else {			// Single element
 
 					// Modify place.data and place.resources
 					if (['create', 'insert', 'update'].includes(action.meta.action)) {
@@ -370,7 +370,7 @@ export const apiReducer = (state = apiStore, action) => {
 			return draft;
 		});
 	}
-	
+
 	return state;
 }
 

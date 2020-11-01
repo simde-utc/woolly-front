@@ -2,12 +2,14 @@ import React from 'react';
 import produce from 'immer';
 import { connect } from 'react-redux';
 import actions, { apiAxios } from '../../redux/actions';
-import { API_URL, ORDER_STATUS } from '../../constants';
+import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from '../../constants';
 import { arrayToMap } from '../../utils';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Container, Grid, Button, Chip, CircularProgress } from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { LoadingButton } from '../../components/common/Buttons';
+import { NavButton } from '../../components/common/Nav';
 import OrderLineItemTicket from '../../components/orders/OrderLineItemTicket';
 
 
@@ -37,7 +39,7 @@ const connector = connect((store, props) => {
 	const orderId = props.match.params.order_id;
 	return {
 		orderId,
-		order: store.getData(['orders', orderId]),
+		order: store.getData(['orders', orderId], null, true),
 	};
 });
 
@@ -88,7 +90,7 @@ class OrderDetail extends React.Component {
 			if (resp.redirect_url)
 				window.location.href = resp.redirect_url;
 			else
-				this.setState({ updatingStatus: false }, this.fetchOrder);
+				this.setState({ updatingStatus: false }, resp.updated ? this.fetchOrder : null);
 		});
 	}
 
@@ -129,13 +131,16 @@ class OrderDetail extends React.Component {
 
 	render() {
 		const { classes, order } = this.props;
+		if (!order)
+			return "Loading"
 		const { orderlineitems, saving, changing, updatingStatus } = this.state;
 		const status = ORDER_STATUS[order.status] || {};
+		const statusMessage = STATUS_MESSAGES[order.status] || {};
 		return (
 			<Container>
 				<Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
-					<h1>Informations sur la commande n°{order.id}</h1>
-					<Chip 
+					<h1>Commande n°{order.id}</h1>
+					<Chip
 						onClick={this.updateStatus}
 						label={status.label || '...'}
 						style={{ backgroundColor: status.color, color: '#fff' }}
@@ -144,15 +149,24 @@ class OrderDetail extends React.Component {
 					/>
 				</Box>
 
-				{/* Change message // status */}
-				<Box my={3}>
-					Vous pouvez modifier les billets qui sont éditables
-					en cliquant sur les différents champs.
+				{/* TODO Change message // status */}
+				<Box clone my={2}>
+					<Alert severity={statusMessage.severity}>
+						<AlertTitle>Votre commande est {status.label.toLowerCase()}</AlertTitle>
+						{statusMessage.message}
+						{statusMessage.link && (
+							<Box mt={2}>
+								<NavButton to={`/sales/${order.sale || ''}`} color="inherit" variant="outlined">
+									{statusMessage.link}
+								</NavButton>
+							</Box>
+						)}
+					</Alert>
 				</Box>
 
 				<Grid container spacing={2} wrap="wrap">
 					{Object.values(orderlineitems).map(orderlineitem => (
-						<Grid item key={orderlineitem.id} xs sm="auto">
+						<Grid item key={orderlineitem.id} xs sm={4} md={3}>
 							<OrderLineItemTicket
 								orderlineitem={orderlineitem}
 								saving={saving}
@@ -176,22 +190,19 @@ class OrderDetail extends React.Component {
 						disabled={!changing}
 						className={classes.button}
 						variant="contained"
+						color="primary"
 					>
 						Sauvegarder les changements
 					</LoadingButton>
-
-					{/* TODO Add download or not option */}
-					{ true && (
-						<Button
-							onClick={this.downloadTickets}
-							disabled={changing || saving}
-							className={classes.button}
-							variant="contained"
-							color="primary"
-						>
-							Télécharger les billets
-						</Button>
-					)}
+					<Button
+						onClick={this.downloadTickets}
+						disabled={changing || saving}
+						className={classes.button}
+						variant="contained"
+						color="primary"
+					>
+						Télécharger les billets
+					</Button>
 				</Box>
 			</Container>
 		);

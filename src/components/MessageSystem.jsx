@@ -38,6 +38,7 @@ export default function MessageSystem({ ...props }) {
 			{Object.values(messages).map(message => (
 				<Message
 					open
+					key={message.id}
 					title={message.title}
 					details={message.details}
 					severity={message.severity}

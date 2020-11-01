@@ -16,7 +16,7 @@ export default function Orders(props) {
 				<Box display="flex" flexWrap="wrap">
 					<UserOrdersList
 						orders={orders}
-						updateOrders={fetchOrders}
+						fetchOrders={fetchOrders}
 					/>
 				</Box>
 			</Loader>

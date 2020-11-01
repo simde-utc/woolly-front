@@ -62,9 +62,10 @@ export const useFormStyles = makeStyles(theme => ({
         flexDirection: 'column',
         paddingTop: '0 !important',
         paddingBottom: '0 !important',
+        minWidth: 220,
     },
     controls: {
-        maxWidth: 240,
+        maxWidth: 280,
     },
     editor: {
         // borderWidth: 1,
