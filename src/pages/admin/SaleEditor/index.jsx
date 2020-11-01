@@ -1,7 +1,7 @@
 import React from 'react'
 // import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../../../redux/actions';
+import actions, { messagesActions } from '../../../redux/actions';
 import produce from 'immer';
 
 import { Container, Box } from '@material-ui/core';
@@ -140,6 +140,10 @@ class SaleEditor extends React.Component {
 						loading_details: false,
 						editing_details: false,
 						saving_details: false,
+						errors: {
+							...prevState.errors,
+							details: {},
+						}
 					};
 			case 'items':
 			case 'itemgroups':
@@ -154,7 +158,7 @@ class SaleEditor extends React.Component {
 					},
 				};
 			default:
-				throw Error(`Cannot get state for unknown resource '${resource}'`)			
+				throw Error(`Cannot get state for unknown resource '${resource}'`)
 		}
 	}
 
@@ -244,7 +248,7 @@ class SaleEditor extends React.Component {
 		}));
 	}
 
-	handleSaveDetails = async event => {
+	handleSaveDetails = event => {
 		const { _editing, ...details } = this.state.details;
 
 		// Check values
@@ -255,28 +259,32 @@ class SaleEditor extends React.Component {
 			}));
 		}
 
-		try {
-			this.setState({ saving_details: true });
-			if (this.isCreator()) {
-				// Create sale
-				const action = actions.sales.create(null, details);
-				const response = await action.payload;
-				// Dispatch creation and go to edit mode
-				this.props.dispatch(action);
-				this.props.history.push(`/admin/sales/${response.data.id}/edit`);
-			} else {
-				// Update sale details
-				this.props.dispatch(actions.sales.update(this.props.saleId, null, details));
+		this.setState({ saving_details: true }, async () => {
+			try {
+				if (this.isCreator()) {
+					// Create sale
+					const action = actions.sales.create(null, details);
+					const response = await action.payload;
+					// Dispatch creation and go to edit mode
+					this.props.dispatch(action);
+					this.props.history.push(`/admin/sales/${response.data.id}/edit`);
+				} else {
+					// Update sale details
+					const action = actions.sales.update(this.props.saleId, null, details);
+					await action.payload;
+					this.props.dispatch(action);
+				}
+			} catch(error) {
+				this.props.dispatch(messagesActions.pushError(error, "La sauvegarde de la vente a échouée"));
+				this.setState(prevState => ({
+					saving_details: false,
+					errors: {
+						...prevState.errors,
+						details: error.response.data,
+					},
+				}));
 			}
-		} catch(error) {
-			// TODO Test
-			this.setState(prevState => ({
-				errors: {
-					...prevState.errors,
-					details: error.response.data,
-				},
-			}));
-		}
+		});
 	}
 
 	handleAddResource = event => {
@@ -326,7 +334,7 @@ class SaleEditor extends React.Component {
 				this.setState(prevState => produce(prevState, draft => {
 					if (resource === 'items')
 						this._removeItemFromGroup(draft, id);
-					
+
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
 					draft.selected = null;
@@ -350,6 +358,7 @@ class SaleEditor extends React.Component {
 				}));
 			}
 		} catch(error) {
+			this.props.dispatch(messagesActions.pushError(error, "La sauvegarde de l'item a échouée"));
 			console.error(error)
 			this.setState(prevState => produce(prevState, draft => {
 				delete draft[`editing_${resource}`][id];
