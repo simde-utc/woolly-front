@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from '@material-ui/core';
 
@@ -16,17 +15,13 @@ const useStyles = makeStyles({
 	},
 });
 
-export default function Footer({ height }) {
+export default function Footer(props) {
 	const classes = useStyles();
 	const simdeLink = <Link href="https://assos.utc.fr/assos/simde" target="_blank" rel="noopener">SiMDE</Link>;
 	const contactLink = <Link href="mailto:simde@assos.utc.fr">Contact</Link>;
 	return (
-		<span className={classes.container} style={{ height }}>
+		<span className={classes.container} style={{ minHeight: 40 }}>
 			Fait avec ♥ par le&nbsp;{simdeLink}.&nbsp;{contactLink}
 		</span>
 	);
 }
-
-Footer.propTypes = {
-	height: PropTypes.number.isRequired,
-};

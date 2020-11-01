@@ -35,11 +35,6 @@ import OrderDetail from './pages/public/OrderDetail';
 // Lazy loaded pages
 const AdminSite = React.lazy(() => import('./pages/admin/'));
 
-// TODO Set in theme
-const HEADER_HEIGHT = 64;
-const FOOTER_HEIGHT = 40;
-
-
 function Wrappers(props) {
 	return (
 		<Provider store={store}>
@@ -75,7 +70,7 @@ class App extends React.Component {
 					boxSizing="border-box"
 					style={{ overflowY: 'hidden' }}
 				>
-					<Header height={HEADER_HEIGHT} />
+					<Header />
 					<Box flex={1} position="relative" style={{ overflowY: 'auto' }}>
 						<React.Suspense fallback={<Loader text="Chargement en cours" size="lg" />}>
 							<Switch>
@@ -92,7 +87,7 @@ class App extends React.Component {
 							</Switch>
 						</React.Suspense>
 					</Box>
-					<Footer height={FOOTER_HEIGHT} />
+					<Footer />
 					<MessageSystem />
 				</Box>
 			</Wrappers>
