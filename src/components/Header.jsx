@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import actions from '../redux/actions';
 
@@ -19,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	brand: {
 		fontSize: 20,
-		color: 'white',
+		color: 'inherit',
 		textDecoration: 'none',
 	},
 }))
@@ -36,14 +35,23 @@ export default function Header(props) {
 
 	React.useEffect(() => {
 		if (auth.user && !userAssos)
-			dispatch(actions.auth(auth.user.id).associations.all());
+			dispatch(actions.auth(auth.user.id).associations.all({ page_size: 'max' }));
 	});
 
 	return (
-		<AppBar position="fixed" style={{ minHeight: props.height }}>
+		<AppBar
+			position="static"
+			color="default"
+			elevation={0}
+			style={{
+				minHeight: 64,
+				borderBottom: '1px solid #65656575',
+			}}
+		>
 			<Container component={Toolbar} className={classes.toolbar}>
 				<NavLink className={classes.brand} to="/">Woolly</NavLink>
 				<div>
+					{/* TODO Set to IconButton when icon */}
 					<NavButton to="/">{textOrIcon('Accueil', Home, largeDisplay)}</NavButton>
 					<NavButton to="/sales">{textOrIcon('Ventes', ShoppingCart, largeDisplay)}</NavButton>
 					{auth.authenticated ? (
@@ -76,8 +84,3 @@ export default function Header(props) {
 		</AppBar>
 	);
 }
-
-Header.propTypes = {
-	height: PropTypes.number.isRequired,
-};
-

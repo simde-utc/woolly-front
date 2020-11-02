@@ -1,6 +1,6 @@
 import React from 'react';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { Dialog, Box, Paper, Grid, Button, IconButton, useMediaQuery } from '@material-ui/core';
-// import { Skeleton } from '@material-ui/lab';
 import { Close } from '@material-ui/icons';
 
 import { useFormStyles } from '../../../../styles';
@@ -8,37 +8,25 @@ import { LoadingButton, ConfirmButton } from '../../../../components/common/Butt
 import ItemsDisplay from './ItemsDisplay';
 import ItemEditor from './ItemEditor';
 import ItemGroupEditor from './ItemGroupEditor';
-// import Loader from '../../../components/common/Loader';
 
 
-function ItemsTutorialMini(props) {
-    return (
-        <Box clone p={2}>
-            <Paper>
-                <p>Hello</p>
-            </Paper>
-        </Box>
-    );
-}
 
-function ItemsTutorialFull(props) {
+function ItemsTutorial(props) {
     return (
         <Grid item xs={12} md={6}>
-            <h2>Ajouter/modifier des articles</h2>
-            <Box clone p={2}>
-                <Paper>
-                    <h5>Ajouter</h5>
-                    <p>
-                        Vous pouvez ajouter des articles et des groupes
-                        en utilisant les boutons ci-dessous.
-                    </p>
-                    <h5>Modifier</h5>
-                    <p>
-                        Une fois ajoutés, cliquez sur les titres de groupe
-                        ou sur les cartes d'article pour les modifier.
-                    </p>
-                </Paper>
-            </Box>
+            <Alert severity="info">
+                <AlertTitle>Ajouter et modifier des articles</AlertTitle>
+                <h5 style={{ marginBottom: 4 }}>Ajouter</h5>
+                <p style={{ marginTop: 0 }}>
+                    Vous pouvez ajouter des articles et des groupes
+                    en utilisant les boutons ci-dessous.
+                </p>
+                <h5 style={{ marginBottom: 4 }}>Modifier</h5>
+                <p style={{ marginTop: 0 }}>
+                    Une fois ajoutés, cliquez sur les titres de groupe
+                    ou sur les cartes d'article pour les modifier.
+                </p>
+            </Alert>
         </Grid>
     );
 }
@@ -47,11 +35,6 @@ function ItemsTutorialFull(props) {
 function ItemsManager({ selected, ...props }) {
     const inDialog = useMediaQuery(theme => theme.breakpoints.down('sm'));
     const classes = useFormStyles();
-
-    // TODO Loading
-    // if (this.state.loading_items || !this.props.usertypes.fetched)
-    //     return <Loader text="Chargement des articles..." />
-
 
     // Get resource editor if a resource is selected
     let editor = null;
@@ -101,7 +84,7 @@ function ItemsManager({ selected, ...props }) {
         // Wrap title with close button
         editorTitle = (
             <Box display="flex" alignItems="center">
-                <h2>{editorTitle}</h2>
+                <h3 style={{ margin: 0 }}>{editorTitle}</h3>
                 <Box clone ml="auto">
                     <IconButton onClick={props.onSelect} name="unselect">
                         <Close />
@@ -114,7 +97,7 @@ function ItemsManager({ selected, ...props }) {
         const buttonProps = { name, value: id, disabled: editorProps.saving };
         editor = (
             <React.Fragment>
-                <Box style={inDialog ? { overflowY: 'auto', overflowX: 'hidden'} : {}}>
+                <Box style={inDialog ? { overflowY: 'auto', overflowX: 'hidden' } : {}}>
                     {editor}
                 </Box>
                 <Box textAlign="center">
@@ -153,8 +136,8 @@ function ItemsManager({ selected, ...props }) {
             </Dialog>
         ) : (
             <Grid item xs={12} md={6}>
-                {editorTitle}
                 <Paper className={classes.editor}>
+                    {editorTitle}
                     {editor}
                 </Paper>
             </Grid>
@@ -162,32 +145,40 @@ function ItemsManager({ selected, ...props }) {
     }
 
     return (
-        <React.Fragment>
-            <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                    <h2>Articles</h2>
-                    {inDialog && editor === null && <ItemsTutorialMini />}
-                    <ItemsDisplay
-                        items={props.items}
-                        itemgroups={props.itemgroups}
-                        usertypes={props.usertypes}
-                        onSelect={props.onSelect}
-                        selected={selected}
-                        editing={props.editing}
-                        saving={props.saving}
-                    />
-                    <Box textAlign="center">
-                        <Button onClick={props.onAdd} name="itemgroups">
+        <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+                {inDialog && editor === null && <ItemsTutorial />}
+                <ItemsDisplay
+                    items={props.items}
+                    itemgroups={props.itemgroups}
+                    usertypes={props.usertypes}
+                    onSelect={props.onSelect}
+                    selected={selected}
+                    editing={props.editing}
+                    saving={props.saving}
+                    errors={props.errors}
+                />
+                <Box textAlign="center">
+                    <Box clone m={1}>
+                        <Button
+                            onClick={props.onAdd} name="itemgroups"
+                            color="primary" variant="outlined"
+                        >
                             Ajouter un groupe
-                        </Button>
-                        <Button onClick={props.onAdd} name="items">
+                        </Button>    
+                    </Box>
+                    <Box clone m={1}>
+                        <Button
+                            onClick={props.onAdd} name="items"
+                            color="primary" variant="contained"
+                        >
                             Ajouter un article
                         </Button>
                     </Box>
-                </Grid>
-                {editor || (!inDialog && <ItemsTutorialFull />)}
+                </Box>
             </Grid>
-        </React.Fragment>
+            {editor || (!inDialog && <ItemsTutorial />)}
+        </Grid>
     );
 }
 

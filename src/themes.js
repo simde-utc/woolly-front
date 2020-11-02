@@ -1,15 +1,10 @@
 import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles';
 
-function createResponseTheme(...args) {
+function createResponsiveTheme(...args) {
     return responsiveFontSizes(createMuiTheme(...args));
 }
 
-// https://material.io/inline-tools/color/
-// #FF7300
-// #F37000
-// #F27405
-
-export const WoollyTheme = createResponseTheme({
+export const WoollyTheme = createResponsiveTheme({
     themeName: 'Woolly',
     typography: {
         fontFamily: [
@@ -20,10 +15,35 @@ export const WoollyTheme = createResponseTheme({
             '"Helvetica Neue"',
             'Arial',
             'sans-serif',
-            // '"Apple Color Emoji"',
-            // '"Segoe UI Emoji"',
-            // '"Segoe UI Symbol"',
         ].join(','),
+    },
+    palette: {
+        primary: {
+            main: '#025862',
+        },
+        secondary: {
+            main: '#2196f3',
+            light: '#00b7ff',
+            dark: '#1976d2',
+            contrastText: '#fff',
+        },
+        success: {
+            main: "#008805",
+        },
+        warning: {
+            main: '#FA8C05',
+            light: '#F2B705',
+            dark: '#EE6B4D',
+            contrastText: '#fff',
+        },
+        error: {
+            main: "#e00000",
+        },
+        neutral: {
+            dark: '#293241',
+            main: '#3D5B81',
+            light: '#98C0D9',
+        },
     },
     overrides: {
         MuiFormControl: {

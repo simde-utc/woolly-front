@@ -19,9 +19,14 @@ export default function ItemCard({ item, usertype, ...props }) {
             value={item.id}
             onClick={props.onSelect}
             raised={props.selected}
+            style={{
+                borderColor: props.hasErrors ? 'red': 'transparent',
+                borderStyle: 'solid',
+                borderWidth: 1,
+            }}
         >
-            <CardContent>
-                <h5>{item.name || 'Création en cours...'}</h5>
+            <CardContent style={{ padding: '4px 16px' }}>
+                <h4>{item.name || 'Création en cours...'}</h4>
                 <ul>
                     <li><b>{formatPrice(item.price, 'Gratuit')}</b></li>
                     {displayQuantity(item.quantity, 'en vente', 'Quantitées illimitées')}

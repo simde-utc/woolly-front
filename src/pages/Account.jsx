@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useUserOrders } from '../redux/hooks';
 
-import { Container, Grid } from '@material-ui/core'; 
+import { Container, Grid } from '@material-ui/core';
 import Loader from '../components/common/Loader';
 
 import AccountDetails from '../components/users/AccountDetails';
@@ -28,7 +28,7 @@ export default function Account(props) {
 					<Loader loading={orders === undefined}>
 						<UserOrdersList
 							orders={orders}
-							updateOrders={fetchOrders}
+							fetchOrders={fetchOrders}
 						/>
 					</Loader>
 				</Grid>

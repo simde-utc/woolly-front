@@ -1,9 +1,46 @@
 import React from 'react';
 
+import { makeStyles } from '@material-ui/core/styles';
 import { CircularProgress } from '@material-ui/core';
 
 
-export default function Stat({ value, max, ...props }) {
+const useStyles = makeStyles(theme => ({
+    container: {
+        position: 'relative',
+        textAlign: 'center',
+    },
+    title: {
+        display: 'block',
+        fontWeight: 200,
+    },
+    stat: {
+        fontSize: '2.5rem',
+    },
+    unit: {
+        color: theme.palette.text.secondary,
+        fontSize: '1rem',
+    },
+    max: {
+        color: theme.palette.text.secondary,
+        position: 'relative',
+        bottom: '-0.5rem',
+    },
+}));
+
+
+export default function Stat({ value, title, max, unit, ...props }) {
+    const classes = useStyles();
+    return (
+        <div className={classes.container}>
+            {title && <span className={classes.title}>{title}</span>}
+            <span className={classes.stat}>{value}</span>
+            {unit && <span className={classes.unit}>{unit}</span>}
+            {max && <span className={classes.max}>/{max}</span> }
+        </div>
+    );
+}
+
+export function CircularStat({ value, max, ...props }) {
     return (
         <div style={{
             position: 'relative',

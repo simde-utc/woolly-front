@@ -1,6 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles';
-import { Collapse, List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { Collapse, IconButton, List, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import { NavListItem, NavIconButton } from '../common/Nav';
 import { ExpandMore, ExpandLess, Visibility } from '@material-ui/icons';
 import SalesList from './SalesList';
@@ -17,6 +17,7 @@ export default function AssoSalesList({ assos, sales, ...props}) {
 	const classes = useStyles();
 
 	const handleOpen = event => {
+		event.preventDefault();
 		const id = event.currentTarget.getAttribute('value');
 		// Ask for sales data if not available
 		if (!isOpen[id] && !sales[id])
@@ -26,13 +27,15 @@ export default function AssoSalesList({ assos, sales, ...props}) {
 	}
 
 	return (
-		<List>
+		<List disablePadding style={{ padding: 0 }}>
 			{Object.values(assos).map(({ id, ...asso }) => (
 				<React.Fragment key={id}>
-					<ListItem button onClick={handleOpen} value={id}>
+					<NavListItem to={`/admin/assos/${id}`}>
 						<ListItemText primary={asso.shortname} />
-						{isOpen[id] ? <ExpandLess /> : <ExpandMore />}
-					</ListItem>
+						<IconButton onClick={handleOpen} value={id}>
+							{isOpen[id] ? <ExpandLess /> : <ExpandMore />}
+						</IconButton>
+					</NavListItem>
 					<Collapse in={Boolean(isOpen[id])} timeout="auto" unmountOnExit>
 						<List component="div" disablePadding classes={{ root: classes.nested }}>
 							<SalesList

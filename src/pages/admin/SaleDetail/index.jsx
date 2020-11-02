@@ -1,12 +1,13 @@
 import React from 'react';
 import { useStoreAPIData } from '../../../redux/hooks';
+import { formatDate } from '../../../utils';
 
 import { Box, Container, Grid, Chip, Tabs, Tab } from '@material-ui/core';
 import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
 
+import Stat from '../../../components/common/Stat';
 import { Link } from '../../../components/common/Nav';
 import { CopyButton } from '../../../components/common/Buttons';
-import Stat from '../../../components/common/Stat';
 
 import QuantitiesSold from './QuantitiesSold';
 import OrdersList from './OrdersList';
@@ -25,32 +26,34 @@ export default function SaleDetail(props) {
 		return "Loading"
 
 	const saleLink = window.location.href.replace('/admin/', '/');
+	const chipMargin = { marginBottom: 4, marginRight: 4 };
 	return (
 		<Container>
-			<h1>{sale.name}</h1>
-
 			<Grid container spacing={2}>
-				<Grid item xs md={3}>
-					<Grid container spacing={1}>
-						<Grid item xs md={12}>
-							<p>Organisé par {sale.association && sale.association.shortname}</p>
+				<Grid item xs={12} md={3}>
+					<Grid container spacing={2} justify="center">
+						<Grid item xs="auto" md={12}>
+							<h4 style={{ marginTop: 0 }}>Organisé par {sale.association && sale.association.shortname}</h4>
 							<div>
 								{sale.is_active
-									? <Chip label="Active" color="primary" icon={<PlayArrow />} />
-									: <Chip label="Inactive" icon={<Pause />} />
+									? <Chip style={chipMargin} label="Active" color="primary" icon={<PlayArrow />} />
+									: <Chip style={chipMargin} label="Inactive" icon={<Pause />} />
 								}
 								{sale.is_public
-									? <Chip label="Publique" icon={<Public />} />
-									: <Chip label="Privée" icon={<Lock />} />
+									? <Chip style={chipMargin} label="Publique" color="primary" icon={<Public />} />
+									: <Chip style={chipMargin} label="Privée" icon={<Lock />} />
 								}
 							</div>
 						</Grid>
-						<Grid item xs md={12}>
-							<h5>Description</h5>
-							<p>{sale.description}</p>
+						<Grid item xs="auto" md={12}>
+							<h4 style={{ marginTop: 0 }}>Dates</h4>
+							<ul>
+								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at, 'datetime') : "Inconnue"}</li>
+								<li>Fermeture: {sale.end_at ? formatDate(sale.end_at, 'datetime') : "Inconnue"}</li>
+							</ul>
 						</Grid>
-						<Grid item xs md={12}>
-							<h5>Liens</h5>
+						<Grid item xs="auto" md={12}>
+							<h4 style={{ marginTop: 0 }}>Liens</h4>
 							<ul>
 								<li><CopyButton value={saleLink}>Partager la vente</CopyButton></li>
 								{sale.cgv
@@ -77,9 +80,9 @@ export default function SaleDetail(props) {
 					<Box py={2}>
 						{(tab === 'quantities' && (
 							<React.Fragment>
-								<Box display="flex" justifyContent="space-evenly" mb={2}>
-									<Stat value={480} max={1000} />
-									<Stat value={`${1050}€`} />
+								<Box display="flex" justifyContent="space-evenly" mt={2} mb={4}>
+									<Stat title="Places vendues" value={480} max={1000} />
+									<Stat title="Argent récolté" value={1050} unit="€" />
 								</Box>
 								<QuantitiesSold
 									items={items}

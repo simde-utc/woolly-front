@@ -20,7 +20,7 @@ export const ORDER_STATUS = {
 	1: { color: '#1976d2', actions: ['cancel'],             label: 'En attente de Validation' },
 	2: { color: '#008805', actions: ['download', 'modify'], label: 'Validée' },
 	3: { color: '#1976d2', actions: ['cancel', 'pay'],      label: 'En attente de Paiement' },
-	4: { color: '#008805', actions: ['download', 'modify'], label: 'Payé' },
+	4: { color: '#008805', actions: ['download', 'modify'], label: 'Payée' },
 	5: { color: '#e00000', actions: [],                     label: 'Expirée' },
 	6: { color: '#e00000', actions: [],                     label: 'Annulée' },
 }
@@ -30,6 +30,16 @@ export const ORDER_ACTIONS = {
 	modify:   { text: "Modifier la commande",    Icon: Edit,              },
 	pay:      { text: "Payer la commande",       Icon: Payment, },
 	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
+}
+
+export const STATUS_MESSAGES = {
+	0: { severity: 'info',		message: "Vous pouvez la complèter en cliquant sur le lien suivant.", link: "Finaliser ma commande" },
+	1: { severity: 'warning',	message: "Veuillez attendre sa validation." },
+	2: { severity: 'success',	message: "Vous pouvez télécharger vos billets en utilisant le bouton en base de page ou bien modifier ceux qui sont éditables en cliquant sur les différents champs." },
+	3: { severity: 'warning',	message: "Vous pouvez la payer en cliquant sur le lien suivant.", link: "Payer ma commande" },
+	4: { severity: 'success',	message: "Vous pouvez télécharger vos billets en utilisant le bouton en base de page ou bien modifier ceux qui sont éditables en cliquant sur les différents champs." },
+	5: { severity: 'error',		message: "Vous pouvez effectuer une autre commande sur la même vente en cliquant sur le lien suivant.", link: "Effectuer une autre commande" },
+	6: { severity: 'error',		message: "Vous pouvez effectuer une autre commande sur la même vente en cliquant sur le lien suivant.", link: "Effectuer une autre commande" },
 }
 
 // Blank data

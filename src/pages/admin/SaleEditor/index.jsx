@@ -1,10 +1,10 @@
 import React from 'react'
 // import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../../../redux/actions';
+import actions, { messagesActions } from '../../../redux/actions';
 import produce from 'immer';
 
-import { Container } from '@material-ui/core';
+import { Container, Box } from '@material-ui/core';
 
 import { areDifferent, dataToChoices, arrayToMap, deepcopy } from '../../../utils';
 import {
@@ -140,6 +140,10 @@ class SaleEditor extends React.Component {
 						loading_details: false,
 						editing_details: false,
 						saving_details: false,
+						errors: {
+							...prevState.errors,
+							details: {},
+						}
 					};
 			case 'items':
 			case 'itemgroups':
@@ -154,7 +158,7 @@ class SaleEditor extends React.Component {
 					},
 				};
 			default:
-				throw Error(`Cannot get state for unknown resource '${resource}'`)			
+				throw Error(`Cannot get state for unknown resource '${resource}'`)
 		}
 	}
 
@@ -244,7 +248,7 @@ class SaleEditor extends React.Component {
 		}));
 	}
 
-	handleSaveDetails = async event => {
+	handleSaveDetails = event => {
 		const { _editing, ...details } = this.state.details;
 
 		// Check values
@@ -255,28 +259,32 @@ class SaleEditor extends React.Component {
 			}));
 		}
 
-		try {
-			this.setState({ saving_details: true });
-			if (this.isCreator()) {
-				// Create sale
-				const action = actions.sales.create(null, details);
-				const response = await action.payload;
-				// Dispatch creation and go to edit mode
-				this.props.dispatch(action);
-				this.props.history.push(`/admin/sales/${response.data.id}/edit`);
-			} else {
-				// Update sale details
-				this.props.dispatch(actions.sales.update(this.props.saleId, null, details));
+		this.setState({ saving_details: true }, async () => {
+			try {
+				if (this.isCreator()) {
+					// Create sale
+					const action = actions.sales.create(null, details);
+					const response = await action.payload;
+					// Dispatch creation and go to edit mode
+					this.props.dispatch(action);
+					this.props.history.push(`/admin/sales/${response.data.id}/edit`);
+				} else {
+					// Update sale details
+					const action = actions.sales.update(this.props.saleId, null, details);
+					await action.payload;
+					this.props.dispatch(action);
+				}
+			} catch(error) {
+				this.props.dispatch(messagesActions.pushError(error, "La sauvegarde de la vente a échouée"));
+				this.setState(prevState => ({
+					saving_details: false,
+					errors: {
+						...prevState.errors,
+						details: error.response.data,
+					},
+				}));
 			}
-		} catch(error) {
-			// TODO Test
-			this.setState(prevState => ({
-				errors: {
-					...prevState.errors,
-					details: error.response.data,
-				},
-			}));
-		}
+		});
 	}
 
 	handleAddResource = event => {
@@ -326,7 +334,7 @@ class SaleEditor extends React.Component {
 				this.setState(prevState => produce(prevState, draft => {
 					if (resource === 'items')
 						this._removeItemFromGroup(draft, id);
-					
+
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
 					draft.selected = null;
@@ -337,17 +345,24 @@ class SaleEditor extends React.Component {
 				if (resource === 'items')
 					await this._saveItemFields(data);
 
+				// Update resource and wait for feedback to dispatch
+				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
+				const action = actions[resource].update(id, queryParams, data)
+				await action.payload;
+
+				this.props.dispatch(action);
 				this.setState(prevState => produce(prevState, draft => {
 					delete draft[`editing_${resource}`][id];
 					delete draft[`saving_${resource}`][id];
 					return draft;
 				}));
-				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
-				this.props.dispatch(actions[resource].update(id, queryParams, data));
 			}
 		} catch(error) {
+			this.props.dispatch(messagesActions.pushError(error, "La sauvegarde de l'item a échouée"));
 			console.error(error)
 			this.setState(prevState => produce(prevState, draft => {
+				delete draft[`editing_${resource}`][id];
+				delete draft[`saving_${resource}`][id];
 				draft.errors[resource][id] = error.response.data;
 				return draft;
 			}));
@@ -410,21 +425,12 @@ class SaleEditor extends React.Component {
 	// Rendering
 
 	render() {
-		// DEBUG
-		window.props = this.props;
-		window.actions = actions;
-
 		const isCreator = this.isCreator();
 		return (
 			<Container>
-				<h1>
-					{(isCreator
-						? "Création d'une vente"
-						: `Édition de la vente ${this.state.name || '...'}`
-					)}
-				</h1>
-				
-				<h2>Détails</h2>
+	            <Box clone mb={3} mt={6} textAlign="center">
+	                <h2>Détails</h2>
+	            </Box>
 				{this.state.loading_details ? (
 					<Loader text="Chargement des détails de la vente..." />
 				) : (
@@ -445,36 +451,41 @@ class SaleEditor extends React.Component {
 				)}
 
 				{!isCreator && (
-					<ItemsManager
-						// Data
-						selected={this.state.selected}
-						items={this.state.items}
-						itemgroups={this.state.itemgroups}
-						usertypes={this.props.usertypes.data}
-						errors={this.state.errors}
-						choices={{
-							fields: this.props.fieldsChoices,
-							itemgroups: this.props.itemgroupsChoices,
-							usertypes: this.props.usertypesChoices,
-						}}
-						// Handlers
-						onChange={this.handleChange}
-						onSave={this.handleSaveResource}
-						onDelete={this.handleDeleteResource}
-						onReset={this.handleResetResource}
-						onAdd={this.handleAddResource}
-						onSelect={this.handleSelectResource}
-						onItemFieldChange={this.handleItemFieldChange}
-						// State data
-						editing={{
-							items: this.state.editing_items,
-							itemgroups: this.state.editing_itemgroups,
-						}}
-						saving={{
-							items: this.state.saving_items,
-							itemgroups: this.state.saving_itemgroups,
-						}}
-					/>
+					<React.Fragment>
+			            <Box clone mb={3} mt={6} textAlign="center">
+			                <h2>Articles</h2>
+			            </Box>
+						<ItemsManager
+							// Data
+							selected={this.state.selected}
+							items={this.state.items}
+							itemgroups={this.state.itemgroups}
+							usertypes={this.props.usertypes.data}
+							errors={this.state.errors}
+							choices={{
+								fields: this.props.fieldsChoices,
+								itemgroups: this.props.itemgroupsChoices,
+								usertypes: this.props.usertypesChoices,
+							}}
+							// Handlers
+							onChange={this.handleChange}
+							onSave={this.handleSaveResource}
+							onDelete={this.handleDeleteResource}
+							onReset={this.handleResetResource}
+							onAdd={this.handleAddResource}
+							onSelect={this.handleSelectResource}
+							onItemFieldChange={this.handleItemFieldChange}
+							// State data
+							editing={{
+								items: this.state.editing_items,
+								itemgroups: this.state.editing_itemgroups,
+							}}
+							saving={{
+								items: this.state.saving_items,
+								itemgroups: this.state.saving_itemgroups,
+							}}
+						/>
+					</React.Fragment>
 				)}
 			</Container>
 		);
