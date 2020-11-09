@@ -42,7 +42,7 @@ function Wrappers(props) {
 			<MuiPickersUtilsProvider utils={DateFnsUtils}>
 				<ThemeProvider theme={WoollyTheme}>
 					<MainLoader>
-						<BrowserRouter>
+						<BrowserRouter basename={process.env.PUBLIC_URL}>
 							{props.children}
 						</BrowserRouter>
 					</MainLoader>

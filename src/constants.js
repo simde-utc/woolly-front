@@ -3,8 +3,9 @@ import {
     FirstPage, LastPage, NavigateNext, NavigateBefore, Search, Payment
 } from '@material-ui/icons';
 
+// Environment variables
 
-export const API_URL = process.env.API_URL || 'http://localhost:8000';
+export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Regex
 
