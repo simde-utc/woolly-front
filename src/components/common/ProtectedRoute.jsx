@@ -22,8 +22,8 @@ const authFunctions = {
 };
 
 export default function ProtectedRoute({ only, authOptions, redirection, component: Component, ...routeProps }) {
-	const auth = useSelector(store => store.getData('auth'));
-	const userAssos = useSelector(store => store.getAuthRelatedData('associations'));
+	const auth = useSelector(store => store.api.getData('auth'));
+	const userAssos = useSelector(store => store.api.getAuthRelatedData('associations'));
 
 	const isAuthorized = (
 		typeof only == 'function'
@@ -32,7 +32,7 @@ export default function ProtectedRoute({ only, authOptions, redirection, compone
 	);
 	return (
 		<Route
-			{...routeProps} 
+			{...routeProps}
 			render={props => (
 				isAuthorized ? <Component {...props} />
 				             : <Redirect to={redirection} />

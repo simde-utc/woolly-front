@@ -2,14 +2,15 @@
  * Création et gestion automatique des actions que l'on dispatch via redux
  *
  * @author Samy Nastuzzi <samy@nastuzzi.fr>
- * @author Alexandre Brasseur 
+ * @author Alexandre Brasseur
  *
  * @copyright Copyright (c) 2018, SiMDE-UTC
  * @license GNU GPL-3.0
  */
 import axios from 'axios';
-import { API_URL } from '../constants';
-import { API_PREFIX, MESSAGE_PREFIX } from './store';
+import { API_URL } from '../../constants';
+
+export const API_REDUX_PREFIX = 'API';
 
 // Default axios for the api
 export const apiAxios = axios.create({
@@ -18,37 +19,7 @@ export const apiAxios = axios.create({
 	xsrfCookieName: 'csrftoken',
 });
 
-/*
-|---------------------------------------------------------
-|		Message System Actions
-|---------------------------------------------------------
-*/
 
-export const messagesActions = {
-	pushError: (error, title=null, params={}) => {
-		console.error(title || "Erreur inconnue", error);
-		if (error.isAxiosError && error.response) {
-			const { data, status } = error.response;
-			title = title || data.error || `Erreur API inconnue (${status})`;
-			const details = data.message;
-			return messagesActions.pushMessage(title, details, "error", params);
-		}
-		return messagesActions.pushMessage(title || "Erreur inconnue", String(error), "error", params)
-	},
-
-	pushMessage: (title, details=null, severity=null, params={}) => ({
-		type: `${MESSAGE_PREFIX}_PUSH`,
-		payload: {
-			id: Math.random().toString(36).substring(2),
-			title, details, severity, params,
-		},
-	}),
-
-	popMessage: (id) => ({
-		type: `${MESSAGE_PREFIX}_POP`,
-		payload: { id },
-	}),
-};
 
 /*
 |---------------------------------------------------------
@@ -99,38 +70,38 @@ export const ACTION_CONFIG_METHODS = {
 	definePath: action => path => {
 		action.path = path.slice();
 		action.pathLocked = true;
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 	/** Define the path for the resource in the store */
 	defineUri: action => uri => {
 		action.uri = uri;
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 	setUriFromPath: action => path => {
 		action.path = path.slice();
 		action.uri = path.join('/');
 		action.idIsGiven = path.length % 2 === 0;
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 	/** Add a valid status */
 	addValidStatus: action => validStatus => {
 		action.validStatus.push(validStatus);
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 	/** Define the valid status */
 	defineValidStatus: action => validStatus => {
 		action.validStatus = validStatus;
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 	/** Set Action options */
 	setOptions: action => options => {
 		action.options = { ...action.options, ...options };
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 
 
@@ -138,19 +109,18 @@ export const ACTION_CONFIG_METHODS = {
 	auth: action => (authId = null) => {
 		action.path = ['auth'];
 		action.uri = authId ? `/users/${authId}` : 'auth/me';
-		return new Proxy(action, actionHandler);
+		return new Proxy(action, apiActionHandler);
 	},
 };
 
-
 /*
 |---------------------------------------------------------
-|		Handler and APIAction class
+|		Proxy Handler
 |---------------------------------------------------------
 */
 
 // Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
-export const actionHandler = {
+export const apiActionHandler = {
 	get(action, attr) {
 		// Access instance
 		if (attr === '_instance')
@@ -203,7 +173,7 @@ export const actionHandler = {
 			// Not an HTTP Method (ex: actions.users(1))
 			if (args.length === 1)
 				action.addId(args[0]);
-			return new Proxy(action, actionHandler);
+			return new Proxy(action, apiActionHandler);
 		};
 
 		// HTTP Action (ex: actions.users.get())
@@ -218,7 +188,12 @@ export const actionHandler = {
 	},
 };
 
-// REST Action management class
+/*
+|---------------------------------------------------------
+|		API Action generator
+|---------------------------------------------------------
+*/
+
 export class APIAction {
 	constructor(axios_instance = apiAxios) {
 		this.axios = axios_instance;
@@ -227,7 +202,7 @@ export class APIAction {
 		this.path = [];
 		this.pathLocked = false;
 		this.actions = API_METHODS;
-		this.validStatus = [200, 201, 202, 203, 204, 416];
+		this.validStatus = [200, 201, 202, 203, 204];
 		this.options = {
 			type: undefined,
 			axios: {},
@@ -235,7 +210,7 @@ export class APIAction {
 			action: {},
 		};
 
-		return new Proxy(this, actionHandler);
+		return new Proxy(this, apiActionHandler);
 	}
 
 	addUri(step) {
@@ -264,7 +239,7 @@ export class APIAction {
 				const value = queryParams[key];
 
 				if (value !== undefined) {
-					if (Object.is(value)) 
+					if (Object.is(value))
 						queries.push(this.generateQueries(value, true));
 					else
 						queries.push(
@@ -282,7 +257,7 @@ export class APIAction {
 	}
 
 	generateType(action) {
-		return [ API_PREFIX, this.actions[action].type, ...this.path ].join('_').toUpperCase();
+		return [ API_REDUX_PREFIX, this.actions[action].type, ...this.path ].join('_').toUpperCase();
 	}
 
 	generateAction(action, queryParams = {}, jsonData = {}) {
@@ -320,4 +295,4 @@ export const actions = new Proxy(axios_instance => new APIAction(axios_instance)
 	},
 });
 
-export default actions; 
+export default actions;

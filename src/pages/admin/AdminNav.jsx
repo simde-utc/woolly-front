@@ -111,7 +111,7 @@ export default function AdminNav(props) {
 	const classes = useStyles();
 	const match = getMatch(useLocation());
 	const resource = useSelector(store => (
-		match && store.findData(match.resource, match.params && match.params.id)
+		match && store.api.findData(match.resource, match.params && match.params.id)
 	));
 
 	const { title, actions } = getNavData(match, resource);

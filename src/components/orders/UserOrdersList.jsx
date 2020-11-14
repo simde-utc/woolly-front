@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router';
 import { useDispatch } from 'react-redux'
-import actions, { apiAxios } from '../../redux/actions';
+import apiActions, { apiAxios } from '../../redux/actions/api';
 
 import {
 	TableContainer, Table, TableHead, TableBody,
@@ -34,7 +34,7 @@ function getStatusActions(dispatch, history, fetchOrders) {
 
 		cancel(event) {
 			const orderId = event.currentTarget.getAttribute('data-order-id');
-			const action = actions.orders(orderId).delete();
+			const action = apiActions.orders(orderId).delete();
 			dispatch(action);
 			action.payload.finally(fetchOrders);
 		},

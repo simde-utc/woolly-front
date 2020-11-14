@@ -10,7 +10,7 @@ import UserOrdersList from '../components/orders/UserOrdersList';
 
 
 export default function Account(props) {
-	const user = useSelector(store => store.getAuthUser());
+	const user = useSelector(store => store.api.getAuthUser());
 	const { orders, fetchOrders } = useUserOrders();
 
 	return (

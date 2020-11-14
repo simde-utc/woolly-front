@@ -15,8 +15,8 @@ import Error404 from '../Error404';
 
 export default function AdminSite(props) {
     // Get data from store
-    const auth = useSelector(store => store.getData('auth'));
-    const userAssos = useSelector(store => store.getAuthRelatedData('associations', null));
+    const auth = useSelector(store => store.api.getData('auth'));
+    const userAssos = useSelector(store => store.api.getAuthRelatedData('associations', null));
 
     // Wait for user's associations to be fetched
     if (userAssos === null)

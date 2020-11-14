@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useSelector, useDispatch } from 'react-redux';
-import { pathToArray } from './store';
-import actions, { APIAction, apiAxios } from './actions';
+import { pathToArray } from './reducers/api';
+import apiActions, { APIAction, apiAxios } from './actions/api';
 
 
 const USE_API_STORE_DEFAULT_OPTIONS = {
@@ -14,7 +14,8 @@ const USE_API_STORE_DEFAULT_OPTIONS = {
 	fetchingValue: undefined,
 };
 
-// FIXME Process pagination
+// HERE FIXME Process pagination
+// Maybe use https://redux-saga.js.org/
 export function useStoreAPIData(path, options = {}) {
 	// Patch params
 	path = pathToArray(path);
@@ -24,7 +25,7 @@ export function useStoreAPIData(path, options = {}) {
 
 	// Get data from redux store
 	const dispatch = useDispatch();
-	const resource = useSelector(store => store.get(path));
+	const resource = useSelector(store => store.api.get(path));
 
 	// FIXME Fires fetching multiple times
 	useDeepCompareEffect(() => {
@@ -49,11 +50,11 @@ export function useStoreAPIData(path, options = {}) {
 	return resource.data;
 }
 
-export async function useUpdateOrderStatus(orderId, auto = { fetch: false, redirect: false }) {
-	const dispatch = useDispatch();
+// TODO Check updateOrderStatus that is used
+export async function updateOrderStatus(dispatch, orderId, auto = { fetch: false, redirect: false }) {
 	const resp = (await apiAxios.get(`/orders/${orderId}/status`)).data
 
-	const fetchOrder = () => dispatch(actions.orders.find(orderId));
+	const fetchOrder = () => dispatch(apiActions.orders.find(orderId));
 	const redirectToPayment = () => resp.redirect_url ? window.location.href = resp.redirect_url : null;
 
 	if (auto.fetch && resp.updated)
@@ -64,9 +65,9 @@ export async function useUpdateOrderStatus(orderId, auto = { fetch: false, redi
 	return { resp, fetchOrder, redirectToPayment };
 }
 
-function fetchOrders(dispatch, userId) {
+function fetchUserOrders(dispatch, userId) {
 	dispatch(
-		actions
+		apiActions
 			.defineUri(`users/${userId}/orders`)
 			.definePath(['auth', 'orders'])
 			.all({
@@ -83,8 +84,8 @@ export function useUserOrders() {
 
 	useEffect(() => {
 		if (userId)
-			fetchOrders(dispatch, userId);
+			fetchUserOrders(dispatch, userId);
 	}, [dispatch, userId]);
 
-	return { userId, orders, fetchOrders: () => fetchOrders(dispatch, userId) };
+	return { userId, orders, fetchOrders: () => fetchUserOrders(dispatch, userId) };
 }

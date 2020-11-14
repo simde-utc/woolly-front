@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Snackbar } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import { messagesActions } from '../redux/actions';
+import messagesActions from '../redux/actions/messages';
 
 
 export function Message({ title, details=null, severity="info", onClose, ...props }) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import produce from 'immer';
 import { connect } from 'react-redux';
-import actions, { apiAxios } from '../../redux/actions';
+import apiActions, { apiAxios } from '../../redux/actions/api';
 import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from '../../constants';
 import { arrayToMap } from '../../utils';
 
@@ -39,7 +39,7 @@ const connector = connect((store, props) => {
 	const orderId = props.match.params.order_id;
 	return {
 		orderId,
-		order: store.getData(['orders', orderId], null, true),
+		order: store.api.getData(['orders', orderId], null, true),
 	};
 });
 
@@ -80,7 +80,7 @@ class OrderDetail extends React.Component {
 	})
 
 	fetchOrder = () => this.props.dispatch(
-		actions.orders.find(this.props.orderId, { include: INCLUDE_QUERY })
+		apiActions.orders.find(this.props.orderId, { include: INCLUDE_QUERY })
 	)
 
 	/** Fetch status and redirect to payment or refresh order */

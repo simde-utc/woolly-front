@@ -1,7 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions, { apiAxios, messagesActions } from '../../redux/actions';
+import apiActions, { apiAxios } from '../../redux/actions/api';
+import messagesActions from '../../redux/actions/messages';
+
 import { isPast } from 'date-fns';
 import { formatDate } from '../../utils';
 import { getButtonColoredVariant } from '../../styles';
@@ -21,10 +23,10 @@ const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
 	return {
 		saleId,
-		authenticated: Boolean(store.getData('auth', {}).authenticated),
-		sale: store.findData('sales', saleId, 'id'),
-		order: store.getData(['sales', saleId, 'userOrder'], null, true),
-		items: store.getData(['sales', saleId, 'items']),
+		authenticated: Boolean(store.api.getData('auth', {}).authenticated),
+		sale: store.api.findData('sales', saleId, 'id'),
+		order: store.api.getData(['sales', saleId, 'userOrder'], null, true),
+		items: store.api.getData(['sales', saleId, 'items']),
 	};
 });
 
@@ -42,10 +44,10 @@ class SaleDetail extends React.Component{
 			this.fetchOrder();
 
 		if (!this.props.sale)
-			this.props.dispatch(actions.sales.find(saleId, { include: 'association' }));
+			this.props.dispatch(apiActions.sales.find(saleId, { include: 'association' }));
 
 		if (!this.props.items)
-			this.props.dispatch(actions.sales(saleId).items.all());
+			this.props.dispatch(apiActions.sales(saleId).items.all());
 	}
 
 	componentDidUpdate(prevProps) {
@@ -69,10 +71,11 @@ class SaleDetail extends React.Component{
 	fetchOrder = () => {
 		const saleId = this.props.saleId;
 		this.props.dispatch(
-			actions.sales(saleId).orders
-			       .definePath(['sales', saleId, 'userOrder' ])
-			       .setOptions({ meta: { action: 'updateAll'} })
-			       .create({ include: 'orderlines' })
+			apiActions
+				.sales(saleId).orders
+				.definePath(['sales', saleId, 'userOrder' ])
+				.setOptions({ meta: { action: 'updateAll'} })
+				.create({ include: 'orderlines' })
 		);
 	}
 
@@ -116,7 +119,7 @@ class SaleDetail extends React.Component{
 
 	/** Cancel an order */
 	cancelOrder = event => {
-		actions.orders.delete(this.props.order.id).payload.finally(this.fetchOrder);
+		apiActions.orders.delete(this.props.order.id).payload.finally(this.fetchOrder);
 	}
 
 	/** Save order and redirect to payment */
