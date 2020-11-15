@@ -1,15 +1,15 @@
-export const MESSAGE_REDUX_PREFIX = "MESSAGE";
+import { MESSAGE_REDUX_PREFIX } from "../constants";
 
-const messages = {
+const messagesActions = {
 	pushError: (error, title = null, params = {}) => {
 		console.error(title || "Erreur inconnue", error);
 		if (error.isAxiosError && error.response) {
 			const { data, status } = error.response;
 			title = title || data.error || `Erreur API inconnue (${status})`;
 			const details = data.message;
-			return messages.pushMessage(title, details, "error", params);
+			return messagesActions.pushMessage(title, details, "error", params);
 		}
-		return messages.pushMessage(
+		return messagesActions.pushMessage(
 			title || "Erreur inconnue",
 			String(error),
 			"error",
@@ -34,4 +34,4 @@ const messages = {
 	}),
 };
 
-export default messages;
+export default messagesActions;

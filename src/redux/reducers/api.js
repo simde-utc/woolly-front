@@ -1,7 +1,6 @@
 import produce from 'immer';
 import { deepcopy, isEmpty } from '../../utils';
-import { API_REDUX_PREFIX } from '../actions/api';
-import { ASYNC_SUFFIXES } from '../store';
+import { API_REDUX_PREFIX, ASYNC_SUFFIXES, DATA_CHANGES, DATA_SCOPES } from '../constants';
 
 /*
 |---------------------------------------------------------
@@ -30,9 +29,9 @@ function getPathFromMeta(meta) {
 	let id = undefined;
 
 	// Pop id from path if needed
-	if (!['updateAll', 'create', 'insert'].includes(meta.action)) {
+	if (meta.idIsGiven)
 		id = path.pop();
-	}
+
 	return { path, id };
 }
 
@@ -58,7 +57,7 @@ export const INITIAL_RESOURCE_STATE = {
 };
 
 // La racine du store
-export const apiStore = {
+export const DEFAULT_API_STORE = {
 
 	// Actual store
 	resources: {},
@@ -121,6 +120,7 @@ export const apiStore = {
 	 * @param  {[type]} replacement [description]
 	 * @return {Object}             La map de resource par id
 	 */
+	// TODO API REDUCER Useful ?
 	getResourceDataById(path, resource, replacement = null) {
 		const pathResources = this.get(path).resources;
 		return Object.keys(pathResources).reduce((acc, id) => {
@@ -128,6 +128,10 @@ export const apiStore = {
 			acc[id] = subResources.fetched ? subResources.data : replacement;
 			return acc;
 		}, {});
+	},
+
+	getStatus(path, id = null) {
+		// TODO
 	},
 
 	// TODO Custom methods
@@ -182,6 +186,10 @@ function processPagination(payload) {
 	}
 }
 
+function getStatus(payload) {
+	return payload.status || (payload.response && payload.response.status);
+}
+
 
 /*
 |---------------------------------------------------------
@@ -189,126 +197,115 @@ function processPagination(payload) {
 |---------------------------------------------------------
 */
 
+function changeOneElement(place, dataChange, id, element, timestamp, status) {
+	if (id == null)
+		throw Error(`Invalid id ${id}`)
+
+	switch (dataChange) {
+		case DATA_CHANGES.ASSIGN:
+			place.data[id] = element;
+
+			if (place.resources[id] === undefined)
+				place.resources[id] = deepcopy(INITIAL_RESOURCE_STATE);
+
+			// Duplicate element in resources as it is only a pointer
+			makeResourceSuccessful(place.resources[id], timestamp, status);
+			place.resources[id].data = element;
+			break;
+
+		case DATA_CHANGES.REMOVE:
+			delete place.data[id];
+			if (place.resources[id] !== undefined)
+				delete place.resources[id]
+			break;
+
+		default:
+			throw Error(`Unknown dataChange ${dataChange}`)
+	}
+}
+
 /** This reducer manages the async API operations */
-export default function apiReducer(state = apiStore, action) {
+export default function apiReducer(state = DEFAULT_API_STORE, action) {
+
+	// if (typeof action.type !== 'string' || !action.type.startsWith(API_REDUX_PREFIX))
+	// 	return state;
 
 	// Api actions
 	if (action.type && action.type.startsWith(API_REDUX_PREFIX)) {
 		return produce(state, draft => {
 			// Get path and id from action.meta
-			let { path, id } = getPathFromMeta(action.meta);
+			const { path, id } = getPathFromMeta(action.meta);
+			// This is the resource place where to store the data
 			let place = buildPathInStore(draft, path);
 
-			// CASE LOADING: Async call is loading
-			if (action.type.endsWith(`_${ASYNC_SUFFIXES.loading}`)) {
-				place.fetching = true;
-				place.status = null;
-				return draft;
-			}
+			const callStatus = action.type.split('_').pop();
+			switch (callStatus) {
 
-			const status = (action.payload.status || (
-				action.payload.response && action.payload.response.status
-			));
-			const statusIsValid = action.meta.validStatus.includes(status);
+				case ASYNC_SUFFIXES.loading:
+					// TODO
+					place.fetching = true;
+					place.status = null;
+					return draft;
 
-			// ====== CASE ERROR: Async call has failed
-			if (action.type.endsWith(`_${ASYNC_SUFFIXES.error}`)) {
-				// if (id) // TODO ????
-				// 	place = buildPathInStore(draft, path.concat([id]));
-
-				// place.data = {};
-				place.fetching = false;
-				place.fetched = statusIsValid;
-				place.error = action.payload;
-				place.failed = statusIsValid;
-				place.status = status;
-				return draft;
-			}
-
-			// Async call has succeeded
-			if (action.type.endsWith(`_${ASYNC_SUFFIXES.success}`)) {
-
-				// ====== CASE HTTP ERROR: HTTP status is not acceptable
-				if (!statusIsValid) {
+				case ASYNC_SUFFIXES.error:
+					// if (id) // TODO ????
+					// 	place = buildPathInStore(draft, path.concat([id]));
 					// place.data = {};
 					place.fetching = false;
 					place.fetched = false;
-					place.error = 'NOT ACCEPTED';
+					place.error = action.payload;
 					place.failed = true;
-					place.status = action.payload.status;
+					place.status = getStatus(action.payload);
 					return draft;
-				}
 
-				// ====== CASE SUCCESS: Update store
+				case ASYNC_SUFFIXES.success:
+					// Get data from payload
+					const { dataScope, dataChange, timestamp } = action.meta;
+					const { data, pagination } = processPagination(action.payload.data);
+					const status = getStatus(action.payload);
 
-				// Set pagination, timestamp, status and others indicators
-				const { timestamp, status } = action.payload;
-				const { data, pagination } = processPagination(action.payload.data);
-				if (pagination)
 					place.pagination = pagination
+					place = makeResourceSuccessful(place, timestamp, status);
 
-				// The resource place where to store the data
-				place = makeResourceSuccessful(place, timestamp, status);
-				id = id || data.id; // TODO
+					switch (dataScope) {
+						case DATA_SCOPES.ONE:
+							const dataId = id || data.id;
+							changeOneElement(place, dataChange, dataId, data, timestamp, status);
+							break;
 
-				// Helper to build a store for the data if it has a key or an id
-				function buildSuccessfulDataStorePath(element, key) {
-					if (key) {
-						let placeForData = buildPathInStore(draft, path.concat([key]));
-						placeForData = makeResourceSuccessful(placeForData, timestamp, status);
-						placeForData.data = element;
-					}
-				}
+						case DATA_SCOPES.FULL:
+							switch (dataChange) {
+								case DATA_CHANGES.ASSIGN:
+									place.data = data;
+									break;
 
-				// Update the data and resources according to the action required
-				if (action.meta.action === 'updateAll') {
-					// Multiple elements
+								case DATA_CHANGES.REMOVE:
+									// TODO Delete place ?
+									delete place.data;
+									delete place.resources;
+									break;
 
-					// Modify data and Create places in resources for each element according to id
-					if (Array.isArray(data)) {      // Array: Multiple elements with id
-						data.forEach(element => {
-							const e_id = element.id; // TODO
-							place.data[e_id] = element;
-							buildSuccessfulDataStorePath(element, e_id);
-						});
-					} else if (id) {                // Resource with id: Single id
-						place.data = data;
-						buildSuccessfulDataStorePath(data, id);
-					} else {                        // Resource without id: keys for resources
-						// TODO Check object, Useful ??
-						place.data = data;
-						// for (const key in data)
-						// 	buildSuccessfulDataStorePath(data[key], key);
-					}
-
-				} else {			// Single element
-
-					// Modify place.data and place.resources
-					if (['create', 'insert', 'update'].includes(action.meta.action)) {
-						if (id) {
-							place.data[id] = data;
-							buildSuccessfulDataStorePath(data, id);
-						} else {
-							place.data = data;
-							for (const key in data)
-								buildSuccessfulDataStorePath(data[key], key);
-						}
-					} else if ('delete' === action.meta.action) {
-							if (id) {
-								delete place.data[id];
-								delete place.resources[id];
-							} else {
-								place.data = {};
-								place.resources = {};
+								default:
+									break;
 							}
+							break;
+
+						case DATA_SCOPES.MULTIPLE:
+							Object.values(data).forEach((element, index) => {
+								const elementId = element.id || index;
+								changeOneElement(place, dataChange, elementId, element, timestamp, status);
+							});
+							break;
+
+						default:
+							break;
 					}
-				}
 
-				return draft;
+					return draft;
+
+				default:
+					return draft;
 			}
-
-			// Return the draft state anyway
-			return draft;
 		});
 	}
 

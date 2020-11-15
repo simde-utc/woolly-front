@@ -9,229 +9,189 @@
  */
 import axios from 'axios';
 import { API_URL } from '../../constants';
+import { isObject } from '../../utils';
 
-export const API_REDUX_PREFIX = 'API';
+import { API_REDUX_PREFIX, DATA_CHANGES, DATA_SCOPES } from '../constants';
 
-// Default axios for the api
+// TODO API AXIOS Where to put ?
+/**
+ * Default axios for the Woolly API
+ */
 export const apiAxios = axios.create({
   baseURL: API_URL,
 	xsrfHeaderName: 'X-CSRFToken',
 	xsrfCookieName: 'csrftoken',
 });
 
-
-
-/*
-|---------------------------------------------------------
-|		Action Methods
-|---------------------------------------------------------
-*/
-
-// Methods calling the API with alliases
+/**
+ * Methods calling the API with alliases
+ */
 export const API_METHODS = {
 	all: {
 		type: 'ALL',
-		method: 'get',
-		action: 'updateAll',
+		httpMethod: 'get',
+		dataChange: DATA_CHANGES.ASSIGN,
+		dataScope: DATA_SCOPES.MULTIPLE,
+		takesId: false,
 	},
 	find: {
 		type: 'FIND',
-		method: 'get',
-		action: 'update',
+		httpMethod: 'get',
+		dataChange: DATA_CHANGES.ASSIGN,
+		dataScope: DATA_SCOPES.ONE,
+		takesId: true,
 	},
 	create: {
 		type: 'CREATE',
-		method: 'post',
-		action: 'insert',
+		httpMethod: 'post',
+		dataChange: DATA_CHANGES.ASSIGN,
+		dataScope: DATA_SCOPES.ONE,
+		takesId: false,
 	},
 	update: {
 		type: 'UPDATE',
-		method: 'put',
-		action: 'update',
-	},
-	remove: {
-		type: 'DELETE',
-		method: 'delete',
-		action: 'delete',
+		httpMethod: 'put',
+		dataChange: DATA_CHANGES.ASSIGN,
+		dataScope: DATA_SCOPES.ONE,
+		takesId: true,
 	},
 	delete: {
 		type: 'DELETE',
-		method: 'delete',
-		action: 'delete',
+		httpMethod: 'delete',
+		dataChange: DATA_CHANGES.REMOVE,
+		dataScope: DATA_SCOPES.ONE,
+		takesId: true,
 	},
-};
-API_METHODS.get = API_METHODS.find;
-API_METHODS.remove = API_METHODS.delete;
-
-// Methods modifying the action
-export const ACTION_CONFIG_METHODS = {
-
-	/** Define the path for the resource in the store */
-	definePath: action => path => {
-		action.path = path.slice();
-		action.pathLocked = true;
-		return new Proxy(action, apiActionHandler);
-	},
-
-	/** Define the path for the resource in the store */
-	defineUri: action => uri => {
-		action.uri = uri;
-		return new Proxy(action, apiActionHandler);
-	},
-
-	setUriFromPath: action => path => {
-		action.path = path.slice();
-		action.uri = path.join('/');
-		action.idIsGiven = path.length % 2 === 0;
-		return new Proxy(action, apiActionHandler);
-	},
-
-	/** Add a valid status */
-	addValidStatus: action => validStatus => {
-		action.validStatus.push(validStatus);
-		return new Proxy(action, apiActionHandler);
-	},
-
-	/** Define the valid status */
-	defineValidStatus: action => validStatus => {
-		action.validStatus = validStatus;
-		return new Proxy(action, apiActionHandler);
-	},
-
-	/** Set Action options */
-	setOptions: action => options => {
-		action.options = { ...action.options, ...options };
-		return new Proxy(action, apiActionHandler);
-	},
-
-
-	// TODO Custom methods
-	auth: action => (authId = null) => {
-		action.path = ['auth'];
-		action.uri = authId ? `/users/${authId}` : 'auth/me';
-		return new Proxy(action, apiActionHandler);
+	get: {
+		type: 'GET',
+		httpMethod: 'get',
+		dataChange: DATA_CHANGES.ASSIGN,
+		dataScope: DATA_SCOPES.FULL,
+		takesId: false,
 	},
 };
 
-/*
-|---------------------------------------------------------
-|		Proxy Handler
-|---------------------------------------------------------
-*/
+/**
+ * Shortcuts and helpers to the API Action
+ */
+export const apiShortcuts = {
+	/**
+	 * Get information about the specified or authenticated user
+	 */
+	authUser: action => {
+		function addAuthPath(userId = null, skipUri = false) {
+			if (action.path.length)
+				console.warning(`actions.api.authUser should be called first, path is ${action.path}`)
 
-// Gestionnaire d'actions (crée dynamiquement les routes api à appeler et où stocker les données)
+			action.path = ['auth'];
+			if (!skipUri)
+				action.uri = userId != null ? `/users/${userId}` : 'auth/me';
+			return new Proxy(action, apiActionHandler);
+		}
+		return new Proxy(addAuthPath, { get: (func, key) => func()[key] });
+	},
+};
+
+/**
+ * Action handler that dynamically creates the URI path to the resource
+ */
 export const apiActionHandler = {
 	get(action, attr) {
 		// Access instance
 		if (attr === '_instance')
 			return action;
 
-		// Real attribute of Action
+		// Access a real attribute of this Action
 		if (action[attr] !== undefined)
 			return action[attr];
 
-		// Methods that configure the action
-		if (attr in ACTION_CONFIG_METHODS)
-			return ACTION_CONFIG_METHODS[attr](action);
+		if (attr in apiShortcuts)
+			return apiShortcuts[attr](action);
 
-		// Build the API query method
-		const apiMethod = (...args) => {
-			let id, queryParams, jsonData;
+		// HTTP Action (ex: `actions.api.users.all()`)
+		if (attr in API_METHODS) {
+			return function (...args) {
+				const methodData = API_METHODS[attr];
+				// TODO { id, query, data } ??
 
-			// GET query on a single element
-			if (['find', 'get'].includes(attr)) {
-				if (args.length > 0 || action.idIsGiven) {
-					if (action.idIsGiven) {
-						[queryParams, jsonData] = args;
-					} else {
-						[id, queryParams, jsonData] = args;
-						action.addId(id);
-					}
-					return action.generateAction('get', queryParams, jsonData);
-				}
-				// ID not specified, fallback to all
-				return action.generateAction('all');
-			}
-
-			// GET on multiple elements
-			if (attr === 'all') {
-				[queryParams, jsonData] = args;
-				return action.generateAction('all', queryParams, jsonData);
-			}
-
-			// POST PUT DELETE an element
-			if (['create', 'update', 'remove', 'delete'].includes(attr)) {
-				if (action.idIsGiven || attr === 'create') {
-					[queryParams, jsonData] = args;
-				} else {
+				let id, queryParams, jsonData;
+				if (methodData.takesId)
 					[id, queryParams, jsonData] = args;
-					action.addId(id);
-				}
-				return action.generateAction(attr, queryParams, jsonData);
+				else
+					[queryParams, jsonData] = args;
+
+				if (id != null && !action.idIsGiven)
+						action.addId(id);
+
+				return action.generateAction(methodData, queryParams, jsonData);
 			}
+		}
 
-			// Not an HTTP Method (ex: actions.users(1))
-			if (args.length === 1)
-				action.addId(args[0]);
-			return new Proxy(action, apiActionHandler);
-		};
-
-		// HTTP Action (ex: actions.users.get())
-		if (attr in API_METHODS)
-			return apiMethod;
-
-		// If not, callback the apiMethod and build the URI
-		// Example: `actions.users` build the URI /users
+		// At this point, we dynamically build the URI
+		// Example: `actions.api.users` build the URI /users
 		action.addUri(attr);
 
-		return new Proxy(apiMethod, { get: (func, key) => func()[key] });
+		// Next we return a Proxy on a function
+		// that will be used to specify a resource id
+		// Example: `actions.api.users(1)`
+		// If it is not called, we will access the Action with a Proxy anyway
+		function resourceSpecifier(id) {
+			if (id != null)
+				action.addId(id);
+			return new Proxy(action, apiActionHandler);
+		}
+
+		return new Proxy(resourceSpecifier, { get: (func, key) => func()[key] });
 	},
 };
 
-/*
-|---------------------------------------------------------
-|		API Action generator
-|---------------------------------------------------------
-*/
-
+/**
+ * API Action generator
+ */
 export class APIAction {
-	constructor(axios_instance = apiAxios) {
-		this.axios = axios_instance;
+	constructor(axiosInstance = apiAxios) {
+		this.axios = axiosInstance;
 		this.uri = '';
 		this.idIsGiven = false;
 		this.path = [];
 		this.pathLocked = false;
-		this.actions = API_METHODS;
-		this.validStatus = [200, 201, 202, 203, 204];
 		this.options = {
 			type: undefined,
 			axios: {},
 			meta: {},
-			action: {},
 		};
 
 		return new Proxy(this, apiActionHandler);
 	}
 
+	configure(modify) {
+		modify(this);
+		return new Proxy(this, apiActionHandler);
+	}
+
 	addUri(step) {
 		this.uri += `/${step}`;
+		this.idIsGiven = false;
 
-		if (!this.pathLocked) {
+		if (!this.pathLocked)
 			this.path.push(step);
-			this.idIsGiven = false;
-		}
 	}
 
 	addId(id) {
 		this.uri += `/${id}`;
+		this.idIsGiven = true;
 
-		if (!this.pathLocked) {
+		if (!this.pathLocked)
 			this.path.push(id);
-			this.idIsGiven = true;
-		}
 	}
 
-	generateQueries(queryParams, prefix) {
+	/**
+	 * Transform an object into a queryParams string recursively if needed
+	 * @param  {Object}  queryParams The object to stringify
+	 * @param  {Boolean} prefix      Used when processing recursively
+	 * @return {String}              The queryParams string
+	 */
+	stringifyQueryParams(queryParams, prefix=undefined) {
 		const queries = [];
 
 		for (const key in queryParams) {
@@ -239,46 +199,45 @@ export class APIAction {
 				const value = queryParams[key];
 
 				if (value !== undefined) {
-					if (Object.is(value))
-						queries.push(this.generateQueries(value, true));
+					const _key = encodeURIComponent(key);
+					const prefixedKey = prefix ? `${prefix}[${_key}]` : _key;
+					if (isObject(value))
+						queries.push(this.stringifyQueryParams(value, prefixedKey));
 					else
-						queries.push(
-							`${encodeURIComponent(prefix ? `[${key}]` : key)}=${encodeURIComponent(value)}`
-						);
+						queries.push(`${prefixedKey}=${encodeURIComponent(value)}`);
 				}
 			}
 		}
 		return queries.join('&');
 	}
 
-	generateUri(uri, queryParams) {
-		const queries = this.generateQueries(queryParams);
-		return uri + (queries.length === 0 ? '' : `?${queries}`);
+	generateUri(uri, queryParams = {}) {
+		const queries = this.stringifyQueryParams(queryParams);
+		return uri + (queries.length > 0 ? `?${queries}`: '');
 	}
 
-	generateType(action) {
-		return [ API_REDUX_PREFIX, this.actions[action].type, ...this.path ].join('_').toUpperCase();
+	generateType(methodType) {
+		return [ API_REDUX_PREFIX, methodType, ...this.path ].join('_').toUpperCase();
 	}
 
-	generateAction(action, queryParams = {}, jsonData = {}) {
-		const actionData = this.actions[action];
+	generateAction(methodData, queryParams = {}, jsonData = {}) {
 		return {
-			type: this.options.type || this.generateType(action),
+			type: this.options.type || this.generateType(methodData.type),
 			meta: {
-				action: actionData.action,
-				validStatus: this.validStatus,
 				path: this.path,
+				idIsGiven: this.idIsGiven,
+				dataChange: methodData.dataChange,
+				dataScope: methodData.dataScope,
 				timestamp: Date.now(),
 				...this.options.meta,
 			},
 			payload: this.axios.request({
 				url: this.generateUri(this.uri, queryParams),
-				method: actionData.method,
+				method: methodData.httpMethod,
 				data: jsonData,
 				withCredentials: true,
 				...this.options.axios,
 			}),
-			...this.options.action,
 		};
 	}
 }
@@ -286,11 +245,12 @@ export class APIAction {
 /**
  * Actions are created dynamically (each use returns a new APIAction instance)
  * Examples:
- *  - actions.users.all()
- *  - actions.users(1).orders.create(null, { status: 'ok' })
+ *  - actions.api.users.all()
+ *  - actions.api.users(1).orders.create(null, { status: 'ok' })
  */
-export const actions = new Proxy(axios_instance => new APIAction(axios_instance), {
+const actions = new Proxy(axiosInstance => new APIAction(axiosInstance), {
 	get(target, attr) {
+		// If the axiosInstance is not specified through the call, we use the default one
 		return new APIAction()[attr];
 	},
 });
