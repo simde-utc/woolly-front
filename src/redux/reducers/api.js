@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { deepcopy, isEmpty } from '../../utils';
+import { DEFAULT_PAGE_SIZE } from '../../constants';
 import { API_REDUX_PREFIX, ASYNC_SUFFIXES, DATA_CHANGES, DATA_SCOPES } from '../constants';
 
 /*
@@ -134,6 +135,14 @@ export const DEFAULT_API_STORE = {
 		// TODO
 	},
 
+	getPagination(path) {
+		// TODO ?
+	},
+
+	getError() {
+		// TODO
+	},
+
 	// TODO Custom methods
 	getAuthUser(path, replacement = null, forceReplacement = true) {
 		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);
@@ -167,6 +176,9 @@ function buildPathInStore(store, path) {
 	}, store);
 }
 
+/**
+ * Make a resource place successful
+ */
 function makeResourceSuccessful(resource, timestamp, status) {
 	resource.fetching = false
 	resource.fetched = true
@@ -174,29 +186,11 @@ function makeResourceSuccessful(resource, timestamp, status) {
 	resource.failed = false
 	resource.lastUpdate = timestamp
 	resource.status = status
-	return resource
 }
 
-function processPagination(payload) {
-	if (payload.hasOwnProperty('results')) {
-		const { results, ...pagination } = payload;
-		return { data: results, pagination: pagination };
-	} else {
-		return { data: payload, pagination: null };
-	}
-}
-
-function getStatus(payload) {
-	return payload.status || (payload.response && payload.response.status);
-}
-
-
-/*
-|---------------------------------------------------------
-|		Reducer
-|---------------------------------------------------------
-*/
-
+/**
+ * Apply a change to one element in place according to dataChange
+ */
 function changeOneElement(place, dataChange, id, element, timestamp, status) {
 	if (id == null)
 		throw Error(`Invalid id ${id}`)
@@ -224,18 +218,78 @@ function changeOneElement(place, dataChange, id, element, timestamp, status) {
 	}
 }
 
+/**
+ * Parse the pagination next and previous url to extract queryParams
+ */
+function parsePaginationUrl(url) {
+	if (url == null)
+		return {};
+	const params = new URL(url).searchParams;
+	return {
+		page: parseInt(params.get('page')) || undefined,
+		pageSize: parseInt(params.get('page_size')) || undefined,
+	};
+}
+
+/**
+ * Process pagination in place and return results
+ */
+function processPagination(place, data) {
+	// No pagination
+	if (!data.hasOwnProperty('results')) {
+		place.pagination = null;
+		return data;
+	}
+
+	const { results, ...pagination } = data;
+	const prevPagination = place.pagination || {};
+
+	const prevParams = parsePaginationUrl(pagination.previous);
+	const nextParams = parsePaginationUrl(pagination.next);
+	const pageSize = prevParams.pageSize || nextParams.pageSize || DEFAULT_PAGE_SIZE;
+	const currentPage = (prevParams.page + 1) || (nextParams.page - 1) || 1;
+
+	// If pagination is different, clean data as some might be missing with a different page size
+	if (prevPagination.pageSize && prevPagination.pageSize !== pageSize) {
+		place.data = {};
+		place.resources = {};
+		place.pagination = {};
+	}
+
+	// Update pagination in place
+	const fetchedPages = (prevPagination.fetchedPages || new Set()).add(currentPage);
+	place.pagination = {
+		count: pagination.count,
+		pageSize,
+		fetchedPages,
+		lastFetched: currentPage,
+		nbPages: Math.ceil(pagination.count / pageSize),
+	}
+
+	return results;
+}
+
+/**
+ * Get the status of the response
+ */
+function getStatus(payload) {
+	return payload.status || (payload.response && payload.response.status);
+}
+
+/*
+|---------------------------------------------------------
+|		Reducer
+|---------------------------------------------------------
+*/
+
 /** This reducer manages the async API operations */
 export default function apiReducer(state = DEFAULT_API_STORE, action) {
 
-	// if (typeof action.type !== 'string' || !action.type.startsWith(API_REDUX_PREFIX))
-	// 	return state;
-
-	// Api actions
 	if (action.type && action.type.startsWith(API_REDUX_PREFIX)) {
 		return produce(state, draft => {
-			// Get path and id from action.meta
+
+			// place is the resource place where to store the data
 			const { path, id } = getPathFromMeta(action.meta);
-			// This is the resource place where to store the data
 			let place = buildPathInStore(draft, path);
 
 			const callStatus = action.type.split('_').pop();
@@ -248,9 +302,8 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 					return draft;
 
 				case ASYNC_SUFFIXES.error:
-					// if (id) // TODO ????
+					// if (id) // TODO test ????
 					// 	place = buildPathInStore(draft, path.concat([id]));
-					// place.data = {};
 					place.fetching = false;
 					place.fetched = false;
 					place.error = action.payload;
@@ -259,13 +312,12 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 					return draft;
 
 				case ASYNC_SUFFIXES.success:
-					// Get data from payload
+					// Get all data need from action
+					const data = processPagination(place, action.payload.data);
 					const { dataScope, dataChange, timestamp } = action.meta;
-					const { data, pagination } = processPagination(action.payload.data);
-					const status = getStatus(action.payload);
 
-					place.pagination = pagination
-					place = makeResourceSuccessful(place, timestamp, status);
+					const status = getStatus(action.payload);
+					makeResourceSuccessful(place, timestamp, status);
 
 					switch (dataScope) {
 						case DATA_SCOPES.ONE:

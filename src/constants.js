@@ -11,6 +11,8 @@ export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const REGEX_SLUG = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
 
+export const PAGE_SIZES = [10, 25, 50];
+export const DEFAULT_PAGE_SIZE = 10;
 
 // Orders
 
