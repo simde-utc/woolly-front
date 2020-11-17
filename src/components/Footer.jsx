@@ -18,7 +18,7 @@ const useStyles = makeStyles({
 export default function Footer(props) {
 	const classes = useStyles();
 	const simdeLink = <Link href="https://assos.utc.fr/assos/simde" target="_blank" rel="noopener">SiMDE</Link>;
-	const contactLink = <Link href="mailto:simde@assos.utc.fr">Contact</Link>;
+	const contactLink = <Link href="/contact">Contact</Link>;
 	return (
 		<span className={classes.container} style={{ minHeight: 40 }}>
 			Fait avec ♥ par le&nbsp;{simdeLink}.&nbsp;{contactLink}

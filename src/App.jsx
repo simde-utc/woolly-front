@@ -31,6 +31,7 @@ import Sales from './pages/public/Sales';
 import SaleDetail from './pages/public/SaleDetail';
 import UserOrders from './pages/public/UserOrders';
 import OrderDetail from './pages/public/OrderDetail';
+import ContactForm from "./pages/public/ContactForm";
 
 // Lazy loaded pages
 const AdminSite = React.lazy(() => import('./pages/admin/'));
@@ -78,6 +79,7 @@ class App extends React.Component {
 								<Route path="/" exact component={PublicSite} />
 								<Route path="/sales" exact component={Sales} />
 								<Route path="/sales/:sale_id" exact component={SaleDetail} />
+								<Route path="/contact" exact component={ContactForm} />
 								<ProtectedRoute path="/account" exact component={Account} />
 								<ProtectedRoute path="/orders" exact component={UserOrders} />
 								<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
