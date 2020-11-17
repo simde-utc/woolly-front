@@ -227,7 +227,7 @@ function parsePaginationUrl(url) {
 	const params = new URL(url).searchParams;
 	return {
 		page: parseInt(params.get('page')) || undefined,
-		pageSize: parseInt(params.get('page_size')) || undefined,
+		page_size: parseInt(params.get('page_size')) || undefined,
 	};
 }
 
@@ -246,11 +246,11 @@ function processPagination(place, data) {
 
 	const prevParams = parsePaginationUrl(pagination.previous);
 	const nextParams = parsePaginationUrl(pagination.next);
-	const pageSize = prevParams.pageSize || nextParams.pageSize || DEFAULT_PAGE_SIZE;
+	const page_size = prevParams.page_size || nextParams.page_size || DEFAULT_PAGE_SIZE;
 	const currentPage = (prevParams.page + 1) || (nextParams.page - 1) || 1;
 
 	// If pagination is different, clean data as some might be missing with a different page size
-	if (prevPagination.pageSize && prevPagination.pageSize !== pageSize) {
+	if (prevPagination.page_size && prevPagination.page_size !== page_size) {
 		place.data = {};
 		place.resources = {};
 		place.pagination = {};
@@ -260,10 +260,10 @@ function processPagination(place, data) {
 	const fetchedPages = (prevPagination.fetchedPages || new Set()).add(currentPage);
 	place.pagination = {
 		count: pagination.count,
-		pageSize,
+		page_size,
 		fetchedPages,
 		lastFetched: currentPage,
-		nbPages: Math.ceil(pagination.count / pageSize),
+		nbPages: Math.ceil(pagination.count / page_size),
 	}
 
 	return results;
@@ -305,7 +305,7 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 					// if (id) // TODO test ????
 					// 	place = buildPathInStore(draft, path.concat([id]));
 					place.fetching = false;
-					place.fetched = false;
+					// place.fetched = false;
 					place.error = action.payload;
 					place.failed = true;
 					place.status = getStatus(action.payload);

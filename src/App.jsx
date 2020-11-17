@@ -2,10 +2,10 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
-import actions from './redux/actions';
-import { Box } from '@material-ui/core';
+import apiActions from './redux/actions/api';
 
 // Style
+import { Box } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -57,7 +57,7 @@ class App extends React.Component {
 
 	componentDidMount() {
 		// Get connected user
-		store.dispatch(actions.auth().all());
+		store.dispatch(apiActions.authUser.get());
 	}
 
 	render() {

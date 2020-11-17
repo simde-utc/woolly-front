@@ -13,10 +13,10 @@ import { isObject } from '../../utils';
 
 import { API_REDUX_PREFIX, DATA_CHANGES, DATA_SCOPES } from '../constants';
 
-// TODO API AXIOS Where to put ?
 /**
  * Default axios for the Woolly API
  */
+// TODO API AXIOS Where to put ?
 export const apiAxios = axios.create({
   baseURL: API_URL,
 	xsrfHeaderName: 'X-CSRFToken',
@@ -248,11 +248,11 @@ export class APIAction {
  *  - actions.api.users.all()
  *  - actions.api.users(1).orders.create(null, { status: 'ok' })
  */
-const actions = new Proxy(axiosInstance => new APIAction(axiosInstance), {
+const apiActions = new Proxy(axiosInstance => new APIAction(axiosInstance), {
 	get(target, attr) {
 		// If the axiosInstance is not specified through the call, we use the default one
 		return new APIAction()[attr];
 	},
 });
 
-export default actions;
+export default apiActions;

@@ -9,6 +9,10 @@ window.__localeId__ = 'fr'
 |---------------------------------------------------------
 */
 
+export function isObject(object) {
+	return typeof object === 'object' && object !== null;
+}
+
 export function isList(object) {
 	return object && object.length !== undefined;
 }
