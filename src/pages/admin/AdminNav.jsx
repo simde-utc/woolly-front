@@ -50,7 +50,7 @@ function getMatch(location) {
 			path: action.path,
 			exact: true,
 			strict: true,
-		})
+		});
 		if (match)
 			return { ...match, ...action };
 	}

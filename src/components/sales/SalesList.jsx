@@ -7,9 +7,9 @@ import { SkeletonList } from '../../components/common/Skeletons';
 import { isEmpty } from '../../utils';
 
 
-export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }) {
+export default function SalesList({ sales, fetched, hasMore, baseUrl, withEdit, assoId, ...props }) {
 
-	if (!sales)
+	if (!fetched)
 		return <SkeletonList nRows={2} withSecondary withAction {...props} />;
 
 	const createSaleLink = {
@@ -18,7 +18,7 @@ export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }
 	};
 	return (
 		<List style={{ padding: 0 }} {...props}>
-			{isEmpty(sales) ? (				
+			{isEmpty(sales) ? (
 				<ListItem button disabled>
 					<ListItemText primary="Pas de ventes" />
 				</ListItem>
@@ -50,12 +50,14 @@ export default function SalesList({ sales, baseUrl, withEdit, assoId, ...props }
 					</ListItemSecondaryAction>
 				</NavListItem>
 			)}
-		</List>    
+		</List>
 	);
 }
 
 SalesList.propTypes = {
 	sales: PropTypes.object,
+	fetched: PropTypes.bool,
+	hasMore: PropTypes.bool,
 	baseUrl: PropTypes.string,
 	withEdit: PropTypes.bool,
 	assoId: PropTypes.string,
@@ -63,6 +65,8 @@ SalesList.propTypes = {
 
 SalesList.defaultProps = {
 	sales: null,
+	fetched: false,
+	hasMore: false,
 	baseUrl: '',
 	withEdit: false,
 	assoId: null,

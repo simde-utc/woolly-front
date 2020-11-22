@@ -1,8 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import apiActions, { apiAxios } from '../../redux/actions/api';
+import { DATA_SCOPES } from '../../redux/constants';
+import apiActions from '../../redux/actions/api';
 import messagesActions from '../../redux/actions/messages';
+import { apiAxios } from '../../utils/api';
 
 import { isPast } from 'date-fns';
 import { formatDate } from '../../utils';
@@ -72,14 +74,16 @@ class SaleDetail extends React.Component{
 		const saleId = this.props.saleId;
 		this.props.dispatch(
 			apiActions
-				.sales(saleId).orders
-				.definePath(['sales', saleId, 'userOrder' ])
-				.setOptions({ meta: { action: 'updateAll'} })
-				.create({ include: 'orderlines' })
+				.configure(action => {
+					action.path = ['sales', saleId, 'userOrder' ];
+					action.pathLocked = true;
+					action.options.meta = { dataScope: DATA_SCOPES.FULL };
+				})
+				.sales(saleId).orders.create({}, { include: 'orderlines' })
 		);
 	}
 
-	/** Sabe order on the server */
+	/** Save order on the server */
 	saveOrder = (event, notif = true, update = false) => {
 		if (!this.props.order) {
 			console.warn("No order")

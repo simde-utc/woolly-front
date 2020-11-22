@@ -7,7 +7,7 @@ import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "../../constants";
 import MaterialTable from "material-table";
 import {
 	Add, Check, Clear, Delete, Edit, GetApp, FilterList, ArrowUpward,
-	FirstPage, LastPage, NavigateNext, NavigateBefore, Search
+	FirstPage, LastPage, NavigateNext, NavigateBefore, Search, ViewColumn
 } from '@material-ui/icons';
 
 
@@ -28,7 +28,7 @@ export const MaterialTableIcons = {
 	Search: Search,
 	SortArrow: ArrowUpward,
 	// ThirdStateCheck: ThirdStateCheck,
-	// ViewColumn: ViewColumn,
+	ViewColumn: ViewColumn,
 };
 
 /*
@@ -43,7 +43,8 @@ query = {
 	totalCount: 12,
 }
 */
-export function paginateResource(resource, mapData = null) {
+// TODO Add sort, search, filtering functionalities
+export function paginateResource(resource, transformData = null) {
 	async function paginateData(query) {
 		const page = query.page + 1;
 		const shouldFetch = (
@@ -58,7 +59,7 @@ export function paginateResource(resource, mapData = null) {
 			const resp = await resource.fetchData(queryParams, true).payload;
 			const { data, pagination } = processPagination(resp.data);
 			return {
-				data: mapData ? data.map(mapData) : data,
+				data: transformData ? transformData(data) : data,
 				page: query.page,
 				totalCount: pagination ? pagination.count : data.length,
 			}
@@ -68,7 +69,7 @@ export function paginateResource(resource, mapData = null) {
 				? pagination.fetchedPages[page].map(id => resource.data[id])
 				: resource.data;
 			return {
-				data: mapData ? data.map(mapData) : data,
+				data: transformData ? transformData(data) : data,
 				page: query.page,
 				totalCount: pagination ? pagination.count : data.length,
 			};
@@ -77,14 +78,14 @@ export function paginateResource(resource, mapData = null) {
 	return paginateData;
 }
 
-export default function APIDataTable({ path, queryParams = {}, mapData = null, options = {}, ...props }) {
+export default function APIDataTable({ path, queryParams = {}, transformData = null, options = {}, ...props }) {
 	const [pageSize, setPageSize] = React.useState(options.pageSize || DEFAULT_PAGE_SIZE);
 	const _queryParams = { ...(queryParams || {}), page_size: pageSize };
 	const resource = useStoreAPIData(pathToArray(path), _queryParams);
 
 	return (
 		<MaterialTable
-			data={paginateResource(resource, mapData)}
+			data={paginateResource(resource, transformData)}
 			icons={MaterialTableIcons}
 			onChangeRowsPerPage={setPageSize}
 			options={{
@@ -103,6 +104,6 @@ APIDataTable.propTypes = {
 		PropTypes.array,
 	]).isRequired,
 	queryParams: PropTypes.object,
-	mapData: PropTypes.func,
+	transformData: PropTypes.func,
 	options: PropTypes.object,
 };

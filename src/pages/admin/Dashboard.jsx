@@ -1,18 +1,17 @@
-import React from 'react'
-import apiActions from '../../redux/actions/api';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Grid } from '@material-ui/core';
+import React from "react";
+import apiActions from "../../redux/actions/api";
+import { useDispatch, useSelector } from "react-redux";
+import { Container, Grid } from "@material-ui/core";
 
-import AssoSalesList from '../../components/sales/AssoSalesList';
-
+import AssoSalesList from "../../components/sales/AssoSalesList";
 
 export default function Dashboard(props) {
 	const dispatch = useDispatch();
-	const assos = useSelector(store => store.api.getAuthRelatedData('associations', {}));
-	const sales = useSelector(store => store.api.getResourceDataById('associations', 'sales', null));
+	const assos = useSelector(store => store.api.getAuthRelatedData("associations", {}));
+	const sales = useSelector(store => store.api.getResourceDataById("associations", "sales", null));
 
-	function handleFetchSales(assoId) {
-		dispatch(apiActions.associations(assoId).sales.all({ include_inactive: true }));
+	function fetchSales(assoId, page = 1) {
+		dispatch(apiActions.associations(assoId).sales.all({ page, include_inactive: true }));
 	}
 
 	return (
@@ -28,7 +27,7 @@ export default function Dashboard(props) {
 					<AssoSalesList
 						assos={assos}
 						sales={sales}
-						fetchSales={handleFetchSales}
+						fetchSales={fetchSales}
 					/>
 				</Grid>
 			</Grid>

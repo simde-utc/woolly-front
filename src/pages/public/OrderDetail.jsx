@@ -131,6 +131,7 @@ class OrderDetail extends React.Component {
 
 	render() {
 		const { classes, order } = this.props;
+		// TODO Better loading
 		if (!order)
 			return "Loading"
 		const { orderlineitems, saving, changing, updatingStatus } = this.state;
