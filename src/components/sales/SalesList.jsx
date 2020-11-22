@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { List, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { List, ListItem, ListItemSecondaryAction, ListItemText, IconButton } from '@material-ui/core';
 import { NavListItem, NavIconButton } from '../common/Nav';
-import { Add, Edit } from '@material-ui/icons';
+import { Add, Edit, Search } from '@material-ui/icons';
 import { SkeletonList } from '../../components/common/Skeletons';
 import { isEmpty } from '../../utils';
 
 
-export default function SalesList({ sales, fetched, hasMore, baseUrl, withEdit, assoId, ...props }) {
+export default function SalesList({ sales, fetched, fetchMore, baseUrl, withEdit, assoId, ...props }) {
 
 	if (!fetched)
 		return <SkeletonList nRows={2} withSecondary withAction {...props} />;
@@ -40,6 +40,16 @@ export default function SalesList({ sales, fetched, hasMore, baseUrl, withEdit, 
 					</NavListItem>
 				))
 			)}
+			{fetchMore && (
+				<ListItem button onClick={fetchMore}>
+					<ListItemText primary="Voir plus de ventes" />
+					<ListItemSecondaryAction>
+						<IconButton edge="end" aria-label="search-sales" onClick={fetchMore}>
+							<Search />
+						</IconButton>
+					</ListItemSecondaryAction>
+				</ListItem>
+			)}
 			{withEdit && (
 				<NavListItem to={createSaleLink}>
 					<ListItemText primary="Créer une vente" />
@@ -57,7 +67,7 @@ export default function SalesList({ sales, fetched, hasMore, baseUrl, withEdit, 
 SalesList.propTypes = {
 	sales: PropTypes.object,
 	fetched: PropTypes.bool,
-	hasMore: PropTypes.bool,
+	fetchMore: PropTypes.func,
 	baseUrl: PropTypes.string,
 	withEdit: PropTypes.bool,
 	assoId: PropTypes.string,
@@ -66,7 +76,7 @@ SalesList.propTypes = {
 SalesList.defaultProps = {
 	sales: null,
 	fetched: false,
-	hasMore: false,
+	fetchMore: undefined,
 	baseUrl: '',
 	withEdit: false,
 	assoId: null,

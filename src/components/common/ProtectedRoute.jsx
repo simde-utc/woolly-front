@@ -10,14 +10,14 @@ const authFunctions = {
 		return auth.authenticated;
 	},
 	admin(auth, userAssos, props) {
-		return auth.authenticated && auth.is_admin;
+		return auth.authenticated && auth.user?.is_admin;
 	},
 	manager(auth, userAssos, props) {
 		return hasManagerRights(auth, userAssos);
 	},
 	asso_manager(auth, userAssos, props) {
 		const asso_id = this.props.computedMatch.params.asso_id;
-		return hasManagerRights(auth, userAssos, props) && (asso_id in userAssos || auth.is_admin);
+		return hasManagerRights(auth, userAssos, props) && (asso_id in userAssos || auth.user?.is_admin);
 	},
 };
 

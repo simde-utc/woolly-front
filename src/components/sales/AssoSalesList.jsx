@@ -15,7 +15,6 @@ export default function AssoSalesList({ assos, sales, ...props }) {
 	const classes = useStyles();
 	const [isOpen, setOpen] = React.useState({});
 
-	// TODO Deal with pagination
 	function handleOpen(event) {
 		event.preventDefault();
 		const id = event.currentTarget.getAttribute("value");
@@ -24,8 +23,18 @@ export default function AssoSalesList({ assos, sales, ...props }) {
 		setOpen({ ...isOpen, [id]: !isOpen[id] });
 
 		// Ask for sales data if not available
-		if (!isOpen[id] && !sales[id])
+		if (!isOpen[id] && !sales[id]?.fetched)
 			props.fetchSales(id);
+	}
+
+	function getFetchMoreHandler(assoId) {
+		if (!sales[assoId])
+			return null;
+
+		const { lastFetched, nbPages } = sales[assoId].pagination;
+		if (lastFetched < nbPages)
+			return () => props.fetchSales(assoId, lastFetched + 1);
+		return null;
 	}
 
 	return (
@@ -41,8 +50,9 @@ export default function AssoSalesList({ assos, sales, ...props }) {
 					<Collapse in={Boolean(isOpen[id])} timeout="auto" unmountOnExit>
 						<List component="div" disablePadding classes={{ root: classes.nested }}>
 							<SalesList
-								sales={sales[id]}
-								fetched={Boolean(sales[id])}
+								sales={sales[id]?.data}
+								fetched={sales[id]?.fetched}
+								fetchMore={getFetchMoreHandler(id)}
 								disablePadding
 								baseUrl="/admin"
 								withEdit

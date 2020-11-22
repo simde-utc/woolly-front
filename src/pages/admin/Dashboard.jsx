@@ -7,11 +7,20 @@ import AssoSalesList from "../../components/sales/AssoSalesList";
 
 export default function Dashboard(props) {
 	const dispatch = useDispatch();
-	const assos = useSelector(store => store.api.getAuthRelatedData("associations", {}));
-	const sales = useSelector(store => store.api.getResourceDataById("associations", "sales", null));
+	const assos = useSelector(store => store.api.getAuthRelatedData("associations"));
+	const sales = useSelector(store => {
+		if (!assos || !store.api.resources?.associations?.resources)
+			return {};
+
+		const assoResources = store.api.resources.associations.resources;
+		return Object.keys(assoResources).reduce((salesMap, assoId) => {
+			salesMap[assoId] = assoResources[assoId]?.resources?.sales;
+			return salesMap
+		}, {});
+	});
 
 	function fetchSales(assoId, page = 1) {
-		dispatch(apiActions.associations(assoId).sales.all({ page, include_inactive: true }));
+		dispatch(apiActions.associations(assoId).sales.all({ page, page_size: 1, include_inactive: true }));
 	}
 
 	return (

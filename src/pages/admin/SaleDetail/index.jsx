@@ -15,7 +15,7 @@ import TicketsList from "./TicketsList";
 
 
 export default function SaleDetail(props) {
-	const [tab, setTab] = React.useState("tickets");
+	const [tab, setTab] = React.useState("quantities");
 
 	const saleId = props.match.params.sale_id;
 	const { data: sale, fetched } = useStoreAPIData(["sales", saleId], { include: "association" }, { singleElement: true });

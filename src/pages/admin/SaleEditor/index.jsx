@@ -17,6 +17,10 @@ import Loader from '../../../components/common/Loader';
 import DetailsEditor from './DetailsEditor';
 import ItemsManager from './ItemsManager/';
 
+const QUERY_PARAMS = {
+	sale: { with: "is_public,max_item_quantity" },
+	items: { include: "itemfields" },
+}
 
 const BLANK_RESOURCES = {
 	items: BLANK_ITEM,
@@ -94,9 +98,9 @@ class SaleEditor extends React.Component {
 			loading_itemgroups: true,
 		});
 		const saleId = this.props.saleId;
-		this.props.dispatch(apiActions.sales.find(saleId));
-		this.props.dispatch(apiActions.sales(saleId).items.all({ include: 'itemfields' }));
-		this.props.dispatch(apiActions.sales(saleId).itemgroups.all());
+		this.props.dispatch(apiActions.sales.find(saleId, QUERY_PARAMS.sale));
+		this.props.dispatch(apiActions.sales(saleId).items.all(QUERY_PARAMS.items));
+		this.props.dispatch(apiActions.sales(saleId).itemgroups.all(QUERY_PARAMS.itemgroups));
 	}
 
 	getStateFor(resource, prevState = {}) {
@@ -264,14 +268,14 @@ class SaleEditor extends React.Component {
 			try {
 				if (this.isCreator()) {
 					// Create sale
-					const action = apiActions.sales.create(null, details);
+					const action = apiActions.sales.create(QUERY_PARAMS.sale, details);
 					const response = await action.payload;
 					// Dispatch creation and go to edit mode
 					this.props.dispatch(action);
 					this.props.history.push(`/admin/sales/${response.data.id}/edit`);
 				} else {
 					// Update sale details
-					const action = apiActions.sales.update(this.props.saleId, null, details);
+					const action = apiActions.sales.update(this.props.saleId, QUERY_PARAMS.sale, details);
 					await action.payload;
 					this.props.dispatch(action);
 				}
@@ -328,7 +332,7 @@ class SaleEditor extends React.Component {
 				data.sale = saleId;
 
 				// Create resource
-				const action = apiActions.sales(saleId)[resource].create(null, data);
+				const action = apiActions.sales(saleId)[resource].create(QUERY_PARAMS[resource], data);
 				await action.payload;
 
 				// Creation succeeded, remove fake id and dispatch created
@@ -347,8 +351,7 @@ class SaleEditor extends React.Component {
 					await this._saveItemFields(data);
 
 				// Update resource and wait for feedback to dispatch
-				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
-				const action = apiActions[resource].update(id, queryParams, data)
+				const action = apiActions[resource].update(id, QUERY_PARAMS[resource], data)
 				await action.payload;
 
 				this.props.dispatch(action);

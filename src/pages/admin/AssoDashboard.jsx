@@ -11,6 +11,8 @@ export default function AssoDashboard(props) {
 	const asso = useStoreAPIData(["associations", assoId], null, { singleElement: true });
 	const sales = useStoreAPIData(["associations", assoId, "sales"]);
 
+	const { lastFetched, nbPages } = sales.pagination;
+	const fetchMore = (lastFetched < nbPages) ? () => sales.fetchData(lastFetched + 1) : null;
 	return (
 		<Container>
 			<Grid container spacing={3}>
@@ -42,6 +44,7 @@ export default function AssoDashboard(props) {
 					<SalesList
 						sales={sales.data}
 						fetched={sales.fetched}
+						fetchMore={fetchMore}
 						baseUrl="/admin"
 						withEdit
 						assoId={assoId}
