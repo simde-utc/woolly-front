@@ -9,21 +9,28 @@ import apiActions, { APIAction, apiAxios, API_METHODS } from './actions/api';
  */
 export function useStoreAPIData(_path, queryParams = undefined, options = {}) {
 	const path = pathToArray(_path);
-	const actionData = options.actionData || API_METHODS.all;
+	const actionData = options.actionData || (
+		options.singleElement ? API_METHODS.find : API_METHODS.all
+	);
 
 	// Get data from redux store
 	const dispatch = useDispatch();
 	const resource = useSelector(store => store.api.get(path));
 
-	function fetchData(page = 1) {
-		const action = new APIAction();
-		action.path = path;
-		action.uri = path.join('/');
-		dispatch(action.generateAction(actionData, { ...queryParams, page }));
+	function fetchData(additionalQuery = null, returnAction = false) {
+		const actionGen = new APIAction();
+		actionGen.path = path;
+		actionGen.uri = path.join('/');
+		actionGen.idIsGiven = Boolean(options.singleElement);
+		const query = additionalQuery ? { ...queryParams, ...additionalQuery } : queryParams;
+		const action = actionGen.generateAction(actionData, query)
+		dispatch(action);
+		if (returnAction)
+			return action;
 	}
 
 	// At first use or when data changes, automaticaly fire fetching
-	useDeepCompareEffect(fetchData, [actionData, path, queryParams, dispatch]);
+	useDeepCompareEffect(fetchData, [actionData, path, queryParams, options, dispatch]);
 
 	return { ...resource, fetchData };
 }

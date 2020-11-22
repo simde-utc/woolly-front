@@ -131,18 +131,6 @@ export const DEFAULT_API_STORE = {
 		}, {});
 	},
 
-	getStatus(path, id = null) {
-		// TODO
-	},
-
-	getPagination(path) {
-		// TODO ?
-	},
-
-	getError() {
-		// TODO
-	},
-
 	// TODO Custom methods
 	getAuthUser(path, replacement = null, forceReplacement = true) {
 		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);
@@ -226,47 +214,53 @@ function parsePaginationUrl(url) {
 		return {};
 	const params = new URL(url).searchParams;
 	return {
-		page: parseInt(params.get('page')) || undefined,
-		page_size: parseInt(params.get('page_size')) || undefined,
+		page: parseInt(params.get('page')) || 1,
+		pageSize: parseInt(params.get('page_size')) || undefined,
 	};
 }
 
 /**
  * Process pagination in place and return results
  */
-function processPagination(place, data) {
+export function processPagination(data, place = undefined) {
 	// No pagination
 	if (!data.hasOwnProperty('results')) {
-		place.pagination = null;
-		return data;
+		if (place)
+			place.pagination = null;
+		return { data, pagination: null };
 	}
 
 	const { results, ...pagination } = data;
-	const prevPagination = place.pagination || {};
+	const prevPagination = (place && place.pagination) || {};
 
 	const prevParams = parsePaginationUrl(pagination.previous);
 	const nextParams = parsePaginationUrl(pagination.next);
-	const page_size = prevParams.page_size || nextParams.page_size || DEFAULT_PAGE_SIZE;
+	const pageSize = prevParams.pageSize || nextParams.pageSize || DEFAULT_PAGE_SIZE;
 	const currentPage = (prevParams.page + 1) || (nextParams.page - 1) || 1;
 
 	// If pagination is different, clean data as some might be missing with a different page size
-	if (prevPagination.page_size && prevPagination.page_size !== page_size) {
+	const resetPagination = place && prevPagination.pageSize && prevPagination.pageSize !== pageSize;
+	if (resetPagination) {
 		place.data = {};
 		place.resources = {};
 		place.pagination = {};
 	}
 
-	// Update pagination in place
-	const fetchedPages = (prevPagination.fetchedPages || new Set()).add(currentPage);
-	place.pagination = {
+	const newPagination = {
 		count: pagination.count,
-		page_size,
-		fetchedPages,
+		pageSize,
+		fetchedPages: {
+			...(!resetPagination ? prevPagination.fetchedPages || {} : {}),
+			[currentPage]: Object.values(results).map(result => result.id),
+		},
 		lastFetched: currentPage,
-		nbPages: Math.ceil(pagination.count / page_size),
-	}
+		nbPages: Math.ceil(pagination.count / pageSize),
+	};
 
-	return results;
+	if (place)
+		place.pagination = newPagination;
+
+	return { data: results, pagination: newPagination };
 }
 
 /**
@@ -313,7 +307,7 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 
 				case ASYNC_SUFFIXES.success:
 					// Get all data need from action
-					const data = processPagination(place, action.payload.data);
+					const { data } = processPagination(action.payload.data, place);
 					const { dataScope, dataChange, timestamp } = action.meta;
 
 					const status = getStatus(action.payload);
