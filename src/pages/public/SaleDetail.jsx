@@ -26,7 +26,7 @@ const connector = connect((store, props) => {
 	return {
 		saleId,
 		authenticated: Boolean(store.api.getData('auth', {}).authenticated),
-		sale: store.api.findData('sales', saleId, 'id'),
+		sale: store.api.findData('sales', saleId),
 		order: store.api.getData(['sales', saleId, 'userOrder'], null, true),
 		items: store.api.getData(['sales', saleId, 'items']),
 	};
@@ -42,11 +42,11 @@ class SaleDetail extends React.Component{
 
 	componentDidMount() {
 		const saleId = this.props.saleId;
-		if (this.props.authenticated && !this.props.order)
+		if (this.props.authenticated)
 			this.fetchOrder();
 
-		if (!this.props.sale)
-			this.props.dispatch(apiActions.sales.find(saleId, { include: 'association' }));
+		if (!this.props.sale?.association?.id)
+			this.props.dispatch(apiActions.sales.find(saleId, { include: "association" }));
 
 		if (!this.props.items)
 			this.props.dispatch(apiActions.sales(saleId).items.all());
@@ -56,7 +56,7 @@ class SaleDetail extends React.Component{
 		const order = this.props.order;
 
 		// Update quantities from current order
-		if (prevProps.order !== order && order && order.orderlines.length) {
+		if (prevProps.order !== order && order?.orderlines?.length) {
 			this.setState({
 				quantities: order.orderlines.reduce((acc, orderline) => {
 					acc[orderline.item] = orderline.quantity;
@@ -70,28 +70,39 @@ class SaleDetail extends React.Component{
 	// 		Order handlers
 	// -----------------------------------------------------
 
+	getOrderAction = () => (
+		apiActions
+		.sales(this.props.saleId).orders()
+		.configure(action => {
+			action.path = ['sales', this.props.saleId, 'userOrder' ];
+			action.idIsGiven = false;
+			action.options.meta = {
+				dataScope: DATA_SCOPES.FULL,
+			};
+		})
+	)
+
 	fetchOrder = () => {
-		const saleId = this.props.saleId;
-		this.props.dispatch(
-			apiActions
-				.configure(action => {
-					action.path = ['sales', saleId, 'userOrder' ];
-					action.pathLocked = true;
-					action.options.meta = { dataScope: DATA_SCOPES.FULL };
-				})
-				.sales(saleId).orders.create({}, { include: 'orderlines' })
-		);
+		// Try to find a previous ongoing order
+		this.getOrderAction().get({ filter: "status=0" }).payload.then(resp => {
+			if (resp.data.results.length) {
+				const orderId = resp.data.results[0].id
+				this.props.dispatch(this.getOrderAction().find(orderId, { include: 'orderlines' }));
+			}
+		});
 	}
 
 	/** Save order on the server */
-	saveOrder = (event, notif = true, update = false) => {
-		if (!this.props.order) {
-			console.warn("No order")
-			return;
+	saveOrder = async (event, notif = true, update = false) => {
+		let order = this.props.order?.id;
+		// Create order if not fetched
+		if (!order) {
+			const action = this.getOrderAction().create({});
+			order = (await action.payload).data.id;
+			this.props.dispatch(action);
 		}
 
 		// Save all orderlines
-		const order = this.props.order.id;
 		const options = { withCredentials: true };
 		const promises = Promise.all(
 			Object.entries(this.state.quantities).reduce((calls, [item, quantity]) => {
@@ -101,7 +112,7 @@ class SaleDetail extends React.Component{
 			}, [])
 		);
 
-		if (notif) // TODO
+		if (notif)
 			promises.then(resp => console.log('Saved'));
 		if (update)
 			promises.then(this.fetchOrder);
@@ -110,7 +121,10 @@ class SaleDetail extends React.Component{
 
 	/** Redirect to payment */
 	payOrder = async event => {
-		const orderId = this.props.order.id;
+		const orderId = this.props.order?.id;
+		if (orderId == null)
+			return this.fetchOrder();
+
 		const returnUrl = window.location.href.replace(this.props.location.pathname, `/orders/${orderId}`);
 		try {
 			const resp = await apiAxios.get(`/orders/${orderId}/pay?return_url=${returnUrl}`, { withCredentials: true });
@@ -130,7 +144,7 @@ class SaleDetail extends React.Component{
 	handleBuy = event => {
 		if (this.canBuy()) {
 			this.setState({ buying: true }, async () => {
-				await this.saveOrder();
+				await this.saveOrder(null, false, false);
 				await this.payOrder();
 			});
 		}
@@ -196,7 +210,7 @@ class SaleDetail extends React.Component{
 				<Box textAlign="center" py={6}>
 					<Container>
 						<h1 className={classes.title}>{sale.name}</h1>
-						<h2 className={classes.subtitle}>Par {sale.association.shortname}</h2>
+						<h2 className={classes.subtitle}>Par {sale.association?.shortname || "..."}</h2>
 					</Container>
 				</Box>
 				<Container>
@@ -225,7 +239,7 @@ class SaleDetail extends React.Component{
 								<Alert severity="warning" color="info">
 									<AlertTitle>La vente n'a pas encore commencée</AlertTitle>
 									<span>
-										Revenez d'ici {formatDate(sale.begin_at, 'fromNowStrict')} pour pouvoir commander.
+										Revenez d'ici {sale.begin_at && formatDate(sale.begin_at, 'fromNowStrict')} pour pouvoir commander.
 									</span>
 								</Alert>
 							)}
@@ -297,7 +311,7 @@ class SaleDetail extends React.Component{
 								<Button
 									onClick={this.saveOrder}
 									// disabled={!canBuy}
-									startIcon={<Save />}
+									// startIcon={<Save />}
 									className={classes.button}
 									variant="outlined"
 								>

@@ -22,20 +22,6 @@ export function pathToArray(path) {
 		return [];
 }
 
-/**
- * Helper to get path and id from an action meta
- */
-function getPathFromMeta(meta) {
-	const path = meta.path.slice();
-	let id = undefined;
-
-	// Pop id from path if needed
-	if (meta.idIsGiven)
-		id = path.pop();
-
-	return { path, id };
-}
-
 
 /*
 |---------------------------------------------------------
@@ -94,14 +80,14 @@ export const DEFAULT_API_STORE = {
 
 	/** Retrieve the data object of a resource */
 	getData(path, replacement = null, forceReplacement = false) {
-		return this.get([ ...pathToArray(path), 'data'], replacement, forceReplacement);
+		return this.get([...pathToArray(path), 'data'], replacement, forceReplacement);
 	},
 
 	/** Retrieve the data with a particuliar value of a resource */
 	findData(path, value, key = 'id', replacement = null, forceReplacement = true) {
-		// Data is stored by id
+		// Data is stored by id so simply access it
 		if (key === 'id')
-			return this.getData([ ...pathToArray(path), value], replacement, forceReplacement);
+			return this.getData([...pathToArray(path), value], replacement, forceReplacement);
 
 		// Otherwise, search the data for the right key
 		const data = this.getData(path);
@@ -112,26 +98,7 @@ export const DEFAULT_API_STORE = {
 		return replacement;
 	},
 
-	/**
-	 * Get specified resource for multiple data by id
-	 * Example: ('sales', 'assos') => { a: asso_of_sale_a, b: asso_of_sale_b }
-	 *
-	 * @param  {[type]} path        [description]
-	 * @param  {[type]} resource    [description]
-	 * @param  {[type]} replacement [description]
-	 * @return {Object}             La map de resource par id
-	 */
-	// TODO API REDUCER Useful ?
-	getResourceDataById(path, resource, replacement = null) {
-		const pathResources = this.get(path).resources;
-		return Object.keys(pathResources).reduce((acc, id) => {
-			const subResources = pathResources[id].resources[resource] || {};
-			acc[id] = subResources.fetched ? subResources.data : replacement;
-			return acc;
-		}, {});
-	},
-
-	// TODO Custom methods
+	// Custom methods to retrieve the authenticated user resources
 	getAuthUser(path, replacement = null, forceReplacement = true) {
 		return this.get(['auth', 'data', 'user', ...pathToArray(path)], replacement, forceReplacement);
 	},
@@ -146,6 +113,20 @@ export const DEFAULT_API_STORE = {
 |		Resource helpers
 |---------------------------------------------------------
 */
+
+/**
+ * Helper to get path and id from an action meta
+ */
+function getPathFromMeta(meta) {
+	const path = meta.path.slice();
+	let id = undefined;
+
+	// Pop id from path if needed
+	if (meta.idIsGiven)
+		id = path.pop();
+
+	return { path, id };
+}
 
 /**
  * Dynamically generate the resource storage in the store from the path
@@ -290,16 +271,12 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 			switch (callStatus) {
 
 				case ASYNC_SUFFIXES.loading:
-					// TODO
 					place.fetching = true;
 					place.status = null;
 					return draft;
 
 				case ASYNC_SUFFIXES.error:
-					// if (id) // TODO test ????
-					// 	place = buildPathInStore(draft, path.concat([id]));
 					place.fetching = false;
-					// place.fetched = false;
 					place.error = action.payload;
 					place.failed = true;
 					place.status = getStatus(action.payload);
@@ -326,9 +303,9 @@ export default function apiReducer(state = DEFAULT_API_STORE, action) {
 									break;
 
 								case DATA_CHANGES.REMOVE:
-									// TODO Delete place ?
 									delete place.data;
 									delete place.resources;
+									delete place.pagination;
 									break;
 
 								default:

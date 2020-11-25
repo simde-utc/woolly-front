@@ -103,7 +103,7 @@ export const apiActionHandler = {
 
 		// Access a real attribute of this Action
 		if (action[attr] !== undefined)
-			return action[attr];
+			return action[attr].bind(action);
 
 		if (attr in apiShortcuts)
 			return apiShortcuts[attr](action);
@@ -112,7 +112,6 @@ export const apiActionHandler = {
 		if (attr in API_METHODS) {
 			return function (...args) {
 				const methodData = API_METHODS[attr];
-				// TODO { id, query, data } ??
 
 				let id, queryParams, jsonData;
 				if (methodData.takesId)
@@ -165,7 +164,8 @@ export class APIAction {
 	}
 
 	configure(modify) {
-		modify(this);
+		if (modify)
+			modify(this);
 		return new Proxy(this, apiActionHandler);
 	}
 
