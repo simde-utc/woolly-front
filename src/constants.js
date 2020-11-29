@@ -26,14 +26,14 @@ export const ORDER_STATUS = {
 	4: { color: '#008805', actions: ['download', 'modify'], label: 'Payée' },
 	5: { color: '#e00000', actions: [],                     label: 'Expirée' },
 	6: { color: '#e00000', actions: [],                     label: 'Annulée' },
-}
+};
 
 export const ORDER_ACTIONS = {
-	download: { text: "Télécharger les billets", Icon: GetApp,           },
-	modify:   { text: "Modifier la commande",    Icon: Edit,              },
+	download: { text: "Télécharger les billets", Icon: GetApp,  },
+	modify:   { text: "Modifier la commande",    Icon: Edit,    },
 	pay:      { text: "Payer la commande",       Icon: Payment, },
-	cancel:   { text: "Annuler la commande",     Icon: Clear,             },
-}
+	cancel:   { text: "Annuler la commande",     Icon: Clear,   },
+};
 
 export const STATUS_MESSAGES = {
 	0: { severity: 'info',		message: "Vous pouvez la complèter en cliquant sur le lien suivant.", link: "Finaliser ma commande" },
@@ -43,7 +43,7 @@ export const STATUS_MESSAGES = {
 	4: { severity: 'success',	message: "Vous pouvez télécharger vos billets en utilisant le bouton en base de page ou bien modifier ceux qui sont éditables en cliquant sur les différents champs." },
 	5: { severity: 'error',		message: "Vous pouvez effectuer une autre commande sur la même vente en cliquant sur le lien suivant.", link: "Effectuer une autre commande" },
 	6: { severity: 'error',		message: "Vous pouvez effectuer une autre commande sur la même vente en cliquant sur le lien suivant.", link: "Effectuer une autre commande" },
-}
+};
 
 // Blank data
 

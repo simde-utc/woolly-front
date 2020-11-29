@@ -1,17 +1,34 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { useUserOrders } from '../redux/hooks';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import apiActions from "../redux/actions/api";
 
-import { Container, Grid } from '@material-ui/core';
-import Loader from '../components/common/Loader';
+import { Container, Grid, Box } from "@material-ui/core";
+import { NavButton } from "../components/common/Nav";
+import Loader from "../components/common/Loader";
 
-import AccountDetails from '../components/users/AccountDetails';
-import UserOrdersList from '../components/orders/UserOrdersList';
+import AccountDetails from "../components/users/AccountDetails";
+import UserOrdersList from "../components/orders/UserOrdersList";
 
 
 export default function Account(props) {
+	const dispatch = useDispatch();
 	const user = useSelector(store => store.api.getAuthUser());
-	const { orders, fetchOrders } = useUserOrders();
+	const orders = useSelector(store => store.api.getAuthRelatedData("lastOrders", undefined));
+
+	React.useEffect(() => {
+		if (user.id) {
+			dispatch(
+				apiActions.authUser(user.id).orders
+				.configure(action => action.path = ["auth", "lastOrders"])
+				.all({
+					order_by: "-id",
+					page_size: 5,
+					filter: { status__in: [1,2,3,4] },
+					include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems',
+				})
+			)
+		}
+	}, [dispatch, user.id]);
 
 	return (
 		<Container>
@@ -24,12 +41,12 @@ export default function Account(props) {
 				</Grid>
 
 				<Grid item xs={12} md={8}>
-					<h2>Mes commandes</h2>
-					<Loader loading={orders === undefined}>
-						<UserOrdersList
-							orders={orders}
-							fetchOrders={fetchOrders}
-						/>
+					<h2>Mes 5 dernières commandes</h2>
+					<Loader loading={orders == null}>
+						<UserOrdersList orders={orders} />
+						<Box mt={4} mb={2} textAlign="center">
+							<NavButton to="/orders">Voir toutes mes commandes</NavButton>
+						</Box>
 					</Loader>
 				</Grid>
 			</Grid>

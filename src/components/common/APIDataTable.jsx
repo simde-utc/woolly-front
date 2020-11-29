@@ -78,10 +78,10 @@ export function paginateResource(resource, transformData = null) {
 	return paginateData;
 }
 
-export default function APIDataTable({ path, queryParams = {}, transformData = null, options = {}, ...props }) {
+export default function APIDataTable({ path, queryParams = {}, apiOptions = {}, transformData = null, options = {}, ...props }) {
 	const [pageSize, setPageSize] = React.useState(options.pageSize || DEFAULT_PAGE_SIZE);
-	const _queryParams = { ...(queryParams || {}), page_size: pageSize };
-	const resource = useStoreAPIData(pathToArray(path), _queryParams);
+	const _queryParams = { ...queryParams, page_size: pageSize };
+	const resource = useStoreAPIData(pathToArray(path), _queryParams, apiOptions);
 
 	return (
 		<MaterialTable
@@ -104,6 +104,7 @@ APIDataTable.propTypes = {
 		PropTypes.array,
 	]).isRequired,
 	queryParams: PropTypes.object,
+	apiOptions: PropTypes.object,
 	transformData: PropTypes.func,
 	options: PropTypes.object,
 };

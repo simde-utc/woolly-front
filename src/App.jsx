@@ -29,7 +29,7 @@ import Error404 from './pages/Error404';
 // Public pages
 import Sales from './pages/public/Sales';
 import SaleDetail from './pages/public/SaleDetail';
-import Orders from './pages/public/Orders';
+import UserOrders from './pages/public/UserOrders';
 import OrderDetail from './pages/public/OrderDetail';
 
 // Lazy loaded pages
@@ -79,7 +79,7 @@ class App extends React.Component {
 								<Route path="/sales" exact component={Sales} />
 								<Route path="/sales/:sale_id" exact component={SaleDetail} />
 								<ProtectedRoute path="/account" exact component={Account} />
-								<ProtectedRoute path="/orders" exact component={Orders} />
+								<ProtectedRoute path="/orders" exact component={UserOrders} />
 								<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
 								<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
 								<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />

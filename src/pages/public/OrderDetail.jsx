@@ -2,11 +2,12 @@ import React from 'react';
 import produce from 'immer';
 import { connect } from 'react-redux';
 import apiActions, { apiAxios } from '../../redux/actions/api';
+import { updateOrderStatus, OrderStatusButton } from '../../components/orders/OrderStatus';
 import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from '../../constants';
 import { arrayToMap } from '../../utils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Box, Container, Grid, Button, Chip, CircularProgress } from '@material-ui/core';
+import { Box, Container, Grid, Button } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { LoadingButton } from '../../components/common/Buttons';
 import { NavButton } from '../../components/common/Nav';
@@ -86,11 +87,11 @@ class OrderDetail extends React.Component {
 	/** Fetch status and redirect to payment or refresh order */
 	updateStatus = () => {
 		this.setState({ updatingStatus: true }, async () => {
-			const resp = (await apiAxios.get(`/orders/${this.props.orderId}/status`)).data
-			if (resp.redirect_url)
-				window.location.href = resp.redirect_url;
+			const resp = await updateOrderStatus(this.props.dispatch, this.props.orderId);
+			if (resp.data.redirect_url)
+				resp.redirectToPayment();
 			else
-				this.setState({ updatingStatus: false }, resp.updated ? this.fetchOrder : null);
+				this.setState({ updatingStatus: false }, resp.data.updated ? this.fetchOrder : null);
 		});
 	}
 
@@ -141,12 +142,11 @@ class OrderDetail extends React.Component {
 			<Container>
 				<Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
 					<h1>Commande n°{order.id}</h1>
-					<Chip
-						onClick={this.updateStatus}
-						label={status.label || '...'}
-						style={{ backgroundColor: status.color, color: '#fff' }}
-						icon={updatingStatus ? <CircularProgress size="1em" style={{ color: '#fff' }} /> : null}
-						clickable
+					<OrderStatusButton
+						status={status}
+						updateStatus={this.updateStatus}
+						updating={updatingStatus}
+						variant="chip"
 					/>
 				</Box>
 
@@ -197,7 +197,7 @@ class OrderDetail extends React.Component {
 					</LoadingButton>
 					<Button
 						onClick={this.downloadTickets}
-						disabled={changing || saving}
+						disabled={!status.actions.includes("download") || changing || saving}
 						className={classes.button}
 						variant="contained"
 						color="primary"

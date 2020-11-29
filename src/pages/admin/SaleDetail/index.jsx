@@ -10,7 +10,7 @@ import { Link } from "../../../components/common/Nav";
 import { CopyButton } from "../../../components/common/Buttons";
 
 import QuantitiesSold from "./QuantitiesSold";
-import OrdersList from "./OrdersList";
+import OrdersTable from "./OrdersTable";
 import TicketsList from "./TicketsList";
 
 
@@ -92,7 +92,7 @@ export default function SaleDetail(props) {
 								/>
 							</React.Fragment>
 						)) || (tab === "orders" && (
-							<OrdersList
+							<OrdersTable
 								saleId={saleId}
 								items={items.data}
 							/>

@@ -1,8 +1,8 @@
-import React from 'react'
-import PropTypes from 'prop-types';
-import { List, ListItem, ListItemText } from '@material-ui/core';
-import { SkeletonList } from '../common/Skeletons';
-import { isEmpty } from '../../utils';
+import React from "react"
+import PropTypes from "prop-types";
+import { List, ListItem, ListItemText } from "@material-ui/core";
+import { SkeletonList } from "../common/Skeletons";
+import { isEmpty } from "../../utils";
 
 
 export default function OrderLinesList({ orderlines, items, prefix, empty, ...props }) {
@@ -12,20 +12,12 @@ export default function OrderLinesList({ orderlines, items, prefix, empty, ...pr
 	if (isEmpty(orderlines))
 		return empty;
 
-	function getItem(item) {
-		if (item.name)
-			return item.name;
-		else if (items && items.hasOwnProperty(item))
-			return items[item].name;
-		return '...';
-	}
-
 	return (
 		<List {...props}>
-			{Object.values(orderlines).map(orderline => (
-				<ListItem key={orderline.id} dense={props.dense} disableGutters={props.dense}>
+			{Object.values(orderlines).map(({ id, quantity, item }, index) => (
+				<ListItem key={id || index} dense={props.dense} disableGutters={props.dense}>
 					<ListItemText>
-						{prefix}{orderline.quantity} &times; {getItem(orderline.item)}
+						{prefix}{quantity} &times; {item?.name || item?.[item]?.name || "..."}
 					</ListItemText>
 				</ListItem>
 			))}
@@ -41,6 +33,6 @@ OrderLinesList.propTypes = {
 };
 
 OrderLinesList.defaultProps = {
-	empty: 'Aucun article',
-	prefix: '',
+	empty: "Aucun article",
+	prefix: "",
 };
