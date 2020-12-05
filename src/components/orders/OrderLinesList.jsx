@@ -1,8 +1,8 @@
 import React from "react"
 import PropTypes from "prop-types";
 import { List, ListItem, ListItemText } from "@material-ui/core";
-import { SkeletonList } from "../common/Skeletons";
-import { isEmpty } from "../../utils";
+import { SkeletonList } from "components/common/Skeletons";
+import { isEmpty } from "utils/helpers";
 
 
 export default function OrderLinesList({ orderlines, items, prefix, empty, ...props }) {

@@ -1,19 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { DATA_SCOPES } from '../../redux/constants';
-import apiActions from '../../redux/actions/api';
-import messagesActions from '../../redux/actions/messages';
-import { apiAxios } from '../../utils/api';
+import { DATA_SCOPES } from 'redux/constants';
+import apiActions from 'redux/actions/api';
+import messagesActions from 'redux/actions/messages';
+import { apiAxios } from 'utils/api';
 
 import { isPast } from 'date-fns';
-import { formatDate } from '../../utils';
-import { getButtonColoredVariant } from '../../styles';
+import { formatDate } from 'utils/format';
+import { getButtonColoredVariant } from 'utils/styles';
 
-import Loader from '../../components/common/Loader';
-import ItemsTable from '../../components/sales/ItemsTable';
-import UnpaidOrderDialog from '../../components/orders/UnpaidOrderDialog';
-import { Link } from '../../components/common/Nav';
+import Loader from 'components/common/Loader';
+import ItemsTable from 'components/sales/ItemsTable';
+import UnpaidOrderDialog from 'components/orders/UnpaidOrderDialog';
+import { Link } from 'components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Container, Box, Grid, Button, Paper, FormControlLabel, Checkbox, Collapse } from '@material-ui/core';

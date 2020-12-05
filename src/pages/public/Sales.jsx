@@ -1,10 +1,11 @@
 import React from "react";
-import APIDataTable from "../../components/common/APIDataTable";
-import { formatDate } from "../../utils";
-import { PORTAIL_URL } from "../../constants";
-
-import { Link } from "../../components/common/Nav";
 import { Container, Box } from "@material-ui/core";
+
+import APIDataTable from "components/common/APIDataTable";
+import { Link } from "components/common/Nav";
+
+import { PORTAIL_URL } from "utils/constants";
+import { formatDate } from "utils/format";
 
 
 export default function Sales(props) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@material-ui/core';
 
-import { formatPrice } from '../../../../utils';
+import { formatPrice } from 'utils/format';
 
 function displayQuantity(quantity, yesText, noText = null) {
     if (quantity)

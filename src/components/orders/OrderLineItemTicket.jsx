@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Paper, TextField } from '@material-ui/core';
-import { isEmpty } from '../../utils';
+import { isEmpty } from 'utils/helpers';
 
 // TODO Different Input types
 

@@ -1,6 +1,3 @@
-import axios from "axios";
-import { API_URL } from "../constants";
-
 /**
  * Type prefixes for each reducer
  */
@@ -8,15 +5,7 @@ export const API_REDUX_PREFIX = "API";
 export const MESSAGE_REDUX_PREFIX = "MESSAGE";
 
 /**
- * Default axios for the Woolly API
- */
-export const apiAxios = axios.create({
-	baseURL: API_URL,
-	xsrfHeaderName: "X-CSRFToken",
-	xsrfCookieName: "csrftoken",
-});
-
-/**
+ * Redux promises suffixes
  */
 export const ASYNC_SUFFIXES = {
 	loading: "LOADING",

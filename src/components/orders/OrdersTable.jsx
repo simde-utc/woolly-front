@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { useHistory } from "react-router";
 import { useDispatch } from "react-redux";
 
-import { parseISO } from "date-fns";
-import { formatDate } from "../../utils";
-import { ORDER_STATUS, ORDER_ACTIONS } from "../../constants";
+import { formatDate } from "utils/format";
+import { updateOrderStatus, getStatusActions } from "utils/api";
+import { ORDER_STATUS, ORDER_ACTIONS } from "utils/constants";
 
-import APIDataTable from "../common/APIDataTable";
-import { updateOrderStatus, getStatusActions, OrderStatusButton, OrderActionButton } from "./OrderStatus";
+import APIDataTable from "components/common/APIDataTable";
+import { Link } from "components/common/Nav";
+import { OrderStatusButton, OrderActionButton } from "./OrderButtons";
 import OrderLinesList from "./OrderLinesList";
-import { Link } from "../common/Nav";
 
 
 export default function OrdersTable({ items, show, queryParams = {}, ...props }) {
@@ -110,7 +110,7 @@ export default function OrdersTable({ items, show, queryParams = {}, ...props })
 				id: order.id,
 				sale: order.sale,
 				owner: order.owner ? `${order.owner.first_name} ${order.owner.last_name}` : null,
-				updated_at: parseISO(order.updated_at),
+				updated_at: order.updated_at,
 				status: ORDER_STATUS[order.status] || {},
 				orderlines: order.orderlines,
 			}))}

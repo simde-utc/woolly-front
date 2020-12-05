@@ -1,61 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import apiActions, { apiAxios } from "../../redux/actions/api";
-import { ORDER_STATUS, API_URL } from "../../constants";
-
 import { Chip, Button, IconButton, CircularProgress } from "@material-ui/core";
 
-
-/**
- * Helper to update the status of an order
- */
-export async function updateOrderStatus(dispatch, orderId, auto = { fetch: false, redirect: false }) {
-	const data = (await apiAxios.get(`/orders/${orderId}/status`)).data
-
-	const fetchOrder = () => dispatch(apiActions.orders.find(orderId));
-	const redirectToPayment = () => data.redirect_url ? window.location.href = data.redirect_url : null;
-
-	if (auto.fetch && data.updated)
-		fetchOrder();
-	if (auto.redirect && data.redirect_url)
-		redirectToPayment();
-
-	return { data, fetchOrder, redirectToPayment };
-}
-
-
-/**
- * Helper to get Order status actions
- */
-export function getStatusActions(dispatch, history) {
-	return {
-		updateStatus(event, id = undefined) {
-			const orderId = id || event.currentTarget.getAttribute("data-order-id");
-			updateOrderStatus(dispatch, orderId, { fetch: true });
-		},
-
-		download(event, id = undefined) {
-			const orderId = id || event.currentTarget.getAttribute("data-order-id");
-			window.open(`${API_URL}/orders/${orderId}/pdf?download`, "_blank");
-		},
-
-		modify(event, id = undefined) {
-			const orderId = id || event.currentTarget.getAttribute("data-order-id");
-			history.push(`/orders/${orderId}`);
-		},
-
-		pay(event, id = undefined) {
-			const saleId = id || event.currentTarget.getAttribute("data-sale-id");
-			history.push(`/sales/${saleId}`);
-		},
-
-		cancel(event, id = undefined) {
-			const orderId = id || event.currentTarget.getAttribute("data-order-id");
-			const action = apiActions.orders(orderId).delete();
-			action.payload.finally(() => updateOrderStatus(dispatch, orderId, { fetch: true }));
-		},
-	};
-};
+import { ORDER_STATUS } from "utils/constants";
 
 
 export function OrderStatusButton({ status, updateStatus, variant, updating, ...props }) {

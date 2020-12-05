@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { List, ListItem, ListItemSecondaryAction, ListItemText, IconButton } from '@material-ui/core';
 import { NavListItem, NavIconButton } from '../common/Nav';
 import { Add, Edit, Search } from '@material-ui/icons';
-import { SkeletonList } from '../../components/common/Skeletons';
-import { isEmpty } from '../../utils';
+import { SkeletonList } from 'components/common/Skeletons';
+import { isEmpty } from 'utils/helpers';
 
 
 export default function SalesList({ sales, fetched, fetchMore, baseUrl, withEdit, assoId, ...props }) {

@@ -2,8 +2,6 @@ import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './reducers';
 
 // Middlewares
-// TODO Useful ?
-// import thunk from 'redux-thunk';
 import { createPromise } from 'redux-promise-middleware';
 
 
@@ -24,7 +22,6 @@ export const ASYNC_SUFFIXES = {
 };
 
 const middlewares = [
-	// thunk,
 	createPromise({ promiseTypeSuffixes: Object.values(ASYNC_SUFFIXES) }),
 ];
 

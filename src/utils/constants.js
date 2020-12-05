@@ -1,7 +1,4 @@
-import {
-    Add, Check, Clear, Delete, Edit, GetApp, FilterList, ArrowUpward,
-    FirstPage, LastPage, NavigateNext, NavigateBefore, Search, Payment
-} from '@material-ui/icons';
+import { Clear, Edit, GetApp, Payment } from '@material-ui/icons';
 
 // Environment variables
 
@@ -10,7 +7,7 @@ export const PORTAIL_URL = 'https://assos.utc.fr';
 
 // Regex
 
-export const REGEX_SLUG = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
+export const SLUG_REGEX = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
 
 export const PAGE_SIZES = [10, 25, 50, 100];
 export const DEFAULT_PAGE_SIZE = 10;
@@ -91,26 +88,4 @@ export const BLANK_ITEMFIELD = {
 	item: null,
 	field: null,
 	editable: true,
-};
-
-// Icons
-
-export const MaterialTableIcons = {
-    Add: Add,
-    Check: Check,
-    Clear: Clear,
-    Delete: Delete,
-    // DetailPanel: DetailPanel,
-    Edit: Edit,
-    Export: GetApp,
-    Filter: FilterList,
-    FirstPage: FirstPage,
-    LastPage: LastPage,
-    NextPage: NavigateNext,
-    PreviousPage: NavigateBefore,
-    ResetSearch: Clear,
-    Search: Search,
-    SortArrow: ArrowUpward,
-    // ThirdStateCheck: ThirdStateCheck,
-    // ViewColumn: ViewColumn,
 };

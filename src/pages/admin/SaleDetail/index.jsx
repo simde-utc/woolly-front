@@ -1,13 +1,13 @@
 import React from "react";
-import { useStoreAPIData } from "../../../redux/hooks";
-import { formatDate } from "../../../utils";
+import { useStoreAPIData } from "redux/hooks";
+import { formatDate } from "utils/format";
 
 import { Box, Container, Grid, Chip, Tabs, Tab } from "@material-ui/core";
 import { PlayArrow, Pause, Public, Lock } from "@material-ui/icons";
 
-import Stat from "../../../components/common/Stat";
-import { Link } from "../../../components/common/Nav";
-import { CopyButton } from "../../../components/common/Buttons";
+import Stat from "components/common/Stat";
+import { Link } from "components/common/Nav";
+import { CopyButton } from "components/common/Buttons";
 
 import QuantitiesSold from "./QuantitiesSold";
 import OrdersTable from "./OrdersTable";

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { Route, Redirect } from 'react-router-dom';
-import { hasManagerRights } from '../../utils';
+import { hasManagerRights } from 'utils/api';
 
 
 const authFunctions = {

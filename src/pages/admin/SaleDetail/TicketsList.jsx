@@ -1,8 +1,8 @@
 import React from "react";
-import { useStoreAPIData } from "../../../redux/hooks";
-import APIDataTable from "../../../components/common/APIDataTable";
-import { VALID_ORDER_STATUS } from "../../../constants";
-import { arrayToMap } from "../../../utils";
+import { useStoreAPIData } from "redux/hooks";
+import APIDataTable from "components/common/APIDataTable";
+import { VALID_ORDER_STATUS } from "utils/constants";
+import { arrayToMap } from "utils/helpers";
 
 export default function TicketsList({ saleId, items, itemgroups, ...props }) {
 	// Get all fields for the moment, shouldn't be too much

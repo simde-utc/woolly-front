@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Paper, Grid, Button } from '@material-ui/core';
 
-import { mergeClasses, useFormStyles } from '../../../styles';
-import { LoadingButton } from '../../../components/common/Buttons';
-import FieldGenerator from '../../../components/common/FieldGenerator';
+import { LoadingButton } from 'components/common/Buttons';
+import FieldGenerator from 'components/common/FieldGenerator';
+import { mergeClasses, useFormStyles } from 'utils/styles';
 
 export default function DetailsEditor({ disabled, editing, isCreator, ...props }) {
 	disabled = disabled || props.saving;

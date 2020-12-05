@@ -7,21 +7,10 @@
  * @copyright Copyright (c) 2018, SiMDE-UTC
  * @license GNU GPL-3.0
  */
-import axios from 'axios';
-import { API_URL } from '../../constants';
-import { isObject } from '../../utils';
+import { apiAxios } from 'utils/api';
+import { isObject } from 'utils/helpers';
+import { API_REDUX_PREFIX, DATA_CHANGES, DATA_SCOPES } from 'redux/constants';
 
-import { API_REDUX_PREFIX, DATA_CHANGES, DATA_SCOPES } from '../constants';
-
-/**
- * Default axios for the Woolly API
- */
-// TODO API AXIOS Where to put ?
-export const apiAxios = axios.create({
-  baseURL: API_URL,
-	xsrfHeaderName: 'X-CSRFToken',
-	xsrfCookieName: 'csrftoken',
-});
 
 /**
  * Methods calling the API with alliases

@@ -1,21 +1,20 @@
 import React from 'react'
-// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import apiActions from '../../../redux/actions/api';
-import messagesActions from '../../../redux/actions/messages';
 import produce from 'immer';
+import apiActions from 'redux/actions/api';
+import messagesActions from 'redux/actions/messages';
 
 import { Container, Box } from '@material-ui/core';
-
-import { areDifferent, dataToChoices, arrayToMap, deepcopy } from '../../../utils';
+import { areDifferent, dataToChoices, arrayToMap, deepcopy } from 'utils/helpers';
 import {
-	REGEX_SLUG, BLANK_SALE_DETAILS,
+	SLUG_REGEX, BLANK_SALE_DETAILS,
 	BLANK_ITEMGROUP, BLANK_ITEM, BLANK_ITEMFIELD
-} from '../../../constants';
+} from 'utils/constants';
 
-import Loader from '../../../components/common/Loader';
+import Loader from 'components/common/Loader';
 import DetailsEditor from './DetailsEditor';
-import ItemsManager from './ItemsManager/';
+import ItemsManager from './ItemsManager/index';
+
 
 const QUERY_PARAMS = {
 	sale: { with: "is_public,max_item_quantity" },
@@ -257,7 +256,7 @@ class SaleEditor extends React.Component {
 		const { _editing, ...details } = this.state.details;
 
 		// Check values
-		if (!REGEX_SLUG.test(details.id)) {
+		if (!SLUG_REGEX.test(details.id)) {
 			return this.setState(prevState => produce(prevState, draft => {
 				draft.errors.details.id = ["Invalide"];
 				return draft;

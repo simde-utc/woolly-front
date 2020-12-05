@@ -1,17 +1,19 @@
 import React from 'react';
 import produce from 'immer';
 import { connect } from 'react-redux';
-import apiActions, { apiAxios } from '../../redux/actions/api';
-import { updateOrderStatus, OrderStatusButton } from '../../components/orders/OrderStatus';
-import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from '../../constants';
-import { arrayToMap } from '../../utils';
+import apiActions from 'redux/actions/api';
+import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from 'utils/constants';
+import { apiAxios, updateOrderStatus } from 'utils/api';
+import { arrayToMap } from 'utils/helpers';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Container, Grid, Button } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import { LoadingButton } from '../../components/common/Buttons';
-import { NavButton } from '../../components/common/Nav';
-import OrderLineItemTicket from '../../components/orders/OrderLineItemTicket';
+
+import { NavButton } from 'components/common/Nav';
+import { LoadingButton } from 'components/common/Buttons';
+import { OrderStatusButton } from 'components/orders/OrderButtons';
+import OrderLineItemTicket from 'components/orders/OrderLineItemTicket';
 
 
 const INCLUDE_QUERY = [

@@ -6,7 +6,8 @@ import {
 } from "@material-ui/core";
 import { Done, Pause, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { formatPrice, isEmpty } from "../../../utils";
+import { formatPrice } from "utils/format";
+import { isEmpty } from "utils/helpers";
 
 export function ItemsSold({ items, ...props }) {
 	if (!items)

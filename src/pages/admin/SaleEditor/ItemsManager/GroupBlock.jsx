@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Box, Grid } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 
-import { isEmpty } from '../../../../utils';
+import { isEmpty } from 'utils/helpers';
 
 import NoItems from './NoItems';
 import ItemCard from './ItemCard';

@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useStoreAPIData } from "../../redux/hooks";
-import { processPagination, pathToArray } from "../../redux/reducers/api";
-import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "../../constants";
+import { useStoreAPIData } from "redux/hooks";
+import { processPagination, pathToArray } from "redux/reducers/api";
+import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "utils/constants";
 
 import MaterialTable from "material-table";
 import {

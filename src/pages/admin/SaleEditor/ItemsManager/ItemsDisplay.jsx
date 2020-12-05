@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@material-ui/core';
 
-import { isEmpty } from '../../../../utils';
+import { isEmpty } from 'utils/helpers';
 
 import NoItems from './NoItems';
 import GroupBlock from './GroupBlock';
@@ -17,7 +17,7 @@ export default function ItemsDisplay({ itemgroups, ...props }) {
     return (
         <Box mr={-3} display="flex" flexWrap="wrap">
             {Object.values(itemgroups).map(itemgroup => (
-                <GroupBlock 
+                <GroupBlock
                     key={itemgroup.id}
                     itemgroup={itemgroup}
                     {...props}

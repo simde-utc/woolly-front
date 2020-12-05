@@ -1,13 +1,14 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import apiActions from '../redux/actions/api';
+import apiActions from 'redux/actions/api';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Container, Button, Menu, Divider, useMediaQuery } from '@material-ui/core';
 import { MoreVert, Home, ShoppingCart, AccountCircle } from '@material-ui/icons';
 import { NavLink } from 'react-router-dom';
-import { NavButton, NavMenuItem } from './common/Nav.jsx';
-import { hasManagerRights, textOrIcon } from '../utils';
+import { NavButton, NavMenuItem } from 'components/common/Nav.jsx';
+import { textOrIcon } from 'utils/format';
+import { hasManagerRights } from 'utils/api';
 
 
 const useStyles = makeStyles(theme => ({

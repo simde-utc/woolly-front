@@ -1,7 +1,7 @@
 import produce from 'immer';
-import { deepcopy, isEmpty } from '../../utils';
-import { DEFAULT_PAGE_SIZE } from '../../constants';
-import { API_REDUX_PREFIX, ASYNC_SUFFIXES, DATA_CHANGES, DATA_SCOPES } from '../constants';
+import { DEFAULT_PAGE_SIZE } from 'utils/constants';
+import { deepcopy, isEmpty } from 'utils/helpers';
+import { API_REDUX_PREFIX, ASYNC_SUFFIXES, DATA_CHANGES, DATA_SCOPES } from 'redux/constants';
 
 /*
 |---------------------------------------------------------

@@ -1,4 +1,4 @@
-import { MESSAGE_REDUX_PREFIX } from "../constants";
+import { MESSAGE_REDUX_PREFIX } from "redux/constants";
 
 const messagesActions = {
 	pushError: (error, title = null, params = {}) => {

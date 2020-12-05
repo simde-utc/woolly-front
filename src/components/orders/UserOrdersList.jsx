@@ -2,16 +2,16 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useHistory } from "react-router";
 import { useDispatch } from "react-redux";
-import { getStatusActions, OrderStatusButton, OrderActionButton } from "./OrderStatus";
-import { ORDER_STATUS, ORDER_ACTIONS } from "../../constants";
+import { getStatusActions } from "utils/api";
+import { ORDER_STATUS, ORDER_ACTIONS } from "utils/constants";
 
 import {
 	TableContainer, Table, TableHead, TableBody,
 	TableRow, TableCell
 } from "@material-ui/core";
-import { Link } from "../common/Nav";
-
+import { Link } from "components/common/Nav";
 import OrderLinesList from "./OrderLinesList";
+import { OrderStatusButton, OrderActionButton } from "./OrderButtons";
 
 
 function UserOrderRow({ order, actions }) {
