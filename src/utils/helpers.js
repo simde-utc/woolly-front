@@ -45,6 +45,20 @@ export function dataToChoices(data, labelKey) {
 	}, {});
 }
 
+export function groupData(data, getKey) {
+	if (typeof getKey === 'string')
+		getKey = stringToGetter(getKey);
+	return Object.values(data).reduce((groupMap, object) => {
+		const group = getKey(object);
+		if (group in groupMap)
+			groupMap[group].push(object);
+		else
+			groupMap[group] = [object];
+		return groupMap;
+	}, {});
+}
+
+
 // -------------------------------------------------
 //    Comparison
 // -------------------------------------------------

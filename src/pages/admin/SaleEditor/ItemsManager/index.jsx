@@ -48,9 +48,9 @@ function ItemsManager({ selected, ...props }) {
         let supprTitle = "Êtes-vous sûr.e de vouloir supprimer ";
         const editorProps = {
             onChange: props.onChange,
-            errors: props.errors[name][id] || {},
-            editing: props.editing[name][id],
-            saving: props.saving[name][id],
+            errors: props.errors?.[name]?.[id] || {},
+            editing: props.editing?.[name]?.[id] || false,
+            saving: props.saving?.[name]?.[id] || false,
             inDialog,
         };
 

@@ -1,25 +1,32 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Box, TableContainer, Table, TableBody, TableRow, TableCell, TextField } from "@material-ui/core";
+import {
+	Box, Paper, TableContainer, Table, TableBody,
+	TableRow, TableCell, TextField,
+} from "@material-ui/core";
 import { SkeletonTable } from "components/common/Skeletons";
+import { isEmpty, groupData } from "utils/helpers";
 import { formatPrice } from "utils/format";
 
 
-export default function ItemsTable({ items, disabled, quantities, onQuantityChange, ...props }) {
-	// Skeleton
+export default function ItemsTable({ items, itemgroups, disabled, quantities, onQuantityChange, ...props }) {
 	if (!items)
 		return <SkeletonTable nCols={3} {...props} />;
 
-	if (Object.values(items).length === 0)
-		return <Box textAlign="center" py={3}>Il n'y a aucun article en vente !</Box>;
+	if (isEmpty(items)) {
+		return (
+			<Box textAlign="center" py={3}>
+				Il n'y a aucun article en vente !
+			</Box>
+		);
+	}
 
-	// TODO Group items
-	return (
+	const getTable = (subitems) => (
 		<TableContainer>
 			<Table {...props}>
 				<TableBody>
-					{Object.values(items).map(item => (
+					{Object.values(subitems).map(item => (
 						<TableRow key={item.id}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{formatPrice(item.price, 'Gratuit')}</TableCell>
@@ -47,6 +54,30 @@ export default function ItemsTable({ items, disabled, quantities, onQuantityChan
 				</TableBody>
 			</Table>
 		</TableContainer>
+	);
+
+	const itemsByGroup = groupData(items, "group");
+	const oneGroup = Object.values(itemsByGroup).length === 0;
+	return (
+		<Box my={2}>
+			{Object.keys(itemsByGroup).sort().map(groupId => (
+				<div key={groupId}>
+					{!(oneGroup && groupId === null) && (
+						<Box clone mt={3} mb={2}>
+							<h4>
+								{groupId === null
+									? <span style={{ textDecoration: "italic" }}>Sans groupe</span>
+									: (itemgroups?.[groupId]?.name || "...")
+								}
+							</h4>
+						</Box>
+					)}
+					<Paper>
+						{getTable(itemsByGroup[groupId])}
+					</Paper>
+				</div>
+			))}
+		</Box>
 	);
 }
 

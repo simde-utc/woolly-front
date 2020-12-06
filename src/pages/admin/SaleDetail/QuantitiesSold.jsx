@@ -9,7 +9,7 @@ import { Skeleton } from "@material-ui/lab";
 import Stat from "components/common/Stat";
 
 import { formatPrice } from "utils/format";
-import { isEmpty } from "utils/helpers";
+import { isEmpty, groupData } from "utils/helpers";
 
 
 const quantitySold = (items, defaultValue = "?") => (
@@ -101,14 +101,7 @@ export default function QuantitiesSold({ items, itemgroups, fetched, max_item_qu
 		);
 	}
 
-	const itemsByGroup = Object.values(items).reduce((groupMap, { group, ...item }) => {
-		if (group in groupMap)
-			groupMap[group].push(item);
-		else
-			groupMap[group] = [item];
-		return groupMap;
-	}, {});
-
+	const itemsByGroup = groupData(items, "group");
 	const orphans = itemsByGroup[null];
 	return (
 		<React.Fragment>

@@ -16,10 +16,14 @@ import UnpaidOrderDialog from 'components/orders/UnpaidOrderDialog';
 import { Link } from 'components/common/Nav';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Container, Box, Grid, Button, Paper, FormControlLabel, Checkbox, Collapse } from '@material-ui/core';
+import { Container, Box, Grid, Button, FormControlLabel, Checkbox, Collapse } from '@material-ui/core';
 import { ShoppingCart, Delete } from '@material-ui/icons';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
+
+function CGVLink({ cgv, ...props }) {
+	return <Link href={cgv} rel="noopener" target="_blank" {...props} />;
+}
 
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id;
@@ -29,6 +33,7 @@ const connector = connect((store, props) => {
 		sale: store.api.findData('sales', saleId),
 		order: store.api.getData(['sales', saleId, 'userOrder'], null, true),
 		items: store.api.getData(['sales', saleId, 'items']),
+		itemgroups: store.api.getData(['sales', saleId, 'itemgroups']),
 	};
 });
 
@@ -50,6 +55,9 @@ class SaleDetail extends React.Component{
 
 		if (!this.props.items)
 			this.props.dispatch(apiActions.sales(saleId).items.all());
+
+		if (!this.props.itemgroups)
+			this.props.dispatch(apiActions.sales(saleId).itemgroups.all());
 	}
 
 	componentDidUpdate(prevProps) {
@@ -197,14 +205,71 @@ class SaleDetail extends React.Component{
 		&& this.hasItemsInCart()
 	)
 
+	getStatusAlert() {
+		const sale = this.props.sale;
+		switch (this.currentSaleState()) {
+			case "NOT_BEGUN":
+				return (
+					<Alert severity="warning" color="info">
+						<AlertTitle>La vente n'a pas encore commencée</AlertTitle>
+						<span>
+							Revenez d'ici {sale.begin_at && formatDate(sale.begin_at, 'fromNowStrict')} pour pouvoir commander.
+						</span>
+					</Alert>
+				);
+			case "FINISHED":
+				return (
+					<Alert severity="warning" color="info">
+						<AlertTitle>La vente est terminée</AlertTitle>
+						<span>
+							Vous pouvez retrouver vos commandes liées à cette vente, <Link to="/orders">sur votre compte</Link>.
+						</span>
+					</Alert>
+				);
+			case "ONGOING":
+				return (
+					<React.Fragment>
+						<FormControlLabel
+							control={(
+								<Checkbox checked={this.state.cgvAccepted} onChange={this.toggleCGV} />
+							)}
+							label={(
+								<span>
+									J'accepte les <CGVLink cgv={sale.cgv}>conditions générales de ventes</CGVLink>
+								</span>
+							)}
+						/>
+						<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
+							<Box clone my={1}>
+								<Alert severity="info">
+									<AlertTitle>Pour acheter</AlertTitle>
+									<Box component="ul" m={0} pl={2}>
+										{!this.props.authenticated && (
+											<li>
+												Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
+											</li>
+										)}
+										{!this.state.cgvAccepted && (
+											<li>
+												Veuillez accepter les CGV ci-dessus.
+											</li>
+										)}
+									</Box>
+								</Alert>
+							</Box>
+						</Collapse>
+					</React.Fragment>
+				);
+			default:
+				return null;
+		}
+	}
+
 	render() {
 		const { classes, sale } = this.props;
-		const { cgvAccepted } = this.state;
-		if (!sale || this.props.fetchingSale)
+		if (!sale)
 			return <Loader fluid text="Loading sale..." />
 
-		const saleState = this.currentSaleState()
-		const CGVLink = props => <Link href={sale.cgv} rel="noopener" target="_blank" {...props} />
 		return (
 			<React.Fragment>
 				<Box textAlign="center" py={6}>
@@ -222,7 +287,7 @@ class SaleDetail extends React.Component{
 
 							<h4>Liens</h4>
 							<ul>
-								<li><CGVLink>Conditions Vénérales de Ventes</CGVLink></li>
+								<li><CGVLink cgv={sale.cgv}>Conditions Vénérales de Ventes</CGVLink></li>
 							</ul>
 
 							<h4>Dates</h4>
@@ -234,68 +299,15 @@ class SaleDetail extends React.Component{
 
 						<Grid item xs={12} sm={8}>
 							<h3>Articles en ventes</h3>
+							{this.getStatusAlert()}
 
-							{saleState === 'NOT_BEGUN' && (
-								<Alert severity="warning" color="info">
-									<AlertTitle>La vente n'a pas encore commencée</AlertTitle>
-									<span>
-										Revenez d'ici {sale.begin_at && formatDate(sale.begin_at, 'fromNowStrict')} pour pouvoir commander.
-									</span>
-								</Alert>
-							)}
-							{saleState === 'FINISHED' && (
-								<Alert severity="warning" color="info">
-									<AlertTitle>La vente est terminée</AlertTitle>
-									<span>
-										Vous pouvez retrouver vos commandes liées à cette vente, <Link to="/orders">sur votre compte</Link>.
-									</span>
-								</Alert>
-							)}
-							{saleState === 'ONGOING' && (
-								<React.Fragment>
-									<FormControlLabel
-										control={(
-											<Checkbox checked={cgvAccepted} onChange={this.toggleCGV} />
-										)}
-										label={(
-											<span>
-												J'accepte les <CGVLink>conditions générales de ventes</CGVLink>
-											</span>
-										)}
-									/>
-
-									<Collapse in={!this.state.cgvAccepted || !this.props.authenticated}>
-										<Box clone my={1}>
-											<Alert severity="info">
-												<AlertTitle>Pour acheter</AlertTitle>
-												<Box component="ul" m={0} pl={2}>
-													{!this.props.authenticated && (
-														<li>
-															Veuillez <Link to="/login" color="inherit" underline="always">vous connecter</Link> pour acheter.
-														</li>
-													)}
-													{!this.state.cgvAccepted && (
-														<li>
-															Veuillez accepter les CGV ci-dessus.
-														</li>
-													)}
-												</Box>
-											</Alert>
-										</Box>
-									</Collapse>
-								</React.Fragment>
-							)}
-
-							<Box clone my={2}>
-								<Paper>
-									<ItemsTable
-										disabled={this.areItemsDisabled()}
-										items={this.props.items}
-										quantities={this.state.quantities}
-										onQuantityChange={this.handleQuantityChange}
-									/>
-								</Paper>
-							</Box>
+							<ItemsTable
+								disabled={this.areItemsDisabled()}
+								items={this.props.items}
+								itemgroups={this.props.itemgroups}
+								quantities={this.state.quantities}
+								onQuantityChange={this.handleQuantityChange}
+							/>
 
 							<Box display="flex" justifyContent="flex-end">
 								<Button
@@ -307,17 +319,6 @@ class SaleDetail extends React.Component{
 								>
 									Vider
 								</Button>
-								{/* SAVE BUTTON, utile  ??
-								<Button
-									onClick={this.saveOrder}
-									// disabled={!canBuy}
-									// startIcon={<Save />}
-									className={classes.button}
-									variant="outlined"
-								>
-									Sauvegarder
-								</Button>
-								 */}
 								<Button
 									onClick={this.handleBuy}
 									disabled={!this.canBuy()}
@@ -329,7 +330,6 @@ class SaleDetail extends React.Component{
 								</Button>
 							</Box>
 						</Grid>
-
 					</Grid>
 
 					<UnpaidOrderDialog
