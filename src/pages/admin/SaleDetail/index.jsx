@@ -6,10 +6,9 @@ import { formatDate } from "utils/format";
 import { Box, Container, Grid, Chip, Tabs, Tab } from "@material-ui/core";
 import { PlayArrow, Pause, Public, Lock } from "@material-ui/icons";
 
-import Stat from "components/common/Stat";
+import Loader from "components/common/Loader";
 import { Link } from "components/common/Nav";
 import { CopyButton } from "components/common/Buttons";
-import Loader from "components/common/Loader";
 
 import QuantitiesSold from "./QuantitiesSold";
 import OrdersTable from "./OrdersTable";
@@ -19,7 +18,7 @@ import TicketsList from "./TicketsList";
 export default function SaleDetail(props) {
 	const { sale_id: saleId, view: tab } = props.match.params;
 	const { data: sale, fetched } = useStoreAPIData(["sales", saleId], { include: "association" }, { singleElement: true });
-	const items = useStoreAPIData(["sales", saleId, "items"], { page_size: "max" });
+	const items = useStoreAPIData(["sales", saleId, "items"], { page_size: "max", with: "quantity_sold" });
 	const itemgroups = useStoreAPIData(["sales", saleId, "itemgroups"], { page_size: "max" });
 
 	if (!fetched)
@@ -77,22 +76,16 @@ export default function SaleDetail(props) {
 						<Tab value="orders" label="Liste des commandes" />
 						<Tab value="charts" label="Graphiques des ventes" disabled />
 					</Tabs>
-
 					<Box py={2}>
 						<Switch>
 							<Route exact path={`${basePath}/quantities`} render={(routeProps) => (
-								<React.Fragment>
-									<Box display="flex" justifyContent="space-evenly" mt={2} mb={4}>
-										<Stat title="Places vendues" value={480} max={1000} />
-										<Stat title="Argent récolté" value={1050} unit="€" />
-									</Box>
-									<QuantitiesSold
-										items={items.data}
-										itemgroups={itemgroups.data}
-										fetched={items.fetched && itemgroups.fetched}
-										{...routeProps}
-									/>
-								</React.Fragment>
+								<QuantitiesSold
+									max_item_quantity={sale.max_item_quantity}
+									items={items.data}
+									itemgroups={itemgroups.data}
+									fetched={items.fetched && itemgroups.fetched}
+									{...routeProps}
+								/>
 							)} />
 							<Route exact path={`${basePath}/tickets`} render={(routeProps) => (
 								<TicketsList
