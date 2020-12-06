@@ -33,10 +33,10 @@ export default function AdminSite(props) {
                 <Route exact path="/admin" component={Dashboard} />
                 <Route exact path="/admin/assos/:asso_id" component={AssoDashboard} only="asso_manager" />
                 <Route exact path="/admin/sales/create" component={SaleEditor} />
-                <Redirect exact from="/admin/sales/:sale_id" to="/admin/sales/:sale_id/stats" />
+                <Redirect exact from="/admin/sales/:sale_id" to="/admin/sales/:sale_id/quantities" />
                 <Route exact path="/admin/sales/:sale_id/view" component={SaleView} />
                 <Route exact path="/admin/sales/:sale_id/edit" component={SaleEditor} />
-                <Route exact path="/admin/sales/:sale_id/stats" component={SaleDetail} />
+                <Route exact path="/admin/sales/:sale_id/:view(quantities|tickets|orders|charts)" component={SaleDetail} />
                 <Route component={Error404} />
             </Switch>
         </React.Fragment>

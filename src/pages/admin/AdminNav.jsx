@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, matchPath } from 'react-router-dom';
+import { useLocation, matchPath, generatePath } from 'react-router-dom';
 
 import { Container, Grid, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -25,7 +25,7 @@ const ADMIN_LINKS = [
 		resource: "sales",
 		title: "Statistiques",
 		icon: <BarChart />,
-		path: "/admin/sales/:id/stats",
+		path: "/admin/sales/:id/:view(quantities|tickets|orders|charts)",
 	},
 	{
 		key: "view",
@@ -60,6 +60,11 @@ function getMatch(location) {
 function getNavData(match, resource) {
 	if (!match)
 		return {};
+	const routeParams = {
+		id: null,
+		view: 'quantities',
+		...match.params,
+	};
 	switch (match.resource) {
 		case 'associations':
 			return {
@@ -72,7 +77,7 @@ function getNavData(match, resource) {
 					ADMIN_LINKS.filter(link => link.resource === "sales").map(link => (
 						<NavIconButton
 							key={link.key}
-							to={link.path.replace(':id', match.params.id)}
+							to={generatePath(link.path, routeParams)}
 							aria-label={`${link.key}-asso`}
 							color={match.key === link.key ? 'primary' : 'secondary'}
 						>
