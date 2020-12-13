@@ -5,8 +5,8 @@ import {
 } from '@material-ui/core';
 
 
-import FieldGenerator from '../../../../components/common/FieldGenerator';
-import { useFormStyles } from '../../../../styles';
+import FieldGenerator from 'components/common/FieldGenerator';
+import { useFormStyles } from 'utils/styles';
 
 
 function ItemFieldsTable({ Field, itemfields, fields, ...props}) {

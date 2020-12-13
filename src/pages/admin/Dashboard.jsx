@@ -1,18 +1,26 @@
-import React from 'react'
-import actions from '../../redux/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Grid } from '@material-ui/core';
+import React from "react";
+import apiActions from "../../redux/actions/api";
+import { useDispatch, useSelector } from "react-redux";
+import { Container, Grid } from "@material-ui/core";
 
-import AssoSalesList from '../../components/sales/AssoSalesList';
-
+import AssoSalesList from "../../components/sales/AssoSalesList";
 
 export default function Dashboard(props) {
 	const dispatch = useDispatch();
-	const assos = useSelector(store => store.getAuthRelatedData('associations', {}));
-	const sales = useSelector(store => store.getResourceDataById('associations', 'sales', null));
+	const assos = useSelector(store => store.api.getAuthRelatedData("associations"));
+	const sales = useSelector(store => {
+		if (!assos || !store.api.resources?.associations?.resources)
+			return {};
 
-	function handleFetchSales(assoId) {
-		dispatch(actions.associations(assoId).sales.all({ include_inactive: true }));
+		const assoResources = store.api.resources.associations.resources;
+		return Object.keys(assoResources).reduce((salesMap, assoId) => {
+			salesMap[assoId] = assoResources[assoId]?.resources?.sales;
+			return salesMap
+		}, {});
+	});
+
+	function fetchSales(assoId, page = 1) {
+		dispatch(apiActions.associations(assoId).sales.all({ page, page_size: 1, include_inactive: true }));
 	}
 
 	return (
@@ -28,7 +36,7 @@ export default function Dashboard(props) {
 					<AssoSalesList
 						assos={assos}
 						sales={sales}
-						fetchSales={handleFetchSales}
+						fetchSales={fetchSales}
 					/>
 				</Grid>
 			</Grid>

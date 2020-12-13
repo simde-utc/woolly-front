@@ -1,22 +1,22 @@
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { hasManagerRights } from '../../utils';
+import { hasManagerRights } from 'utils/api';
 
-import Loader from '../../components/common/Loader';
-import AdminNav from './AdminNav';
-import Dashboard from './Dashboard';
-import AssoDashboard from './AssoDashboard';
-import SaleView from './SaleView';
-import SaleDetail from './SaleDetail/';
-import SaleEditor from './SaleEditor/';
-import Error404 from '../Error404';
+import Loader from 'components/common/Loader';
+import AdminNav from 'pages/admin/AdminNav';
+import Dashboard from 'pages/admin/Dashboard';
+import AssoDashboard from 'pages/admin/AssoDashboard';
+import SaleView from 'pages/admin/SaleView';
+import SaleDetail from 'pages/admin/SaleDetail/index';
+import SaleEditor from 'pages/admin/SaleEditor/index';
+import Error404 from 'pages/Error404';
 
 
 export default function AdminSite(props) {
     // Get data from store
-    const auth = useSelector(store => store.getData('auth'));
-    const userAssos = useSelector(store => store.getAuthRelatedData('associations', null));
+    const auth = useSelector(store => store.api.getData('auth'));
+    const userAssos = useSelector(store => store.api.getAuthRelatedData('associations', null));
 
     // Wait for user's associations to be fetched
     if (userAssos === null)

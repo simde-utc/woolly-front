@@ -2,10 +2,10 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
-import actions from './redux/actions';
-import { Box } from '@material-ui/core';
+import apiActions from './redux/actions/api';
 
 // Style
+import { Box } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -29,7 +29,7 @@ import Error404 from './pages/Error404';
 // Public pages
 import Sales from './pages/public/Sales';
 import SaleDetail from './pages/public/SaleDetail';
-import Orders from './pages/public/Orders';
+import UserOrders from './pages/public/UserOrders';
 import OrderDetail from './pages/public/OrderDetail';
 
 // Lazy loaded pages
@@ -57,7 +57,7 @@ class App extends React.Component {
 
 	componentDidMount() {
 		// Get connected user
-		store.dispatch(actions.auth().all());
+		store.dispatch(apiActions.authUser.get());
 	}
 
 	render() {
@@ -79,7 +79,7 @@ class App extends React.Component {
 								<Route path="/sales" exact component={Sales} />
 								<Route path="/sales/:sale_id" exact component={SaleDetail} />
 								<ProtectedRoute path="/account" exact component={Account} />
-								<ProtectedRoute path="/orders" exact component={Orders} />
+								<ProtectedRoute path="/orders" exact component={UserOrders} />
 								<ProtectedRoute path="/orders/:order_id" exact component={OrderDetail} />
 								<Route path="/login" exact render={props => <LoginLogout {...props} action="login" />} />
 								<Route path="/logout" exact render={props => <LoginLogout {...props} action="logout" />} />

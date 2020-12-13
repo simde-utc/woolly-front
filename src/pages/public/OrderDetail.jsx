@@ -1,16 +1,19 @@
 import React from 'react';
 import produce from 'immer';
 import { connect } from 'react-redux';
-import actions, { apiAxios } from '../../redux/actions';
-import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from '../../constants';
-import { arrayToMap } from '../../utils';
+import apiActions from 'redux/actions/api';
+import { API_URL, ORDER_STATUS, STATUS_MESSAGES } from 'utils/constants';
+import { apiAxios, updateOrderStatus } from 'utils/api';
+import { arrayToMap } from 'utils/helpers';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Box, Container, Grid, Button, Chip, CircularProgress } from '@material-ui/core';
+import { Box, Container, Grid, Button } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import { LoadingButton } from '../../components/common/Buttons';
-import { NavButton } from '../../components/common/Nav';
-import OrderLineItemTicket from '../../components/orders/OrderLineItemTicket';
+
+import { NavButton } from 'components/common/Nav';
+import { LoadingButton } from 'components/common/Buttons';
+import { OrderStatusButton } from 'components/orders/OrderButtons';
+import OrderLineItemTicket from 'components/orders/OrderLineItemTicket';
 
 
 const INCLUDE_QUERY = [
@@ -39,7 +42,7 @@ const connector = connect((store, props) => {
 	const orderId = props.match.params.order_id;
 	return {
 		orderId,
-		order: store.getData(['orders', orderId], null, true),
+		order: store.api.getData(['orders', orderId], null, true),
 	};
 });
 
@@ -80,17 +83,17 @@ class OrderDetail extends React.Component {
 	})
 
 	fetchOrder = () => this.props.dispatch(
-		actions.orders.find(this.props.orderId, { include: INCLUDE_QUERY })
+		apiActions.orders.find(this.props.orderId, { include: INCLUDE_QUERY })
 	)
 
 	/** Fetch status and redirect to payment or refresh order */
 	updateStatus = () => {
 		this.setState({ updatingStatus: true }, async () => {
-			const resp = (await apiAxios.get(`/orders/${this.props.orderId}/status`)).data
-			if (resp.redirect_url)
-				window.location.href = resp.redirect_url;
+			const resp = await updateOrderStatus(this.props.dispatch, this.props.orderId);
+			if (resp.data.redirect_url)
+				resp.redirectToPayment();
 			else
-				this.setState({ updatingStatus: false }, resp.updated ? this.fetchOrder : null);
+				this.setState({ updatingStatus: false }, resp.data.updated ? this.fetchOrder : null);
 		});
 	}
 
@@ -131,6 +134,7 @@ class OrderDetail extends React.Component {
 
 	render() {
 		const { classes, order } = this.props;
+		// TODO Better loading
 		if (!order)
 			return "Loading"
 		const { orderlineitems, saving, changing, updatingStatus } = this.state;
@@ -140,12 +144,11 @@ class OrderDetail extends React.Component {
 			<Container>
 				<Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
 					<h1>Commande n°{order.id}</h1>
-					<Chip
-						onClick={this.updateStatus}
-						label={status.label || '...'}
-						style={{ backgroundColor: status.color, color: '#fff' }}
-						icon={updatingStatus ? <CircularProgress size="1em" style={{ color: '#fff' }} /> : null}
-						clickable
+					<OrderStatusButton
+						status={status}
+						updateStatus={this.updateStatus}
+						updating={updatingStatus}
+						variant="chip"
 					/>
 				</Box>
 
@@ -196,7 +199,7 @@ class OrderDetail extends React.Component {
 					</LoadingButton>
 					<Button
 						onClick={this.downloadTickets}
-						disabled={changing || saving}
+						disabled={!status.actions.includes("download") || changing || saving}
 						className={classes.button}
 						variant="contained"
 						color="primary"

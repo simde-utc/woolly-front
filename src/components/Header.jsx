@@ -1,13 +1,14 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import actions from '../redux/actions';
+import apiActions from 'redux/actions/api';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Container, Button, Menu, Divider, useMediaQuery } from '@material-ui/core';
 import { MoreVert, Home, ShoppingCart, AccountCircle } from '@material-ui/icons';
 import { NavLink } from 'react-router-dom';
-import { NavButton, NavMenuItem } from './common/Nav.jsx';
-import { hasManagerRights, textOrIcon } from '../utils';
+import { NavButton, NavMenuItem } from 'components/common/Nav.jsx';
+import { textOrIcon } from 'utils/format';
+import { hasManagerRights } from 'utils/api';
 
 
 const useStyles = makeStyles(theme => ({
@@ -30,12 +31,12 @@ export default function Header(props) {
 	const [menuTarget, setMenuTarget] = React.useState(null);
 
 	const dispatch = useDispatch();
-	const auth = useSelector(store => store.getData('auth', {}));
-	const userAssos = useSelector(store => store.getAuthRelatedData('associations', null));
+	const auth = useSelector(store => store.api.getData('auth', {}));
+	const userAssos = useSelector(store => store.api.getAuthRelatedData('associations', null));
 
 	React.useEffect(() => {
 		if (auth.user && !userAssos)
-			dispatch(actions.auth(auth.user.id).associations.all({ page_size: 'max' }));
+			dispatch(apiActions.authUser(auth.user.id).associations.all({ page_size: 'max' }));
 	});
 
 	return (

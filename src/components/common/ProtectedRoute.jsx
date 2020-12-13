@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { Route, Redirect } from 'react-router-dom';
-import { hasManagerRights } from '../../utils';
+import { hasManagerRights } from 'utils/api';
 
 
 const authFunctions = {
@@ -10,20 +10,20 @@ const authFunctions = {
 		return auth.authenticated;
 	},
 	admin(auth, userAssos, props) {
-		return auth.authenticated && auth.is_admin;
+		return auth.authenticated && auth.user?.is_admin;
 	},
 	manager(auth, userAssos, props) {
 		return hasManagerRights(auth, userAssos);
 	},
 	asso_manager(auth, userAssos, props) {
 		const asso_id = this.props.computedMatch.params.asso_id;
-		return hasManagerRights(auth, userAssos, props) && (asso_id in userAssos || auth.is_admin);
+		return hasManagerRights(auth, userAssos, props) && (asso_id in userAssos || auth.user?.is_admin);
 	},
 };
 
 export default function ProtectedRoute({ only, authOptions, redirection, component: Component, ...routeProps }) {
-	const auth = useSelector(store => store.getData('auth'));
-	const userAssos = useSelector(store => store.getAuthRelatedData('associations'));
+	const auth = useSelector(store => store.api.getData('auth'));
+	const userAssos = useSelector(store => store.api.getAuthRelatedData('associations'));
 
 	const isAuthorized = (
 		typeof only == 'function'
@@ -32,7 +32,7 @@ export default function ProtectedRoute({ only, authOptions, redirection, compone
 	);
 	return (
 		<Route
-			{...routeProps} 
+			{...routeProps}
 			render={props => (
 				isAuthorized ? <Component {...props} />
 				             : <Redirect to={redirection} />

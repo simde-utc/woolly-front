@@ -1,7 +1,7 @@
 import React from 'react';
 
-import FieldGenerator from '../../../../components/common/FieldGenerator';
-import { useFormStyles } from '../../../../styles';
+import FieldGenerator from 'components/common/FieldGenerator';
+import { useFormStyles } from 'utils/styles';
 
 
 export default function ItemGroupEditor({ itemgroup, ...props }) {

@@ -1,31 +1,32 @@
-import React from 'react';
-import { useStoreAPIData } from '../../../redux/hooks';
-import { formatDate } from '../../../utils';
+import React from "react";
+import { useStoreAPIData } from "redux/hooks";
+import { formatDate } from "utils/format";
 
-import { Box, Container, Grid, Chip, Tabs, Tab } from '@material-ui/core';
-import { PlayArrow, Pause, Public, Lock } from '@material-ui/icons';
+import { Box, Container, Grid, Chip, Tabs, Tab } from "@material-ui/core";
+import { PlayArrow, Pause, Public, Lock } from "@material-ui/icons";
 
-import Stat from '../../../components/common/Stat';
-import { Link } from '../../../components/common/Nav';
-import { CopyButton } from '../../../components/common/Buttons';
+import Stat from "components/common/Stat";
+import { Link } from "components/common/Nav";
+import { CopyButton } from "components/common/Buttons";
 
-import QuantitiesSold from './QuantitiesSold';
-import OrdersList from './OrdersList';
-import TicketsList from './TicketsList';
+import QuantitiesSold from "./QuantitiesSold";
+import OrdersTable from "./OrdersTable";
+import TicketsList from "./TicketsList";
 
 
 export default function SaleDetail(props) {
-	const [tab, setTab] = React.useState('quantities');
+	const [tab, setTab] = React.useState("quantities");
 
 	const saleId = props.match.params.sale_id;
-	const sale = useStoreAPIData(['sales', saleId], { queryParams: { include: 'association' } });
-	const items = useStoreAPIData(['sales', saleId, 'items']);
-	const itemgroups = useStoreAPIData(['sales', saleId, 'itemgroups']);
+	const { data: sale, fetched } = useStoreAPIData(["sales", saleId], { include: "association" }, { singleElement: true });
+	const items = useStoreAPIData(["sales", saleId, "items"], { page_size: 'max' });
+	const itemgroups = useStoreAPIData(["sales", saleId, "itemgroups"], { page_size: 'max' });
 
-	if (!sale)
+	// TODO Better loader
+	if (!fetched)
 		return "Loading"
 
-	const saleLink = window.location.href.replace('/admin/', '/');
+	const saleLink = window.location.href.replace("/admin/", "/");
 	const chipMargin = { marginBottom: 4, marginRight: 4 };
 	return (
 		<Container>
@@ -48,8 +49,8 @@ export default function SaleDetail(props) {
 						<Grid item xs="auto" md={12}>
 							<h4 style={{ marginTop: 0 }}>Dates</h4>
 							<ul>
-								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at, 'datetime') : "Inconnue"}</li>
-								<li>Fermeture: {sale.end_at ? formatDate(sale.end_at, 'datetime') : "Inconnue"}</li>
+								<li>Ouverture: {sale.begin_at ? formatDate(sale.begin_at, "datetime") : "Inconnue"}</li>
+								<li>Fermeture: {sale.end_at ? formatDate(sale.end_at, "datetime") : "Inconnue"}</li>
 							</ul>
 						</Grid>
 						<Grid item xs="auto" md={12}>
@@ -78,28 +79,31 @@ export default function SaleDetail(props) {
 					</Tabs>
 
 					<Box py={2}>
-						{(tab === 'quantities' && (
+						{(tab === "quantities" && (
 							<React.Fragment>
 								<Box display="flex" justifyContent="space-evenly" mt={2} mb={4}>
 									<Stat title="Places vendues" value={480} max={1000} />
 									<Stat title="Argent récolté" value={1050} unit="€" />
 								</Box>
 								<QuantitiesSold
-									items={items}
-									itemgroups={itemgroups}
+									items={items.data}
+									itemgroups={itemgroups.data}
+									fetched={items.fetched && itemgroups.fetched}
 								/>
 							</React.Fragment>
-						)) || (tab === 'orders' && (
-							<OrdersList
-								saleId={sale.id}
-								items={items}
+						)) || (tab === "orders" && (
+							<OrdersTable
+								saleId={saleId}
+								items={items.data}
 							/>
-						)) || (tab === 'tickets' && (
+						)) || (tab === "tickets" && (
 							<TicketsList
-								saleId={sale.id}
-								items={items}
+								saleId={saleId}
+								items={items.data}
+								itemgroups={itemgroups.data}
+								fetched={items.fetched}
 							/>
-						)) || (tab === 'chart' && (
+						)) || (tab === "chart" && (
 							<p>À venir...</p>
 						))}
 					</Box>

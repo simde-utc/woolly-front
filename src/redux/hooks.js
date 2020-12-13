@@ -1,90 +1,35 @@
-import { useEffect } from 'react';
-import useDeepCompareEffect from 'use-deep-compare-effect';
-import { useSelector, useDispatch } from 'react-redux';
-import { pathToArray } from './store';
-import actions, { APIAction, apiAxios } from './actions';
+import useDeepCompareEffect from "use-deep-compare-effect";
+import { useSelector, useDispatch } from "react-redux";
+import { pathToArray } from "./reducers/api";
+import { APIAction, API_METHODS } from "./actions/api";
 
-
-const USE_API_STORE_DEFAULT_OPTIONS = {
-	action: 'get',
-	queryParams: undefined,
-	jsonData: undefined,
-
-	raiseError: true,
-	fetchingValue: undefined,
-};
-
-// FIXME Process pagination
-export function useStoreAPIData(path, options = {}) {
-	// Patch params
-	path = pathToArray(path);
-	options = { ...USE_API_STORE_DEFAULT_OPTIONS, ...options };
-	if (options.action === 'get' && path.length % 2)
-		options.action = 'all';
+/**
+ * Hook to get data from the store using automatic API calls
+ */
+export function useStoreAPIData(_path, queryParams = undefined, options = {}) {
+	const path = pathToArray(_path);
+	const actionData = options.actionData || (
+		options.singleElement ? API_METHODS.find : API_METHODS.all
+	);
 
 	// Get data from redux store
 	const dispatch = useDispatch();
-	const resource = useSelector(store => store.get(path));
+	const resource = useSelector(store => store.api.get(path));
 
-	// FIXME Fires fetching multiple times
-	useDeepCompareEffect(() => {
-		// Fetch if not fetched
-		if (!resource.fetched && !resource.fetching) {
-			const action = new APIAction();
-			action.path = path;
-			action.uri = path.join('/');
-			const actionData = action.generateAction(options.action, options.queryParams, options.jsonData);
-			// console.log(actionData)
-			dispatch(actionData);
-		}
+	function fetchData(additionalQuery = null, returnAction = false) {
+		const actionGen = new APIAction();
+		actionGen.path = path;
+		actionGen.uri = options.uri || path.join("/");
+		actionGen.idIsGiven = Boolean(options.singleElement);
+		const query = additionalQuery ? { ...queryParams, ...additionalQuery } : queryParams;
+		const action = actionGen.generateAction(actionData, query)
+		dispatch(action);
+		if (returnAction)
+			return action;
+	}
 
-		// Raise error if needed
-		if (resource.error && options.raiseError)
-			throw Error(resource.error);
-	}, [resource, path, options, dispatch]);
+	// At first use or when data changes, automaticaly fire fetching
+	useDeepCompareEffect(fetchData, [actionData, path, queryParams, options, dispatch]);
 
-	if (!resource.fetched || resource.fetching)
-		return options.fetchingValue;
-
-	return resource.data;
-}
-
-export async function useUpdateOrderStatus(orderId, auto = { fetch: false, redirect: false }) {
-	const dispatch = useDispatch();
-	const resp = (await apiAxios.get(`/orders/${orderId}/status`)).data
-
-	const fetchOrder = () => dispatch(actions.orders.find(orderId));
-	const redirectToPayment = () => resp.redirect_url ? window.location.href = resp.redirect_url : null;
-
-	if (auto.fetch && resp.updated)
-		fetchOrder();
-	if (auto.redirect && resp.redirect_url)
-		redirectToPayment();
-
-	return { resp, fetchOrder, redirectToPayment };
-}
-
-function fetchOrders(dispatch, userId) {
-	dispatch(
-		actions
-			.defineUri(`users/${userId}/orders`)
-			.definePath(['auth', 'orders'])
-			.all({
-				order_by: '-id',
-				include: 'sale,orderlines,orderlines__item,orderlines__orderlineitems',
-			})
-	);
-}
-
-export function useUserOrders() {
-	const dispatch = useDispatch();
-	const userId = useSelector(store => store.getAuthUser('id', null));
-	const orders = useSelector(store => store.getAuthRelatedData('orders', undefined));
-
-	useEffect(() => {
-		if (userId)
-			fetchOrders(dispatch, userId);
-	}, [dispatch, userId]);
-
-	return { userId, orders, fetchOrders: () => fetchOrders(dispatch, userId) };
+	return { ...resource, fetchData };
 }

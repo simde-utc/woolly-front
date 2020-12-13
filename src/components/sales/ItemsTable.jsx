@@ -1,9 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-import { Box, TableContainer, Table, TableBody, TableRow, TableCell, TextField } from '@material-ui/core/';
-import { SkeletonTable } from '../common/Skeletons';
-import { formatPrice } from '../../utils';
+import { Box, TableContainer, Table, TableBody, TableRow, TableCell, TextField } from "@material-ui/core";
+import { SkeletonTable } from "components/common/Skeletons";
+import { formatPrice } from "utils/format";
 
 
 export default function ItemsTable({ items, disabled, quantities, onQuantityChange, ...props }) {

@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { CircularProgress } from '@material-ui/core'; 
-import { capitalFirst } from '../../utils';
+import { CircularProgress } from '@material-ui/core';
+import { capitalFirst } from 'utils/format';
 
 const FLEX_DIRECTIONS = {
 	right:  'row',

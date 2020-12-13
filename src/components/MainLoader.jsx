@@ -18,11 +18,12 @@ const useStyles = makeStyles({
 export default function MainLoader(props) {
 
 	const classes = useStyles();
-	const auth = useSelector(store => store.get('auth'));
+	const auth = useSelector(store => store.api.get('auth'));
 
 	// Fail if cannot get auth
 	if (auth.error) {
 		console.warn(auth.error)
+		// TODO Deal with errors
 		throw new Error("Impossible de contacter le serveur")
 	}
 

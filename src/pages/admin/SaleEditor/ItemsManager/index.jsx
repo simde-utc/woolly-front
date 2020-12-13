@@ -3,8 +3,8 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import { Dialog, Box, Paper, Grid, Button, IconButton, useMediaQuery } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 
-import { useFormStyles } from '../../../../styles';
-import { LoadingButton, ConfirmButton } from '../../../../components/common/Buttons';
+import { useFormStyles } from 'utils/styles';
+import { LoadingButton, ConfirmButton } from 'components/common/Buttons';
 import ItemsDisplay from './ItemsDisplay';
 import ItemEditor from './ItemEditor';
 import ItemGroupEditor from './ItemGroupEditor';
@@ -92,7 +92,7 @@ function ItemsManager({ selected, ...props }) {
                 </Box>
             </Box>
         );
-    
+
         // Wrap editor with edition buttons
         const buttonProps = { name, value: id, disabled: editorProps.saving };
         editor = (
@@ -104,7 +104,7 @@ function ItemsManager({ selected, ...props }) {
                     {!isNew && (
                         <Button
                             onClick={props.onReset}
-                            {...buttonProps} 
+                            {...buttonProps}
                             disabled={!editorProps.editing || editorProps.saving}
                         >
                             Annuler
@@ -165,7 +165,7 @@ function ItemsManager({ selected, ...props }) {
                             color="primary" variant="outlined"
                         >
                             Ajouter un groupe
-                        </Button>    
+                        </Button>
                     </Box>
                     <Box clone m={1}>
                         <Button

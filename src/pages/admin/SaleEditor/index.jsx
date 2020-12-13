@@ -1,21 +1,25 @@
 import React from 'react'
-// import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions, { messagesActions } from '../../../redux/actions';
 import produce from 'immer';
+import apiActions from 'redux/actions/api';
+import messagesActions from 'redux/actions/messages';
 
 import { Container, Box } from '@material-ui/core';
-
-import { areDifferent, dataToChoices, arrayToMap, deepcopy } from '../../../utils';
+import { areDifferent, dataToChoices, arrayToMap, deepcopy } from 'utils/helpers';
 import {
-	REGEX_SLUG, BLANK_SALE_DETAILS,
+	SLUG_REGEX, BLANK_SALE_DETAILS,
 	BLANK_ITEMGROUP, BLANK_ITEM, BLANK_ITEMFIELD
-} from '../../../constants';
+} from 'utils/constants';
 
-import Loader from '../../../components/common/Loader';
+import Loader from 'components/common/Loader';
 import DetailsEditor from './DetailsEditor';
-import ItemsManager from './ItemsManager/';
+import ItemsManager from './ItemsManager/index';
 
+
+const QUERY_PARAMS = {
+	sale: { with: "is_public,max_item_quantity" },
+	items: { include: "itemfields" },
+}
 
 const BLANK_RESOURCES = {
 	items: BLANK_ITEM,
@@ -25,15 +29,15 @@ const BLANK_RESOURCES = {
 const connector = connect((store, props) => {
 	const saleId = props.match.params.sale_id || null;
 
-	const assos = store.getAuthRelatedData('associations', {});
-	const usertypes = store.get('usertypes');
-	const itemgroups = saleId ? store.getData(['sales', saleId, 'itemgroups'], {}) : {};
-	const fields = store.get('fields');
+	const assos = store.api.getAuthRelatedData('associations', {});
+	const usertypes = store.api.get('usertypes');
+	const itemgroups = saleId ? store.api.getData(['sales', saleId, 'itemgroups'], {}) : {};
+	const fields = store.api.get('fields');
 
 	return {
 		saleId,
-		sale: saleId ? store.getData(['sales', saleId], null) : null,
-		items: saleId ? store.getData(['sales', saleId, 'items'], {}) : {},
+		sale: saleId ? store.api.getData(['sales', saleId], null) : null,
+		items: saleId ? store.api.getData(['sales', saleId, 'items'], {}) : {},
 		itemgroups,
 		itemgroupsChoices: { ...dataToChoices(itemgroups, 'name'), null: { label: 'Sans groupe', value: 'null' } },
 
@@ -60,9 +64,9 @@ class SaleEditor extends React.Component {
 
 		// Fetch side resources
 		if (!this.props.usertypes.fetched)
-			this.props.dispatch(actions.usertypes.all());
+			this.props.dispatch(apiActions.usertypes.all());
 		if (!this.props.fields.fetched)
-			this.props.dispatch(actions.fields.all());
+			this.props.dispatch(apiActions.fields.all());
 	}
 
 	componentDidUpdate(prevProps) {
@@ -93,9 +97,9 @@ class SaleEditor extends React.Component {
 			loading_itemgroups: true,
 		});
 		const saleId = this.props.saleId;
-		this.props.dispatch(actions.sales.find(saleId));
-		this.props.dispatch(actions.sales(saleId).items.all({ include: 'itemfields' }));
-		this.props.dispatch(actions.sales(saleId).itemgroups.all());
+		this.props.dispatch(apiActions.sales.find(saleId, QUERY_PARAMS.sale));
+		this.props.dispatch(apiActions.sales(saleId).items.all(QUERY_PARAMS.items));
+		this.props.dispatch(apiActions.sales(saleId).itemgroups.all(QUERY_PARAMS.itemgroups));
 	}
 
 	getStateFor(resource, prevState = {}) {
@@ -193,9 +197,9 @@ class SaleEditor extends React.Component {
 		// Save changes and return a Promise for all calls
 		// TODO Get and update items from items(itemId).itemfields
 		return Promise.all([
-			...changes.to_create.map(data => actions.itemfields.create(null, data)),
-			...changes.to_update.map(([id, data]) => actions.itemfields.update(id, null, data)),
-			...changes.to_delete.map(id => actions.itemfields.delete(id)),
+			...changes.to_create.map(data => apiActions.itemfields.create(null, data)),
+			...changes.to_update.map(([id, data]) => apiActions.itemfields.update(id, null, data)),
+			...changes.to_delete.map(id => apiActions.itemfields.delete(id)),
 		].map(action => action.payload));
 	}
 
@@ -252,7 +256,7 @@ class SaleEditor extends React.Component {
 		const { _editing, ...details } = this.state.details;
 
 		// Check values
-		if (!REGEX_SLUG.test(details.id)) {
+		if (!SLUG_REGEX.test(details.id)) {
 			return this.setState(prevState => produce(prevState, draft => {
 				draft.errors.details.id = ["Invalide"];
 				return draft;
@@ -263,14 +267,14 @@ class SaleEditor extends React.Component {
 			try {
 				if (this.isCreator()) {
 					// Create sale
-					const action = actions.sales.create(null, details);
+					const action = apiActions.sales.create(QUERY_PARAMS.sale, details);
 					const response = await action.payload;
 					// Dispatch creation and go to edit mode
 					this.props.dispatch(action);
 					this.props.history.push(`/admin/sales/${response.data.id}/edit`);
 				} else {
 					// Update sale details
-					const action = actions.sales.update(this.props.saleId, null, details);
+					const action = apiActions.sales.update(this.props.saleId, QUERY_PARAMS.sale, details);
 					await action.payload;
 					this.props.dispatch(action);
 				}
@@ -327,7 +331,7 @@ class SaleEditor extends React.Component {
 				data.sale = saleId;
 
 				// Create resource
-				const action = actions.sales(saleId)[resource].create(null, data);
+				const action = apiActions.sales(saleId)[resource].create(QUERY_PARAMS[resource], data);
 				await action.payload;
 
 				// Creation succeeded, remove fake id and dispatch created
@@ -346,8 +350,7 @@ class SaleEditor extends React.Component {
 					await this._saveItemFields(data);
 
 				// Update resource and wait for feedback to dispatch
-				const queryParams = resource === 'items' ? { include: 'itemfields' } : null;
-				const action = actions[resource].update(id, queryParams, data)
+				const action = apiActions[resource].update(id, QUERY_PARAMS[resource], data)
 				await action.payload;
 
 				this.props.dispatch(action);
@@ -379,7 +382,7 @@ class SaleEditor extends React.Component {
 			draft.selected = null;
 			delete draft[resource][id];
 			return draft;
-		}), () => isNew || this.props.dispatch(actions[resource].delete(id)));
+		}), () => isNew || this.props.dispatch(apiActions[resource].delete(id)));
 	}
 
 	handleResetResource = event => {

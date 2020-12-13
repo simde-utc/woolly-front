@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { shorten } from '../../utils';
+import { shorten } from 'utils/format';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Card, CardContent, CardActions } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { NavButton } from '../common/Nav';
+import { NavButton } from 'components/common/Nav';
 
 
 const useStyles = makeStyles(theme => ({
