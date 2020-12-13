@@ -8,6 +8,7 @@ import { apiAxios } from 'utils/api';
 
 import { isPast } from 'date-fns';
 import { formatDate } from 'utils/format';
+import { getCountdown } from 'utils/api';
 import { getButtonColoredVariant } from 'utils/styles';
 
 import Loader from 'components/common/Loader';
@@ -15,10 +16,37 @@ import ItemsTable from 'components/sales/ItemsTable';
 import UnpaidOrderDialog from 'components/orders/UnpaidOrderDialog';
 import { Link } from 'components/common/Nav';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Container, Box, Grid, Button, Paper, FormControlLabel, Checkbox, Collapse } from '@material-ui/core';
-import { ShoppingCart, Delete } from '@material-ui/icons';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import {withStyles} from '@material-ui/core/styles';
+import {
+	Container, Box, Grid, Button, Paper, FormControlLabel, Checkbox,
+	Collapse, LinearProgress,Typography,
+} from '@material-ui/core';
+import {ShoppingCart, Delete} from '@material-ui/icons';
+import {Alert, AlertTitle} from '@material-ui/lab';
+
+
+function LinearProgressWithLabel(props) {
+	return (
+		<Box display="flex" alignItems="center" direction="row">
+			{props.value ? (
+				<Box width="100%" mr={1} ml={1}>
+					<LinearProgress variant="determinate" {...props} />
+					<LinearProgress variant="determinate" {...props} />
+				</Box>
+			) : (
+				<Box width="100%" mr={1} ml={1}>
+					<LinearProgress {...props} />
+					<LinearProgress/>
+				</Box>
+			)}
+			<Box mr={1}>
+				<Typography variant="body2" color="textSecondary" display="inline">
+					{props.text}
+				</Typography>
+			</Box>
+		</Box>
+	);
+}
 
 
 const connector = connect((store, props) => {
@@ -38,6 +66,8 @@ class SaleDetail extends React.Component{
 		quantities: {},
 		buying: false,
 		cgvAccepted: false,
+		progress: 0,
+		timeLeft: "Chargement...",
 	}
 
 	componentDidMount() {
@@ -50,6 +80,16 @@ class SaleDetail extends React.Component{
 
 		if (!this.props.items)
 			this.props.dispatch(apiActions.sales(saleId).items.all());
+
+		this.interval = setInterval(() => {
+			if (document.getElementById(this.props.sale.id)) {
+				const countdown = getCountdown(this.props.sale.begin_at);
+				if (!countdown.timer)
+					window.location.reload(false);
+
+				this.setState(prevState => ({...prevState, progress: countdown.nbSeconds, timeLeft: countdown.timer}))
+			}
+		}, 1000);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -65,6 +105,10 @@ class SaleDetail extends React.Component{
 			});
 		}
 	}
+
+  componentWillUnmount() {
+	  clearInterval(this.interval);
+  }
 
 	// -----------------------------------------------------
 	// 		Order handlers
@@ -297,17 +341,28 @@ class SaleDetail extends React.Component{
 								</Paper>
 							</Box>
 
-							<Box display="flex" justifyContent="flex-end">
-								<Button
-									onClick={this.handleReset}
-									disabled={!this.hasItemsInCart()}
-									startIcon={<Delete />}
-									className={classes.buttonEmpty}
-									variant="outlined"
-								>
-									Vider
-								</Button>
-								{/* SAVE BUTTON, utile  ??
+							{saleState === 'NOT_BEGUN' ? (
+								<Box style={{width: '100%'}}>
+									<Alert severity="success" variant="outlined" icon={false}>
+										<AlertTitle>La vente n'a pas encore commencée, encore un peu de patience
+											!</AlertTitle>
+										<LinearProgressWithLabel id={sale.id} value={this.state.progress}
+																 text={this.state.timeLeft}/>
+									</Alert>
+
+								</Box>
+							) : (
+								<Box display="flex" justifyContent="flex-end">
+									<Button
+										onClick={this.handleReset}
+										disabled={!this.hasItemsInCart()}
+										startIcon={<Delete/>}
+										className={classes.buttonEmpty}
+										variant="outlined"
+									>
+										Vider
+									</Button>
+									{/* SAVE BUTTON, utile  ??
 								<Button
 									onClick={this.saveOrder}
 									// disabled={!canBuy}
@@ -318,16 +373,20 @@ class SaleDetail extends React.Component{
 									Sauvegarder
 								</Button>
 								 */}
-								<Button
-									onClick={this.handleBuy}
-									disabled={!this.canBuy()}
-									startIcon={<ShoppingCart />}
-									className={classes.buttonBuy}
-									variant="contained"
-								>
-									Acheter
-								</Button>
-							</Box>
+									<Button
+										onClick={this.handleBuy}
+										disabled={!this.canBuy()}
+										startIcon={<ShoppingCart/>}
+										className={classes.buttonBuy}
+										variant="contained"
+									>
+										Acheter
+									</Button>
+								</Box>
+
+
+							)}
+
 						</Grid>
 
 					</Grid>
