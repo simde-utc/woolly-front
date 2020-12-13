@@ -5,6 +5,7 @@ import {
 	formatDistanceToNow,
 	formatDistanceToNowStrict,
 } from "date-fns";
+import { fr } from "date-fns/locale";
 
 window.__localeId__ = 'fr';
 
@@ -40,17 +41,18 @@ export function formatPrice(price, defaultValue = undefined) {
 
 export function formatDate(date, variant = "date") {
 	if (typeof date === "string") date = parseISO(date);
+	const options = { locale: fr };
 	switch (variant) {
 		case "date":
-			return lightFormat(date, "dd/MM/yyyy");
+			return lightFormat(date, "dd/MM/yyyy", options);
 		case "datetime":
-			return lightFormat(date, "dd/MM/yyyy HH:mm");
+			return lightFormat(date, "dd/MM/yyyy HH:mm", options);
 		case "datetimesec":
-			return lightFormat(date, "dd/MM/yyyy HH:mm:ss");
+			return lightFormat(date, "dd/MM/yyyy HH:mm:ss", options);
 		case "fromNow":
-			return formatDistanceToNow(date);
+			return formatDistanceToNow(date, options);
 		case "fromNowStrict":
-			return formatDistanceToNowStrict(date);
+			return formatDistanceToNowStrict(date, options);
 		default:
 			throw Error(`Unknown format '${variant}'`);
 	}

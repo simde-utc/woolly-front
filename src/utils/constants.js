@@ -12,6 +12,14 @@ export const SLUG_REGEX = /^[a-zA-Z]([-_]?[a-zA-Z0-9])*$/;
 export const PAGE_SIZES = [10, 25, 50, 100];
 export const DEFAULT_PAGE_SIZE = 10;
 
+// Sales
+
+export const SALE_STATUS = {
+	NOT_BEGUN: {key: 'NOT_BEGUN', label: 'Ouverte prochaine... ', color: 'orange'},
+	ONGOING: {key: 'ONGOING', label: 'En cours !', color: 'green'},
+	FINISHED: {key: 'FINISHED', label: 'Terminée !', color: 'red'},
+}
+
 // Orders
 
 export const VALID_ORDER_STATUS = [2, 4];

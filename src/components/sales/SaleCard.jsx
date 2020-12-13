@@ -1,14 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { shorten } from 'utils/format';
-import { getCountdown, saleIsOpen } from 'utils/api';
-import {isPast} from "date-fns";
+import { getSaleState } from "utils/api";
 
 import { makeStyles } from '@material-ui/core/styles';
-import {
-	Box, Grid, Card, CardContent, CardActions,
-	Chip, LinearProgress, Typography,
-} from '@material-ui/core';
+import { Grid, Card, CardContent, CardActions, Chip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { NavButton } from 'components/common/Nav';
 
@@ -63,16 +59,7 @@ export function SaleCardSkeleton() {
 
 export default function SaleCard({sale, ...props}) {
     const classes = useStyles();
-    function currentSaleState() {
-        if (!sale)
-            return null;
-        if (sale.end_at && isPast(new Date(sale.end_at)))
-            return {label: 'Terminée !', color: 'red'};
-        if (sale.begin_at && isPast(new Date(sale.begin_at)))
-            return {label: 'En cours !', color: 'green'};
-        return {label: 'Ouverte prochaine ... ', color: 'orange'};
-    }
-
+    const currentSaleState = getSaleState(sale);
     return (
         <Grid item xs={12} sm={6} md={4} lg={3}>
             <Card className={classes.card}>
@@ -81,27 +68,22 @@ export default function SaleCard({sale, ...props}) {
                         {sale.name}
                     </h4>
                     <span className={classes.subtitle}>
-                        Par {sale.association?.shortname}
+                        Par {sale.association?.shortname || "..."}
                     </span>
                     <p className={classes.description}>
                         {shorten(sale.description, 150)}
                     </p>
-                    <b>
-                        <Chip style={{backgroundColor: currentSaleState().color}}
-                              label={currentSaleState().label}
-                              color="primary"
-                        />
-                    </b>
-
-
+                    <Chip
+                        style={{backgroundColor: currentSaleState.color}}
+                        label={currentSaleState.label}
+                        color="primary"
+                    />
                 </CardContent>
                 <CardActions>
                     <NavButton className="go-to-sale" to={`/sales/${sale.id}`}>
                         Accéder à la vente
                     </NavButton>
                 </CardActions>
-
-
             </Card>
         </Grid>
     );
