@@ -5,7 +5,10 @@ import { getCountdown, saleIsOpen } from 'utils/api';
 import {isPast} from "date-fns";
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Card, CardContent, CardActions, Chip } from '@material-ui/core';
+import {
+	Box, Grid, Card, CardContent, CardActions,
+	Chip, LinearProgress, Typography,
+} from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { NavButton } from 'components/common/Nav';
 
@@ -59,16 +62,35 @@ export function SaleCardSkeleton() {
 }
 
 
+function LinearProgressWithLabel(props) {
+    return (
+        <Box display="flex" alignItems="center" direction="row">
+            <Box width="100%" mr={1} ml={1}>
+                <LinearProgress variant="determinate" {...props} />
+            </Box>
+
+            <Box  mr={1}>
+                <Typography variant="body2" color="textSecondary" display="inline">
+                    {props.text}
+                </Typography>
+            </Box>
+        </Box>
+    );
+}
+
 export default function SaleCard({sale, ...props}) {
     const classes = useStyles();
+    const [store, changeStore] = React.useState({progress: 0, timeLeft: "Chargement..."});
 
-   React.useEffect(() => {
+   	React.useEffect(() => {
         const interval = setInterval(() => {
             if(document.getElementById(sale.id)) {
-                const count = getCountdown(sale.begin_at)
-                if(!count)
+                const count = getCountdown(sale.begin_at);
+                console.log(count)
+                if(!count.timer)
                     window.location.reload(false);
-                document.getElementById(sale.id).children[0].textContent = count;
+
+                changeStore(prevState => ({...prevState, progress: count.nbSeconds, timeLeft: count.timer}));
             }
         }, 1000);
         return () => clearInterval(interval);
@@ -92,8 +114,8 @@ export default function SaleCard({sale, ...props}) {
                         {sale.name}
                     </h4>
                     <span className={classes.subtitle}>
-						Par {sale.association && sale.association.shortname}
-					</span>
+                        Par {sale?.association?.shortname}
+                    </span>
                     <p className={classes.description}>
                         {shorten(sale.description, 150)}
                     </p>
@@ -113,10 +135,12 @@ export default function SaleCard({sale, ...props}) {
 						</NavButton>
 					</CardActions>
                     ) : (
-                    <Chip id={sale.id}
+                    <LinearProgressWithLabel id={sale.id} value={store.progress} text={store.timeLeft}/>
+
+                    /*<Chip id={sale.id}
                           label={getCountdown(sale.begin_at)}
                           color="primary"
-                    />
+                    />*/
                     )
                 }
 

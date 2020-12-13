@@ -80,19 +80,31 @@ export function getCountdown(date) {
 		end: today
 	});
 	let result = null;
+	let durationSec = 0;
 	if(duration.days > 0) {
-		result = duration.days + " jours " ;
+		result = duration.days + "jours" ;
+		durationSec += duration.days * 24 * 3600;
 	}
 	if(duration.hours > 0) {
-		result = result + duration.hours + " h " ;
+		result = result + duration.hours + "h" ;
+		durationSec += duration.hours * 3600;
 	}
 	if(duration.minutes > 0) {
-		result = result + duration.minutes + " min " ;
+		result = result + duration.minutes + "min" ;
+		durationSec += duration.minutes * 60;
 	}
 	if(duration.seconds > 0) {
-		result = result + duration.seconds + " sec " ;
+		result = result + duration.seconds + "sec " ;
+		durationSec += duration.seconds;
 	}
-	return result;
+
+	if(durationSec > 3600)
+		durationSec = 0;
+	else {
+		durationSec = Math.round((3600/(durationSec + 3600))*100);
+	}
+
+	return {timer: result, nbSeconds: durationSec};
 }
 
 export function saleIsOpen(sale) {
