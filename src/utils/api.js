@@ -2,6 +2,7 @@ import axios from "axios";
 import apiActions from "redux/actions/api";
 import { API_URL } from "utils/constants";
 import { isEmpty } from "utils/helpers";
+import { formatDistanceToNow, isBefore, intervalToDuration } from 'date-fns'
 
 /**
  * Default axios for the API
@@ -69,3 +70,32 @@ export function getStatusActions(dispatch, history) {
 	};
 };
 
+
+export function getCountdown(date) {
+	const today = new Date();
+	const begin = new Date(date);
+
+	let duration = intervalToDuration({
+		start: begin,
+		end: today
+	});
+	let result = null;
+	if(duration.days > 0) {
+		result = duration.days + " jours " ;
+	}
+	if(duration.hours > 0) {
+		result = result + duration.hours + " h " ;
+	}
+	if(duration.minutes > 0) {
+		result = result + duration.minutes + " min " ;
+	}
+	if(duration.seconds > 0) {
+		result = result + duration.seconds + " sec " ;
+	}
+	return result;
+}
+
+export function saleIsOpen(sale) {
+	const today = new Date();
+	return isBefore(new Date(sale.begin_at), today) && isBefore(today, new Date(sale.end_at));
+}
