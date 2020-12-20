@@ -65,6 +65,8 @@ export const BLANK_SALE_DETAILS = {
 
 	begin_at: null,
 	end_at: null,
+
+	color:"",
 };
 
 export const BLANK_ITEMGROUP = {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Paper, Grid, Button } from '@material-ui/core';
 
-import { LoadingButton } from 'components/common/Buttons';
 import FieldGenerator from 'components/common/FieldGenerator';
+import { LoadingButton } from 'components/common/Buttons';
 import { mergeClasses, useFormStyles } from 'utils/styles';
 
 export default function DetailsEditor({ disabled, editing, isCreator, ...props }) {
@@ -20,6 +20,7 @@ export default function DetailsEditor({ disabled, editing, isCreator, ...props }
 					{Field.text('id', 'ID', onlyCreate)}
 					{Field.select('association', 'Association', props.assos, onlyCreate)}
 					{Field.text('description', 'Description', { required: true, multiline: true, rows: 4 })}
+					{Field.color('color', 'Couleur')}
 				</Grid>
 
 				<Grid item xs sm={6} className={mergeClasses(classes, 'column', 'controls')}>

@@ -4,6 +4,7 @@ import {
 	FormControl, InputLabel, Select, MenuItem, Chip
 } from '@material-ui/core';
 import { KeyboardDateTimePicker } from '@material-ui/pickers';
+import { ColorPicker } from 'material-ui-color';
 // import CheckInput from './CheckInput';
 
 class FieldGenerator {
@@ -20,6 +21,11 @@ class FieldGenerator {
 
 	onChangeDatetime = name => value => {
 		const fakeEvent = { target: { name, value } };
+		return this.onChange(fakeEvent);
+	}
+
+	onChangeColor = name => color => {
+		const fakeEvent = { target: { name, value: `#${color.hex}` } };
 		return this.onChange(fakeEvent);
 	}
 
@@ -122,13 +128,13 @@ class FieldGenerator {
 				onChange={this.onChange}
 				labelId={this.getKey(key)}
 				// helperText={this.displayErrors(key)}
-                renderValue={selected => (
-                    <div>
-                        {selected.map(value => (
-                            <Chip key={value} label={choices[value].label} />
-                        ))}
-                    </div>
-                )}
+				renderValue={selected => (
+					<div>
+						{selected.map(value => (
+							<Chip key={value} label={choices[value].label} />
+						))}
+					</div>
+				)}
 				{...this.getProps(props)}
 			>
 				{Object.values(choices).map(choice => (
@@ -140,6 +146,18 @@ class FieldGenerator {
 					</MenuItem>
 				))}
 			</Select>
+		</FormControl>
+	)
+
+	color = (key, label, props = {}) => (
+		<FormControl error={Boolean(this.errors[key])}>
+			<InputLabel htmlFor={this.getKey(key)} shrink>{label}</InputLabel>
+			<div className="MuiInput-formControl">
+				<ColorPicker
+					value={this.getValue(key, props) || '#ffffff'}
+					onChange={this.onChangeColor(this.getKey(key))}
+				/>
+			</div>
 		</FormControl>
 	)
 }
